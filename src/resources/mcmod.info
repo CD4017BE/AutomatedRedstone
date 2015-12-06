@@ -1,0 +1,16 @@
+[
+{
+  "modid": "AutomatedRedstone",
+  "name": "Automated Redstone",
+  "description": "Better redstone cables and programmable circuits",
+  "version": "${version}",
+  "mcversion": "1.7.10",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["CD4017BE"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
