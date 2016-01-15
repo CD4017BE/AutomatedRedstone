@@ -10,10 +10,19 @@ import dan200.computercraft.api.lua.ILuaContext;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
+import cpw.mods.fml.common.Optional;
+import cpw.mods.fml.common.Optional.Interface;
 
 import java.util.ArrayList;
 
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
+import li.cil.oc.api.network.Environment;
+import li.cil.oc.api.network.Message;
+import li.cil.oc.api.network.Node;
 import cd4017be.api.circuits.IRedstone8bit;
+import cd4017be.api.computers.ComputerAPI;
 import cd4017be.lib.ModTileEntity;
 import cd4017be.lib.util.Utils;
 import net.minecraft.block.Block;
@@ -28,7 +37,8 @@ import net.minecraft.tileentity.TileEntity;
  *
  * @author CD4017BE
  */
-public class Display8bit extends ModTileEntity implements IRedstone8bit, IPeripheral
+@Optional.InterfaceList(value = {@Interface(iface = "dan200.computercraft.api.peripheral.IPeripheral", modid = "ComputerCraft"), @Interface(iface = "li.cil.oc.api.network.Environment", modid = "OpenComputers")})
+public class Display8bit extends ModTileEntity implements IRedstone8bit, IPeripheral, Environment
 {
     private boolean update;
     public byte state;
@@ -122,20 +132,32 @@ public class Display8bit extends ModTileEntity implements IRedstone8bit, IPeriph
         update = true;
     }
     
-    private ArrayList<IComputerAccess> listeners = new ArrayList<IComputerAccess>();
+    //---------------- Computer APIs --------------------
     
+    private ArrayList<Object> listeners = new ArrayList<Object>();
+    
+    private void updateEvent() {
+        for (Object computer : listeners)
+            ComputerAPI.sendEvent(computer, "in8bit", state);
+    }
+    
+    //ComputerCraft:
+    
+    @Optional.Method(modid = "ComputerCraft")
     @Override
     public String getType() 
     {
         return "RedstoneCircuits-In8bit";
     }
 
+    @Optional.Method(modid = "ComputerCraft")
     @Override
     public String[] getMethodNames() 
     {
         return new String[]{"getInput"};
     }
 
+    @Optional.Method(modid = "ComputerCraft")
     @Override
     public Object[] callMethod(IComputerAccess computer, ILuaContext lua, int cmd, Object[] par) throws LuaException 
     {
@@ -144,29 +166,68 @@ public class Display8bit extends ModTileEntity implements IRedstone8bit, IPeriph
         } else return null;
     }
 
+    @Optional.Method(modid = "ComputerCraft")
     @Override
     public void attach(IComputerAccess computer) 
     {
         listeners.add(computer);
     }
 
+    @Optional.Method(modid = "ComputerCraft")
     @Override
     public void detach(IComputerAccess computer) 
     {
         listeners.remove(computer);
     }
 
+    @Optional.Method(modid = "ComputerCraft")
     @Override
     public boolean equals(IPeripheral peripheral) 
     {
         return this.hashCode() == peripheral.hashCode();
     }
+
+    //OpenComputers:
     
-    private void updateEvent()
-    {
-        for (IComputerAccess computer : listeners) {
-            computer.queueEvent("in8bit", new Object[]{Double.valueOf(state)});
-        }
+    private Object node = ComputerAPI.newOCnode(this, "RedstoneCircuits-In8bit", false);
+    
+    @Override
+	public void invalidate() {
+		super.invalidate();
+		ComputerAPI.removeOCnode(node);
+	}
+
+	@Override
+	public void onChunkUnload() {
+		super.onChunkUnload();
+		ComputerAPI.removeOCnode(node);
+	}
+
+	@Optional.Method(modid = "OpenComputers")
+	@Override
+	public Node node() {
+		return (Node)node;
+	}
+
+    @Optional.Method(modid = "OpenComputers")
+	@Override
+	public void onConnect(Node node) {
+    	if (node.host() instanceof Context) listeners.add(node.host());
+	}
+
+    @Optional.Method(modid = "OpenComputers")
+	@Override
+	public void onDisconnect(Node node) {
+    	if (node.host() instanceof Context) listeners.remove(node.host());
+	}
+
+    @Optional.Method(modid = "OpenComputers")
+	@Override
+	public void onMessage(Message message) {}
+    
+    @Optional.Method(modid = "OpenComputers")
+    @Callback(doc = "" ,direct = true)
+    public Object[] getInput(Context cont, Arguments args) {
+    	return new Object[]{state};
     }
-    
 }

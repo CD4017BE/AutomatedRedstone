@@ -44,7 +44,7 @@ public class Circuit extends AutomatedTile implements IRedstone8bit, IRedstone1b
     @Override
     public String getInventoryName() 
     {
-        return "Redstone Circuit" + (name.length() > 0 ? " (".concat(name).concat(")") : "");
+        return super.getInventoryName() + (name.length() > 0 ? " (".concat(name).concat(")") : "");
     }
     
     //CPU

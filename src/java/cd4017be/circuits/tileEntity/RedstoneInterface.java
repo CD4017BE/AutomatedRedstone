@@ -36,12 +36,6 @@ public class RedstoneInterface extends AutomatedTile implements IRedstone8bit, I
     private boolean update;
 
     @Override
-    public String getInventoryName() 
-    {
-        return "8-bit-Port Redstone Adapter";
-    }
-
-    @Override
     protected void customPlayerCommand(byte cmd, DataInputStream dis, EntityPlayerMP player) throws IOException 
     {
         if (cmd == 0) {

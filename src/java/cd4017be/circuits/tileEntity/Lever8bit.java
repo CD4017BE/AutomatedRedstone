@@ -13,7 +13,16 @@ import dan200.computercraft.api.peripheral.IPeripheral;
 
 import java.util.ArrayList;
 
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
+import li.cil.oc.api.network.Environment;
+import li.cil.oc.api.network.Message;
+import li.cil.oc.api.network.Node;
+import cpw.mods.fml.common.Optional;
+import cpw.mods.fml.common.Optional.Interface;
 import cd4017be.api.circuits.IRedstone8bit;
+import cd4017be.api.computers.ComputerAPI;
 import cd4017be.lib.ModTileEntity;
 import cd4017be.lib.util.Utils;
 import net.minecraft.entity.player.EntityPlayer;
@@ -27,7 +36,8 @@ import net.minecraft.tileentity.TileEntity;
  *
  * @author CD4017BE
  */
-public class Lever8bit extends ModTileEntity implements IRedstone8bit, IPeripheral
+@Optional.InterfaceList(value = {@Interface(iface = "dan200.computercraft.api.peripheral.IPeripheral", modid = "ComputerCraft"), @Interface(iface = "li.cil.oc.api.network.Environment", modid = "OpenComputers")})
+public class Lever8bit extends ModTileEntity implements IRedstone8bit, IPeripheral, Environment
 {
     private boolean update;
     public byte state;
@@ -115,7 +125,16 @@ public class Lever8bit extends ModTileEntity implements IRedstone8bit, IPeripher
     {
     }
     
-    private ArrayList<IComputerAccess> listeners = new ArrayList<IComputerAccess>();
+    //---------------- Computer APIs --------------------
+    
+    private ArrayList<Object> listeners = new ArrayList<Object>();
+    
+    private void updateEvent() {
+        for (Object computer : listeners) 
+            ComputerAPI.sendEvent(computer, "out8bit", state);
+    }
+    
+    //ComputerCraft:
     
     @Override
     public String getType() 
@@ -160,12 +179,57 @@ public class Lever8bit extends ModTileEntity implements IRedstone8bit, IPeripher
     {
         return this.hashCode() == peripheral.hashCode();
     }
+
+    //OpenComputers:
     
-    private void updateEvent()
-    {
-        for (IComputerAccess computer : listeners) {
-            computer.queueEvent("out8bit", new Object[]{Double.valueOf(state)});
-        }
+    private Object node = ComputerAPI.newOCnode(this, "RedstoneCircuits-Out8bit", false);
+    
+    @Override
+	public void invalidate() {
+		super.invalidate();
+		ComputerAPI.removeOCnode(node);
+	}
+
+	@Override
+	public void onChunkUnload() {
+		super.onChunkUnload();
+		ComputerAPI.removeOCnode(node);
+	}
+
+	@Optional.Method(modid = "OpenComputers")
+	@Override
+	public Node node() {
+		return (Node)node;
+	}
+
+    @Optional.Method(modid = "OpenComputers")
+	@Override
+	public void onConnect(Node node) {
+    	if (node.host() instanceof Context) listeners.add(node.host());
+	}
+
+    @Optional.Method(modid = "OpenComputers")
+	@Override
+	public void onDisconnect(Node node) {
+    	if (node.host() instanceof Context) listeners.remove(node.host());
+	}
+
+    @Optional.Method(modid = "OpenComputers")
+	@Override
+	public void onMessage(Message message) {}
+    
+    @Optional.Method(modid = "OpenComputers")
+    @Callback(doc = "" ,direct = true)
+    public Object[] getOutput(Context cont, Arguments args) {
+    	return new Object[]{state};
     }
     
+    @Optional.Method(modid = "OpenComputers")
+    @Callback(doc = "" ,direct = true)
+    public Object[] setOutput(Context cont, Arguments args) {
+    	state = (byte)args.checkInteger(0);
+    	update = true;
+        worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+    	return new Object[0];
+    }
 }

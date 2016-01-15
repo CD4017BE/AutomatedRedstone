@@ -36,7 +36,7 @@ public class Assembler extends AutomatedTile implements IAutomatedInv
     public Assembler()
     {
         netData = new TileEntityData(1, 3, 0, 0);
-        inventory = new Inventory(this, 8, new Component(0, 1, -1), new Component(2, 3, 1), new Component(3, 6, 0)).setInvName("Assembler");
+        inventory = new Inventory(this, 8, new Component(0, 1, -1), new Component(2, 3, 1), new Component(3, 6, 0));
     }
 
     @Override

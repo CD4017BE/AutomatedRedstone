@@ -48,8 +48,8 @@ public class GuiRedstoneInterface extends GuiMachine
 	protected void drawGuiContainerForegroundLayer(int mx, int my) 
     {
 		super.drawGuiContainerForegroundLayer(mx, my);
-		this.drawInfo(26, 16, 16, 16, "\\i", "gui.rs.dir");
-		this.drawInfo(44, 16, 16, 16, "\\i", "gui.rs.channel");
+		this.drawInfo(26, 16, 16, 16, "\\i", "rs.dir");
+		this.drawInfo(44, 16, 16, 16, "\\i", "rs.channel");
 	}
     
     @Override

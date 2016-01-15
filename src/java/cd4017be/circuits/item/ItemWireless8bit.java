@@ -13,12 +13,7 @@ public class ItemWireless8bit extends DefaultItemBlock
     public ItemWireless8bit(Block id)
     {
         super(id);
-    }
-
-    @Override
-    public String getItemStackDisplayName(ItemStack item) 
-    {
-        return (item.getItemDamage() != 0 ? "Linked 8-bit wireless " + (item.getItemDamage() == 1 ? "Transmitter" : "Receiver") : super.getItemStackDisplayName(item));
+        this.setHasSubtypes(true);
     }
 
     @Override

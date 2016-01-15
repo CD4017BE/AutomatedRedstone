@@ -55,14 +55,14 @@ public class GuiProgrammer extends GuiMachine
 	protected void drawGuiContainerForegroundLayer(int mx, int my) 
     {
 		super.drawGuiContainerForegroundLayer(mx, my);
-		this.drawInfo(152, 37, 16, 16, "\\i", "gui.program.save");
-		this.drawInfo(152, 73, 16, 16, "\\i", "gui.program.load");
-		this.drawInfo(89, 16, 12, 8, "\\i", "gui.program.cs");
-		this.drawInfo(102, 16, 12, 8, "\\i", "gui.program.cr");
-		this.drawInfo(116, 16, 12, 8, "\\i", "gui.program.o1");
-		this.drawInfo(129, 16, 12, 8, "\\i", "gui.program.o2");
-		this.drawInfo(95, 4, 74, 8, "\\i", "gui.program.name");
-		this.drawInfo(8, 16, 70, 8, "\\i", "gui.program.info");
+		this.drawInfo(152, 37, 16, 16, "\\i", "program.save");
+		this.drawInfo(152, 73, 16, 16, "\\i", "program.load");
+		this.drawInfo(89, 16, 12, 8, "\\i", "program.cs");
+		this.drawInfo(102, 16, 12, 8, "\\i", "program.cr");
+		this.drawInfo(116, 16, 12, 8, "\\i", "program.o1");
+		this.drawInfo(129, 16, 12, 8, "\\i", "program.o2");
+		this.drawInfo(95, 4, 74, 8, "\\i", "program.name");
+		this.drawInfo(8, 16, 70, 8, "\\i", "program.info");
 	}
 
 	@Override
@@ -75,7 +75,7 @@ public class GuiProgrammer extends GuiMachine
         this.drawTexturedModalRect(this.guiLeft + 8, this.guiTop + 25 + n, 176, 0, 8, 12);
         this.drawText();
         this.drawConfig();
-        fontRendererObj.drawString("Circuit Programm:", this.guiLeft + 8, this.guiTop + 4, 0x404040);
+        fontRendererObj.drawString(tileEntity.getInventoryName(), this.guiLeft + 8, this.guiTop + 4, 0x404040);
         fontRendererObj.drawString(curW == 2 && curY == 32 ? numS : tileEntity.name, this.guiLeft + 96, this.guiTop + 4, 0x404040);
         this.drawStringCentered(tileEntity.message, this.guiLeft + this.xSize / 2, this.guiTop + 91, 0x804040);
     }

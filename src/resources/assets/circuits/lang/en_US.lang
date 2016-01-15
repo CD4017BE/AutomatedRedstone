@@ -1,0 +1,74 @@
+// Blocks
+// names
+tile.cd4017be.programmer.name=Circuit Programmer
+tile.cd4017be.assembler.name=Circuit Assembler
+tile.cd4017be.circuit.name=Redstone Circuit
+tile.cd4017be.rsp8bit.name=8-bit solid Redstone-Wire
+tile.cd4017be.rsp1bit:0.name=1-bit solid Redstone-Wire
+tile.cd4017be.rsp1bit:1.name=1-bit Redstone-Wire output
+tile.cd4017be.rsp1bit:2.name=1-bit Redstone-Wire input
+tile.cd4017be.lever8bit.name=8-bit Lever
+tile.cd4017be.display8bit.name=8-bit Display
+tile.cd4017be.rsInterface.name=8-bit-Port Redstone Adapter
+tile.cd4017be.wireless8bit:0.name=Interdimensional 8-bit wireless Port
+tile.cd4017be.wireless8bit:1.name=Linked 8-bit wireless Transmitter
+tile.cd4017be.wireless8bit:2.name=Linked 8-bit wireless Receiver
+tile.cd4017be.invReader.name=8-bit Inventory Sensor
+tile.cd4017be.itemTranslocator.name=8-bit Item Translocator
+tile.cd4017be.invConnector.name=Inventory Connector
+// tooltips
+tile.cd4017be.programmer.tip=Used to programm logic circuits\ninto the Redstone Circuit.
+tile.cd4017be.assembler.tip=Used to add hardware to the Redstone Circuit.
+tile.cd4017be.circuit.tip=Can perform complicated redstone logic.\nPut in Circuit Assemble to add hardware.\nPut in Circuit Programmer add software.\nConnects with 1-bit & 8-bit redstone.
+tile.cd4017be.rsp8bit.tip=Transfers a 8-bit redstone signal.
+tile.cd4017be.rsp1bit:0.tip=Transfers a 1-bit redstone signal\nfrom Input to Output cables.
+tile.cd4017be.rsp1bit:1.tip=Emits a redstone signal.
+tile.cd4017be.rsp1bit:2.tip=Receives a redstone signal.
+tile.cd4017be.lever8bit.tip=8 levers in one block.\nConnects with 8-bit redstone. 
+tile.cd4017be.display8bit.tip=Displays 8-bit redstone states.\nClick to switch display modes:\nBinary, Hexadecimal, Decimal\nConnects with 8-bit redstone.
+tile.cd4017be.rsInterface.tip=Transfers signals between 1-bit and 8-bit redstone.
+tile.cd4017be.wireless8bit:0.tip=Transmits a 8-bit signal to its linked Receiver.
+tile.cd4017be.invReader.tip=Outputs 8 signals depending on\nthe amount of specific items\nin its neighbor inventories.
+tile.cd4017be.itemTranslocator.tip=Can perform 8 different item\ntransportation tasks between its\nneighbor inventories on input signal.
+tile.cd4017be.invConnector.tip=Provides remote access to its linked inventory.\nConnection shows green if linked and red if not.\nClick with empty hand to change orientation.\nClick with solid block to cover.
+
+// Items
+// names
+item.cd4017be.circuitPlan.name=Circuit Programm
+// tooltips
+item.cd4017be.circuitPlan.tip=Stores programm sourcecode for later use.\nPut paper into your Circuit Programmer to save.
+
+//GUI
+//Inventory names
+gui.cd4017be.programmer.name=Circuit Programm:
+gui.cd4017be.assembler.name=Assembler
+gui.cd4017be.circuit.name=Redstone Circuit
+gui.cd4017be.rsInterface.name=Redstone Adapter
+gui.cd4017be.invReader.name=Inventory Sensor
+gui.cd4017be.itemTranslocator.name=Item Translocator
+//Gui tooltips
+gui.cd4017be.rs.dir=Signal direction
+gui.cd4017be.rs.channel=Signal channel
+gui.cd4017be.filter.neg=Invert filter?
+gui.cd4017be.filter.ore=Use Ore-Dictionary?
+gui.cd4017be.filter.nbt=Check NBT data?
+gui.cd4017be.filter.meta=Check damage/meta?
+gui.cd4017be.assembler.do=Assemble
+gui.cd4017be.assembler.undo=Disassemble
+gui.cd4017be.program.save=Save/Compile program
+gui.cd4017be.program.load=Load program
+gui.cd4017be.program.cs=counter set-bits
+gui.cd4017be.program.cr=counter reset-bits
+gui.cd4017be.program.o1=output bits 0-7
+gui.cd4017be.program.o2=output bits 8-15
+gui.cd4017be.program.name=program name
+gui.cd4017be.program.info=Available commands:\n"+" = OR-gate\n"-" = NOR-gate\n"&" = AND-gate\n"*" = NAND-gate\n"/" = XOR-gate\n"\" = XNOR-gate\n"%" = Input\n"# = " = compare equal\n"# < " = compare lesser\n"# > " = compare greater
+gui.cd4017be.circuit.io=Circuit IO-Byte
+gui.cd4017be.invRead.inv=Neighbor inventory
+gui.cd4017be.invRead.invS=Access side
+gui.cd4017be.invRead.comp=Compare mode
+gui.cd4017be.invRead.am=Compare amount
+gui.cd4017be.trans.invIn=Neighbor source inventory
+gui.cd4017be.trans.invOut=Neighbor destination inventory
+gui.cd4017be.trans.am=Transfer amount
+gui.cd4017be.trans.redir=Side to redirect inventory access\nfrom neighbor translocators.

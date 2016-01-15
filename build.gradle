@@ -17,7 +17,7 @@ buildscript {
 
 apply plugin: 'forge'
 
-version = "1.7.10-2.2.0"
+version = "1.7.10-2.2.1"
 group= "com.cd4017be.circuits" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "AutomatedRedstone"
 
@@ -56,8 +56,8 @@ artifacts {
 }
 
 dependencies {
-	compile files('C:/Users/CD4017BE/Minecraft Modding/Mods-1.7.10/CD4017BE_lib/build/libs/CD4017BE_lib-1.7.10-2.4.2-deobf.jar')
-
+	compile files('C:/Users/CD4017BE/Minecraft Modding/Mods-1.7.10/CD4017BE_lib/build/libs/CD4017BE_lib-1.7.10-2.7.3-deobf.jar')
+	compile files('C:/Users/CD4017BE/Minecraft Modding/Mods-1.7.10/CD4017BE_lib/libs/ComputerCraft1.75.jar')
 }
 
 processResources
