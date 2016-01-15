@@ -6,6 +6,7 @@
 
 package cd4017be.circuits;
 
+import cd4017be.api.computers.ComputerAPI;
 import cd4017be.circuits.block.BlockInvConnector;
 import cd4017be.circuits.block.BlockRSPipe1;
 import cd4017be.circuits.block.BlockRSPipe8;
@@ -30,7 +31,6 @@ import cd4017be.lib.DefaultItemBlock;
 import cd4017be.lib.TileBlock;
 import cd4017be.lib.TileBlockRegistry;
 import cd4017be.lib.TileContainer;
-import cd4017be.lib.templates.ComputerPeripheralProvider;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.SidedProxy;
@@ -74,7 +74,7 @@ public class RedstoneCircuits
         proxy.registerRenderers();
         proxy.registerBlocks();
         proxy.registerRecipes();
-        ComputerPeripheralProvider.register();
+        ComputerAPI.register();
     }
     
     @Mod.EventHandler
