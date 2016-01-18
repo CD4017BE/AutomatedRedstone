@@ -48,8 +48,8 @@ public class GuiCircuit extends GuiMachine
 	protected void drawGuiContainerForegroundLayer(int mx, int my) 
     {
 		super.drawGuiContainerForegroundLayer(mx, my);
-		this.drawInfo(26, 34, 16, 16, "\\i", "gui.circuit.io");
-		this.drawInfo(44, 34, 16, 16, "\\i", "gui.rs.channel");
+		this.drawInfo(26, 34, 16, 16, "\\i", "circuit.io");
+		this.drawInfo(44, 34, 16, 16, "\\i", "rs.channel");
 	}
     
     @Override

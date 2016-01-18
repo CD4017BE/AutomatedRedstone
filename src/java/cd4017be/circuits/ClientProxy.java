@@ -18,11 +18,9 @@ import cd4017be.circuits.tileEntity.Lever8bit;
 import cd4017be.lib.BlockItemRegistry;
 import cd4017be.lib.TileBlock;
 import cd4017be.lib.TileBlockRegistry;
-import cd4017be.lib.TooltipInfo;
 import cd4017be.lib.templates.PipeRenderer;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.util.ResourceLocation;
 
 /**
  *
@@ -52,7 +50,6 @@ public class ClientProxy extends CommonProxy
         pipeRenderer.setRenderMachine((TileBlock)BlockItemRegistry.getBlock("tile.invConnector"));
         TileEntityRendererDispatcher.instance.mapSpecialRenderers.put(Lever8bit.class, new RSInterfaceRenderer());
         TileEntityRendererDispatcher.instance.mapSpecialRenderers.put(Display8bit.class, new RSInterfaceRenderer());
-        TooltipInfo.loadInfoFile(new ResourceLocation("circuits", "lang/toolTips.txt"));
     }
     
 }

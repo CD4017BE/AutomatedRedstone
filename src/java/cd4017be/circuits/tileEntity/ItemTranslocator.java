@@ -31,7 +31,7 @@ public class ItemTranslocator extends AutomatedTile implements ILinkedInventory,
 	
 	public ItemTranslocator() 
 	{
-		inventory = new Inventory(this, 8).setInvName("Item Translocator");
+		inventory = new Inventory(this, 8);
 		/* long0 = inv cfg
 		 * long1 = 0-23,24-47: sides cfg in
 		 * long2 = 0-23,24-47: sides cfg out

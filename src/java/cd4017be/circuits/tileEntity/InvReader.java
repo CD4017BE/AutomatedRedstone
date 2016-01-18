@@ -28,7 +28,7 @@ public class InvReader extends AutomatedTile implements IRedstone8bit, ISidedInv
 	
 	public InvReader() 
 	{
-		inventory = new Inventory(this, 8).setInvName("Inventory Sensor");
+		inventory = new Inventory(this, 8);
 		netData = new TileEntityData(3, 8, 0, 0);
 	}
 	

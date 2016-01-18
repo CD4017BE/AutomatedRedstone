@@ -8,6 +8,7 @@ import org.lwjgl.opengl.GL11;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.StatCollector;
 import cd4017be.circuits.tileEntity.ItemTranslocator;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.TileContainer;
@@ -36,18 +37,18 @@ public class GuiItemTranslocator extends GuiMachine {
 	protected void drawGuiContainerForegroundLayer(int mx, int my) 
     {
 		super.drawGuiContainerForegroundLayer(mx, my);
-		this.drawInfo(188, 108, 16, 12, "\\i", "gui.rs.dir");
-		this.drawInfo(8, 16, 7, 16, "\\i", "gui.rs.channel");
-		this.drawInfo(17, 16, 7, 7, "\\i", "gui.trans.invIn");
-		this.drawInfo(17, 25, 7, 7, "\\i", "gui.invRead.invS");
-		this.drawInfo(98, 16, 7, 7, "\\i", "gui.trans.invOut");
-		this.drawInfo(98, 25, 7, 7, "\\i", "gui.invRead.invS");
-		this.drawInfo(44, 16, 16, 7, "\\i", "gui.filter.neg");
-		this.drawInfo(44, 25, 16, 7, "\\i", "gui.filter.ore");
-		this.drawInfo(62, 25, 16, 7, "\\i", "gui.filter.nbt");
-		this.drawInfo(62, 16, 16, 7, "\\i", "gui.filter.meta");
-		this.drawInfo(80, 20, 16, 8, "\\i", "gui.trans.am");
-		this.drawInfo(188, 88, 16, 16, "\\i", "gui.trans.redir");
+		this.drawInfo(188, 108, 16, 12, "\\i", "rs.dir");
+		this.drawInfo(8, 16, 7, 16, "\\i", "rs.channel");
+		this.drawInfo(17, 16, 7, 7, "\\i", "trans.invIn");
+		this.drawInfo(17, 25, 7, 7, "\\i", "invRead.invS");
+		this.drawInfo(98, 16, 7, 7, "\\i", "trans.invOut");
+		this.drawInfo(98, 25, 7, 7, "\\i", "invRead.invS");
+		this.drawInfo(44, 16, 16, 7, "\\i", "filter.neg");
+		this.drawInfo(44, 25, 16, 7, "\\i", "filter.ore");
+		this.drawInfo(62, 25, 16, 7, "\\i", "filter.nbt");
+		this.drawInfo(62, 16, 16, 7, "\\i", "filter.meta");
+		this.drawInfo(80, 20, 16, 8, "\\i", "trans.am");
+		this.drawInfo(188, 88, 16, 16, "\\i", "trans.redir");
 	}
     
     @Override
@@ -82,7 +83,7 @@ public class GuiItemTranslocator extends GuiMachine {
         	this.drawStringCentered("" + tileEntity.netData.ints[i], this.guiLeft + 88 + i / 4 * 99, this.guiTop + 20 + (i % 4) * 18, 0x404040);
         this.drawStringCentered(String.format("%.2f", (float)tileEntity.netData.ints[8] / 20F).concat("s"), this.guiLeft + 79, this.guiTop + 92, 0x404040);
         this.drawStringCentered(tileEntity.getInventoryName(), this.guiLeft + this.xSize / 2, this.guiTop + 4, 0x404040);
-        this.drawStringCentered("Inventory", this.guiLeft + this.xSize / 2, this.guiTop + 110, 0x404040);
+        this.drawStringCentered(StatCollector.translateToLocal("container.inventory"), this.guiLeft + this.xSize / 2, this.guiTop + 110, 0x404040);
     }
 
 	@Override

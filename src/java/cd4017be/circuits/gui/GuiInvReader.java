@@ -7,6 +7,7 @@ import java.io.IOException;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.StatCollector;
 
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
@@ -45,16 +46,16 @@ public class GuiInvReader extends GuiMachine
 	protected void drawGuiContainerForegroundLayer(int mx, int my) 
     {
 		super.drawGuiContainerForegroundLayer(mx, my);
-		this.drawInfo(188, 90, 16, 12, "\\i", "gui.rs.dir");
-		this.drawInfo(8, 16, 7, 16, "\\i", "gui.rs.channel");
-		this.drawInfo(17, 16, 7, 7, "\\i", "gui.invRead.inv");
-		this.drawInfo(17, 25, 7, 7, "\\i", "gui.invRead.invS");
-		this.drawInfo(44, 16, 7, 7, "\\i", "gui.filter.neg");
-		this.drawInfo(44, 25, 7, 7, "\\i", "gui.invRead.comp");
-		this.drawInfo(53, 16, 16, 7, "\\i", "gui.filter.ore");
-		this.drawInfo(71, 16, 16, 7, "\\i", "gui.filter.nbt");
-		this.drawInfo(89, 16, 16, 7, "\\i", "gui.filter.meta");
-		this.drawInfo(53, 24, 52, 8, "\\i", "gui.invRead.am");
+		this.drawInfo(188, 90, 16, 12, "\\i", "rs.dir");
+		this.drawInfo(8, 16, 7, 16, "\\i", "rs.channel");
+		this.drawInfo(17, 16, 7, 7, "\\i", "invRead.inv");
+		this.drawInfo(17, 25, 7, 7, "\\i", "invRead.invS");
+		this.drawInfo(44, 16, 7, 7, "\\i", "filter.neg");
+		this.drawInfo(44, 25, 7, 7, "\\i", "invRead.comp");
+		this.drawInfo(53, 16, 16, 7, "\\i", "filter.ore");
+		this.drawInfo(71, 16, 16, 7, "\\i", "filter.nbt");
+		this.drawInfo(89, 16, 16, 7, "\\i", "filter.meta");
+		this.drawInfo(53, 24, 52, 8, "\\i", "invRead.am");
 	}
 
 	@Override
@@ -84,7 +85,7 @@ public class GuiInvReader extends GuiMachine
         }
         for (int i = 0; i < refVal.length; i++) refVal[i].drawTextBox(); 
         this.drawStringCentered(tileEntity.getInventoryName(), this.guiLeft + this.xSize / 2, this.guiTop + 4, 0x404040);
-        this.drawStringCentered("Inventory", this.guiLeft + this.xSize / 2, this.guiTop + 92, 0x404040);
+        this.drawStringCentered(StatCollector.translateToLocal("container.inventory"), this.guiLeft + this.xSize / 2, this.guiTop + 92, 0x404040);
     }
     
     @Override

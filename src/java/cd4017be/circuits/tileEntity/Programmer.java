@@ -58,7 +58,7 @@ public class Programmer extends AutomatedTile implements ISidedInventory
     public Programmer()
     {
         netData = new TileEntityData(1, 0, 0, 0);
-        inventory = new Inventory(this, 1).setInvName("Circuit Programmer");
+        inventory = new Inventory(this, 1);
     }
 
     @Override
