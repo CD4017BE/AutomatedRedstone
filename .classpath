@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src/java"/>
+	<classpathentry kind="src" path="src/resources"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/CD4017BE_lib"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Forge-1.7.10"/>
+	<classpathentry kind="lib" path="/CD4017BE_lib/libs/ComputerCraft1.75.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
