@@ -1,6 +1,5 @@
 package cd4017be.circuits.tileEntity;
 
-import java.io.DataInputStream;
 import java.io.IOException;
 
 import net.minecraft.block.Block;
@@ -9,6 +8,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import cd4017be.api.circuits.ILinkedInventory;
 import cd4017be.api.circuits.IRedstone8bit;
@@ -24,7 +24,7 @@ public class InvReader extends AutomatedTile implements IRedstone8bit, ISidedInv
 {
 	private byte input;
 	private byte output;
-	private boolean update;
+	private boolean update1;
 	
 	public InvReader() 
 	{
@@ -33,12 +33,12 @@ public class InvReader extends AutomatedTile implements IRedstone8bit, ISidedInv
 	}
 	
 	@Override
-	public void updateEntity() 
+	public void update() 
 	{
 		if (worldObj.isRemote) return;
-		if (update) this.getIn();
-		this.update();
-		if (update) this.output(0);
+		if (update1) this.getIn();
+		this.update1();
+		if (update1) this.output(0);
 	}
 	
 	@Override
@@ -47,7 +47,7 @@ public class InvReader extends AutomatedTile implements IRedstone8bit, ISidedInv
 		super.readFromNBT(nbt);
 		input = nbt.getByte("in");
 		output = nbt.getByte("out");
-		update = true;
+		update1 = true;
 		int[] data = nbt.getIntArray("ref");
 		System.arraycopy(data, 0, netData.ints, 0, Math.min(data.length, netData.ints.length));
 		netData.longs[1] = nbt.getLong("cfg1");
@@ -66,7 +66,7 @@ public class InvReader extends AutomatedTile implements IRedstone8bit, ISidedInv
 	}
 
 	@Override
-	protected void customPlayerCommand(byte cmd, DataInputStream dis, EntityPlayerMP player) throws IOException 
+	protected void customPlayerCommand(byte cmd, PacketBuffer dis, EntityPlayerMP player) throws IOException 
 	{
 		if (cmd < 8) netData.ints[cmd] = dis.readInt();
 		else if (cmd < 16) {
@@ -88,7 +88,7 @@ public class InvReader extends AutomatedTile implements IRedstone8bit, ISidedInv
 			long p = 48 + s * 2;
 			long x = ((netData.longs[1] >> p & 0x3L) + 1L) % 3L;
 			netData.longs[1] = netData.longs[1] & ~(0x3L << p) | x << p;
-			worldObj.notifyBlocksOfNeighborChange(xCoord, yCoord, zCoord, this.getBlockType());
+			worldObj.notifyNeighborsOfStateChange(pos, this.getBlockType());
 		}
 	}
 
@@ -114,10 +114,10 @@ public class InvReader extends AutomatedTile implements IRedstone8bit, ISidedInv
             if (d8 < 0 && te != null && te instanceof IRedstone8bit && ((IRedstone8bit)te).getDirection(i^1) > 0)
                 input |= ((IRedstone8bit)te).getValue(i^1);
         }
-        update = (input | output) != lstate;
+        update1 = (input | output) != lstate;
     }
 	
-	private void update()
+	private void update1()
 	{
 		byte lstate = (byte)(output | input);
 		output = 0;
@@ -156,7 +156,7 @@ public class InvReader extends AutomatedTile implements IRedstone8bit, ISidedInv
 			if ((comp == 1 && x == netData.ints[i]) || (comp == 2 && x < netData.ints[i]) || (comp == 3 && x > netData.ints[i]))
 				output |= 1 << i;
 		}
-		update |= (output | input) != lstate;
+		update1 |= (output | input) != lstate;
 	}
 	
 	private void output(int recursion)
@@ -171,7 +171,7 @@ public class InvReader extends AutomatedTile implements IRedstone8bit, ISidedInv
             if (d8 > 0 && te != null && te instanceof IRedstone8bit && ((IRedstone8bit)te).getDirection(i^1) < 0)
                 ((IRedstone8bit)te).setValue(i^1, state, recursion);
         }
-        update = false;
+        update1 = false;
 	}
 
 	public byte getDir(int b)
@@ -187,7 +187,7 @@ public class InvReader extends AutomatedTile implements IRedstone8bit, ISidedInv
 	@Override
     public void onNeighborBlockChange(Block b) 
     {
-        update = true;
+        update1 = true;
     }
 	
 	@Override
@@ -208,12 +208,12 @@ public class InvReader extends AutomatedTile implements IRedstone8bit, ISidedInv
     {
         if (recursion < 16) {
         	this.getIn();
-        	if (update) output(recursion);
-        } else update = true;
+        	if (update1) output(recursion);
+        } else update1 = true;
     }
 
 	@Override
-	public ItemStack getStackInSlotOnClosing(int i) 
+	public ItemStack removeStackFromSlot(int i) 
 	{
 		return null;
 	}

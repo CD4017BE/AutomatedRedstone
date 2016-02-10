@@ -1,0 +1,7 @@
+{
+	"parent": "circuits:block/baseHex",
+    "textures": {
+        "pipe": "circuits:blocks/RSPipe8N",
+		"core": "circuits:blocks/logicConv"
+    }
+}

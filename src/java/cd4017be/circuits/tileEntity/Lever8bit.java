@@ -6,23 +6,9 @@
 
 package cd4017be.circuits.tileEntity;
 
-import dan200.computercraft.api.lua.ILuaContext;
-import dan200.computercraft.api.lua.LuaException;
-import dan200.computercraft.api.peripheral.IComputerAccess;
-import dan200.computercraft.api.peripheral.IPeripheral;
-
-import java.util.ArrayList;
-
-import li.cil.oc.api.machine.Arguments;
-import li.cil.oc.api.machine.Callback;
-import li.cil.oc.api.machine.Context;
-import li.cil.oc.api.network.Environment;
-import li.cil.oc.api.network.Message;
-import li.cil.oc.api.network.Node;
-import cpw.mods.fml.common.Optional;
-import cpw.mods.fml.common.Optional.Interface;
+import net.minecraftforge.fml.common.Optional;
+import net.minecraftforge.fml.common.Optional.Interface;
 import cd4017be.api.circuits.IRedstone8bit;
-import cd4017be.api.computers.ComputerAPI;
 import cd4017be.lib.ModTileEntity;
 import cd4017be.lib.util.Utils;
 import net.minecraft.entity.player.EntityPlayer;
@@ -31,34 +17,36 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ITickable;
 
 /**
  *
  * @author CD4017BE
  */
 @Optional.InterfaceList(value = {@Interface(iface = "dan200.computercraft.api.peripheral.IPeripheral", modid = "ComputerCraft"), @Interface(iface = "li.cil.oc.api.network.Environment", modid = "OpenComputers")})
-public class Lever8bit extends ModTileEntity implements IRedstone8bit, IPeripheral, Environment
+public class Lever8bit extends ModTileEntity implements IRedstone8bit, ITickable //, IPeripheral, Environment //TODO reimplement
 {
     private boolean update;
     public byte state;
 
     @Override
-    public boolean onActivated(EntityPlayer player, int s, float X, float Y, float Z) 
+    public boolean onActivated(EntityPlayer player, EnumFacing s, float X, float Y, float Z) 
     {
-        if (!player.isSneaking() && s == worldObj.getBlockMetadata(xCoord, yCoord, zCoord)) {
+        if (!player.isSneaking() && s.getIndex() + 2 == this.getBlockMetadata()) {
             int i = Y < 0.5F ? 4 : 0;
-            if (s == 3) {
+            if (s == EnumFacing.SOUTH) {
                 i |= (int)Math.floor(X * 4F);
-            } else if (s == 2) {
+            } else if (s == EnumFacing.NORTH) {
                 i |= (int)Math.floor((1F - X) * 4F);
-            } else if (s == 5) {
-                i |= (int)Math.floor((1F - Z) * 4F);
-            } else if (s == 4) {
-                i |= (int)Math.floor(Z * 4F);
+            } else if (s == EnumFacing.WEST) {
+            	i |= (int)Math.floor(Z * 4F);
+            } else if (s == EnumFacing.EAST) {
+            	i |= (int)Math.floor((1F - Z) * 4F);
             }
             state ^= 1 << i;
             update = true;
-            worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+            this.markUpdate();
             return true;
         } else return false;
     }
@@ -66,7 +54,7 @@ public class Lever8bit extends ModTileEntity implements IRedstone8bit, IPeripher
     @Override
     public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) 
     {
-        state = pkt.func_148857_g().getByte("state");
+        state = pkt.getNbtCompound().getByte("state");
     }
 
     @Override
@@ -74,13 +62,12 @@ public class Lever8bit extends ModTileEntity implements IRedstone8bit, IPeripher
     {
         NBTTagCompound nbt = new NBTTagCompound();
         nbt.setByte("state", state);
-        return new S35PacketUpdateTileEntity(xCoord, yCoord, zCoord, -1, nbt);
+        return new S35PacketUpdateTileEntity(pos, -1, nbt);
     }
 
     @Override
-    public void updateEntity() 
+    public void update() 
     {
-        super.updateEntity();
         if (worldObj.isRemote) return;
         if (update) {
             for (int i = 0; i < 6; i++) {
@@ -89,7 +76,7 @@ public class Lever8bit extends ModTileEntity implements IRedstone8bit, IPeripher
                     ((IRedstone8bit)te).setValue(i^1, state, 1);
                 }
             }
-            this.updateEvent();
+            //this.updateEvent(); TODO reimplement
         }
     }
 
@@ -126,6 +113,7 @@ public class Lever8bit extends ModTileEntity implements IRedstone8bit, IPeripher
     }
     
     //---------------- Computer APIs --------------------
+    /* TODO reimplement
     
     private ArrayList<Object> listeners = new ArrayList<Object>();
     
@@ -157,7 +145,7 @@ public class Lever8bit extends ModTileEntity implements IRedstone8bit, IPeripher
             if (par.length != 1 || !(par[0] instanceof Double)) throw new LuaException("missing parameter [setOutput(Number state)]");
             state = ((Double)par[0]).byteValue();
             update = true;
-            worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+            this.markUpdate();
             return null;
         } else return null;
     }
@@ -229,7 +217,9 @@ public class Lever8bit extends ModTileEntity implements IRedstone8bit, IPeripher
     public Object[] setOutput(Context cont, Arguments args) {
     	state = (byte)args.checkInteger(0);
     	update = true;
-        worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+        this.markUpdate();
     	return new Object[0];
     }
+    
+    */
 }

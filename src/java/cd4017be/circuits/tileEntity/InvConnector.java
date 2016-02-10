@@ -12,13 +12,17 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.IChatComponent;
+import net.minecraft.util.ITickable;
 import cd4017be.api.circuits.ILinkedInventory;
 import cd4017be.lib.ModTileEntity;
 import cd4017be.lib.templates.IPipe;
 import cd4017be.lib.util.Utils;
 
-public class InvConnector extends ModTileEntity implements ILinkedInventory, IPipe 
+public class InvConnector extends ModTileEntity implements ILinkedInventory, IPipe, ITickable
 {
 	private boolean linkUpdate = true;
 	private int[] linkPos = new int[]{0, -1, 0};
@@ -37,7 +41,7 @@ public class InvConnector extends ModTileEntity implements ILinkedInventory, IPi
 	}
 
 	@Override
-	public void onNeighborTileChange(int tx, int ty, int tz) 
+	public void onNeighborTileChange(BlockPos pos) 
 	{
 		linkUpdate = true;
 	}
@@ -60,7 +64,7 @@ public class InvConnector extends ModTileEntity implements ILinkedInventory, IPi
 	}
 
 	@Override
-	public void updateEntity() 
+	public void update() 
 	{
 		if (worldObj.isRemote || !linkUpdate) return;
 		TileEntity last = linkObj;
@@ -74,7 +78,7 @@ public class InvConnector extends ModTileEntity implements ILinkedInventory, IPi
 				linkPos[1] = -1;
 			} else {
 				linkPos = ((ILinkedInventory)te).getLinkPos();
-				linkObj = worldObj.getTileEntity(linkPos[0], linkPos[1], linkPos[2]);
+				linkObj = worldObj.getTileEntity(new BlockPos(linkPos[0], linkPos[1], linkPos[2]));
 				if (linkObj == null) linkPos[1] = -1;
 			}
 			if (linkObj != null && (linkObj instanceof ILinkedInventory || !(linkObj instanceof IInventory))) {
@@ -83,17 +87,17 @@ public class InvConnector extends ModTileEntity implements ILinkedInventory, IPi
 			}
 		} else {
 			linkObj = te;
-			linkPos = new int[]{te.xCoord, te.yCoord, te.zCoord};
+			linkPos = new int[]{te.getPos().getX(), te.getPos().getY(), te.getPos().getZ()};
 		}
 		if (linkObj != last) {
-			worldObj.notifyBlocksOfNeighborChange(xCoord, yCoord, zCoord, getBlockType());
-			worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+			worldObj.notifyNeighborsOfStateChange(pos, getBlockType());
+			this.markUpdate();
 		}
 		linkUpdate = false;
 	}
 	
 	@Override
-    public boolean onActivated(EntityPlayer player, int s, float X, float Y, float Z) 
+    public boolean onActivated(EntityPlayer player, EnumFacing s, float X, float Y, float Z) 
     {
         ItemStack item = player.getCurrentEquippedItem();
         if (player.isSneaking() && item == null) {
@@ -101,12 +105,12 @@ public class InvConnector extends ModTileEntity implements ILinkedInventory, IPi
             if (cover != null) {
                 player.setCurrentItemOrArmor(0, cover.item);
                 cover = null;
-                worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+                this.markUpdate();
                 return true;
             }
             IInventory inv = this.getLinkInv();
             if (inv == null) player.addChatMessage(new ChatComponentText("Not Linked!"));
-            else player.addChatMessage(new ChatComponentText(String.format("Linked to %s at %d, %d, %d", inv.getInventoryName(), linkPos[0], linkPos[1], linkPos[2])));
+            else player.addChatMessage(new ChatComponentText(String.format("Linked to %s at %d, %d, %d", inv.getName(), linkPos[0], linkPos[1], linkPos[2])));
             return true;
         } else if (item == null) {
         	if (!worldObj.isRemote) this.connect();
@@ -116,7 +120,7 @@ public class InvConnector extends ModTileEntity implements ILinkedInventory, IPi
             item.stackSize--;
             if (item.stackSize <= 0) item = null;
             player.setCurrentItemOrArmor(0, item);
-            worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+            this.markUpdate();
             return true;
         } else return false;
     }
@@ -135,7 +139,7 @@ public class InvConnector extends ModTileEntity implements ILinkedInventory, IPi
 			TileEntity te = Utils.getTileOnSide(this, d);
 			if (te != null && te instanceof IInventory) {
 				conDir = d;
-				worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+				this.markUpdate();
 				linkUpdate = true;
 				return;
 			}
@@ -164,7 +168,7 @@ public class InvConnector extends ModTileEntity implements ILinkedInventory, IPi
 	}
 
 	@Override
-	public ItemStack getStackInSlotOnClosing(int i) 
+	public ItemStack removeStackFromSlot(int i) 
 	{
 		return null;
 	}
@@ -177,17 +181,17 @@ public class InvConnector extends ModTileEntity implements ILinkedInventory, IPi
 	}
 
 	@Override
-	public String getInventoryName() 
+	public String getName() 
 	{
 		IInventory inv = this.getLinkInv();
-		return inv == null ? "No Connection" : inv.getInventoryName();
+		return inv == null ? "No Connection" : inv.getName();
 	}
 
 	@Override
-	public boolean hasCustomInventoryName() 
+	public boolean hasCustomName() 
 	{
 		IInventory inv = this.getLinkInv();
-		return inv == null ? true : inv.hasCustomInventoryName();
+		return inv == null ? true : inv.hasCustomName();
 	}
 
 	@Override
@@ -198,10 +202,10 @@ public class InvConnector extends ModTileEntity implements ILinkedInventory, IPi
 	}
 
 	@Override
-	public void openInventory() {}
+	public void openInventory(EntityPlayer player) {}
 
 	@Override
-	public void closeInventory() {}
+	public void closeInventory(EntityPlayer player) {}
 
 	@Override
 	public boolean isItemValidForSlot(int i, ItemStack stack) 
@@ -227,10 +231,10 @@ public class InvConnector extends ModTileEntity implements ILinkedInventory, IPi
 	@Override
     public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) 
     {
-        conDir = pkt.func_148857_g().getByte("dir");
-        linkPos[1] = pkt.func_148857_g().getBoolean("link") ? 0 : -1;
-        cover = Cover.read(pkt.func_148857_g(), "cover");
-        worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+        conDir = pkt.getNbtCompound().getByte("dir");
+        linkPos[1] = pkt.getNbtCompound().getBoolean("link") ? 0 : -1;
+        cover = Cover.read(pkt.getNbtCompound(), "cover");
+        this.markUpdate();
     }
 
     @Override
@@ -240,7 +244,7 @@ public class InvConnector extends ModTileEntity implements ILinkedInventory, IPi
         nbt.setShort("dir", conDir);
         nbt.setBoolean("link", linkPos[1] >= 0);
         if (cover != null) cover.write(nbt, "cover");
-        return new S35PacketUpdateTileEntity(xCoord, yCoord, zCoord, -1, nbt);
+        return new S35PacketUpdateTileEntity(pos, -1, nbt);
     }
     
     @Override
@@ -248,35 +252,35 @@ public class InvConnector extends ModTileEntity implements ILinkedInventory, IPi
     {
         super.breakBlock();
         if (cover != null) {
-            EntityItem entity = new EntityItem(worldObj, xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, cover.item);
+            EntityItem entity = new EntityItem(worldObj, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, cover.item);
             cover = null;
             worldObj.spawnEntityInWorld(entity);
         }
     }
 
 	@Override
-	public int[] getAccessibleSlotsFromSide(int s) 
+	public int[] getSlotsForFace(EnumFacing s) 
 	{
 		IInventory inv = this.getLinkInv();
 		if (inv == null) return new int[0];
-		if (inv instanceof ISidedInventory) return ((ISidedInventory)inv).getAccessibleSlotsFromSide(s);
+		if (inv instanceof ISidedInventory) return ((ISidedInventory)inv).getSlotsForFace(s);
 		int[] ret = new int[inv.getSizeInventory()];
 		for (int i = 0; i < ret.length; i++) ret[i] = i;
 		return ret;
 	}
 
 	@Override
-	public boolean canInsertItem(int i, ItemStack stack, int s) 
+	public boolean canInsertItem(int i, ItemStack stack, EnumFacing s) 
 	{
-		if (s == conDir) return false;
+		if (s.getIndex() == conDir) return false;
 		IInventory inv = this.getLinkInv();
 		return inv != null && (!(inv instanceof ISidedInventory) || ((ISidedInventory)inv).canInsertItem(i, stack, s));
 	}
 
 	@Override
-	public boolean canExtractItem(int i, ItemStack stack, int s) 
+	public boolean canExtractItem(int i, ItemStack stack, EnumFacing s) 
 	{
-		if (s == conDir) return false;
+		if (s.getIndex() == conDir) return false;
 		IInventory inv = this.getLinkInv();
 		return inv != null && (!(inv instanceof ISidedInventory) || ((ISidedInventory)inv).canExtractItem(i, stack, s));
 	}
@@ -301,6 +305,28 @@ public class InvConnector extends ModTileEntity implements ILinkedInventory, IPi
 	public byte getLinkDir() 
 	{
 		return conDir;
+	}
+
+	@Override
+	public int getField(int id) {
+		return 0;
+	}
+
+	@Override
+	public void setField(int id, int value) {}
+
+	@Override
+	public int getFieldCount() {
+		return 0;
+	}
+
+	@Override
+	public void clear() {}
+
+	@Override
+	public IChatComponent getDisplayName() {
+		IInventory inv = this.getLinkInv();
+		return inv == null ? new ChatComponentText("No Connection") : inv.getDisplayName();
 	}
 
 }

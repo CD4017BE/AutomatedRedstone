@@ -6,7 +6,6 @@
 
 package cd4017be.circuits.tileEntity;
 
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +25,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 
 /**
@@ -78,8 +78,8 @@ public class Programmer extends AutomatedTile implements ISidedInventory
     @Override
     public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) 
     {
-        this.load(pkt.func_148857_g());
-        message = pkt.func_148857_g().getString("msg");
+        this.load(pkt.getNbtCompound());
+        message = pkt.getNbtCompound().getString("msg");
     }
 
     @Override
@@ -88,11 +88,11 @@ public class Programmer extends AutomatedTile implements ISidedInventory
         NBTTagCompound nbt = new NBTTagCompound();
         this.save(nbt);
         nbt.setString("msg", message);
-        return new S35PacketUpdateTileEntity(xCoord, yCoord, zCoord, -1, nbt);
+        return new S35PacketUpdateTileEntity(pos, -1, nbt);
     }
 
     @Override
-    protected void customPlayerCommand(byte cmd, DataInputStream dis, EntityPlayerMP player) throws IOException 
+    protected void customPlayerCommand(byte cmd, PacketBuffer dis, EntityPlayerMP player) throws IOException 
     {
         message = "";
         if (cmd == 0 && inventory.items[0] != null) {
@@ -111,20 +111,20 @@ public class Programmer extends AutomatedTile implements ISidedInventory
                 if (inventory.items[0].stackTagCompound == null) inventory.items[0].stackTagCompound = new NBTTagCompound();
                 NBTTagCompound code = this.write();
                 if (!message.equals("Compiling successfull")) {
-                    this.worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+                    this.markUpdate();
                     return;
                 }
                 int n = code.getTagList("Src", 8).tagCount();
                 if ((inventory.items[0].stackTagCompound.getByte("Gates") & 0xff) < n) {
                     message = "Not enought Gates: " + n + " needed!";
-                    this.worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+                    this.markUpdate();
                     return;
                 } n = 0;
                 for (byte b : code.getByteArray("Out"))
                     if (b >= 0) n++;
                 if ((inventory.items[0].stackTagCompound.getByte("InOut") & 0xff) < n) {
                     message = "Not enought IO-Ports: " + n + " needed!";
-                    this.worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+                    this.markUpdate();
                     return;
                 } n = 0;
                 byte[] b = code.getByteArray("Count");
@@ -133,7 +133,7 @@ public class Programmer extends AutomatedTile implements ISidedInventory
                 }
                 if ((inventory.items[0].stackTagCompound.getByte("Count") & 0xff) < n) {
                     message = "Not enought Counter: " + n + " needed!";
-                    this.worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+                    this.markUpdate();
                     return;
                 }
                 NBTTagCompound progr = new NBTTagCompound();
@@ -147,7 +147,7 @@ public class Programmer extends AutomatedTile implements ISidedInventory
             else inventory.items[0].stackTagCompound = this.write();
         } else if (cmd == 2) { //setLine
             byte l = dis.readByte();
-            if (l >= 0 && l < gates.length) gates[l] = dis.readUTF();
+            if (l >= 0 && l < gates.length) gates[l] = dis.readStringFromBuffer(40);
         } else if (cmd == 3) { //addLine
             byte l = dis.readByte();
             if (l >= 0 && l <= gates.length){
@@ -173,9 +173,9 @@ public class Programmer extends AutomatedTile implements ISidedInventory
             byte l = dis.readByte();
             if (l >= 0 && l < counter.length) counter[l] = dis.readByte();
         } else if (cmd == 7) {
-            name = dis.readUTF();
+            name = dis.readStringFromBuffer(40);
         }
-        this.worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+        this.markUpdate();
     }
     
     private void load(NBTTagCompound nbt)

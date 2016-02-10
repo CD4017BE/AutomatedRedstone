@@ -6,7 +6,6 @@
 
 package cd4017be.circuits.tileEntity;
 
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,12 +16,15 @@ import cd4017be.lib.TileEntityData;
 import cd4017be.lib.templates.AutomatedTile;
 import cd4017be.lib.util.Utils;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 
 /**
  *
@@ -30,7 +32,7 @@ import net.minecraftforge.common.util.ForgeDirection;
  */
 public class Circuit extends AutomatedTile implements IRedstone8bit, IRedstone1bit
 {
-    
+	
     public Circuit()
     {
         /**
@@ -42,9 +44,9 @@ public class Circuit extends AutomatedTile implements IRedstone8bit, IRedstone1b
     }
 
     @Override
-    public String getInventoryName() 
+    public String getName() 
     {
-        return super.getInventoryName() + (name.length() > 0 ? " (".concat(name).concat(")") : "");
+        return super.getName() + (name.length() > 0 ? " (".concat(name).concat(")") : "");
     }
     
     //CPU
@@ -58,32 +60,34 @@ public class Circuit extends AutomatedTile implements IRedstone8bit, IRedstone1b
     private int var;
     private short timer = 0;
     private boolean update;
+    private boolean updateCon;
     
     @Override
-    public void updateEntity() 
+    public void update() 
     {
-        super.updateEntity();
+        super.update();
         if (worldObj.isRemote) return;
+        if (updateCon) {
+        	worldObj.notifyNeighborsOfStateChange(pos, this.getBlockType());
+        	updateCon = false;
+        }
         timer++;
-        if (getConfig(6) == 0) timer = 0;
+        if (getConfig(12) == 0) timer = 0;
         if (timer >= netData.ints[0]) {
             timer = 0;
-            byte d8, d1;
             int c;
             if (update) {
                 io[0] = io[1] = 0;
                 for (int i = 0; i < 6; i++) {
-                    ForgeDirection dir = ForgeDirection.getOrientation(i);
-                    d1 = this.getBitDirection(i);
-                    d8 = this.getDirection(i);
-                    if (d1 > -1 && d8 > -1) continue;
-                    c = this.getConfig(i);
+                    EnumFacing dir = EnumFacing.VALUES[i];
+                    c = this.getConfig(i + 6);
+                    if (c >= 2) continue;
                     TileEntity te = Utils.getTileOnSide(this, (byte)i);
-                    if (d8 < 0 && te != null && te instanceof IRedstone8bit && ((IRedstone8bit)te).getDirection(i^1) > 0) {
-                        io[c >> 4] |= ((IRedstone8bit)te).getValue(i^1);
-                    } else if (d1 < 0 && ((te != null && te instanceof IRedstone1bit && ((IRedstone1bit)te).getBitDirection(i^1) > 0 && ((IRedstone1bit)te).getBitValue(i^1))
-                        || worldObj.getIndirectPowerOutput(xCoord + dir.offsetX, yCoord + dir.offsetY, zCoord + dir.offsetZ, i))) {
-                        io[c >> 4] |= 1 << ((c & 0xf) - 2);
+                    if (te != null && te instanceof IRedstone8bit && ((IRedstone8bit)te).getDirection(i^1) > 0) {
+                    	io[c] |= ((IRedstone8bit)te).getValue(i^1) & this.getConfig(i);
+                    } else if ((te != null && te instanceof IRedstone1bit && ((IRedstone1bit)te).getBitDirection(i^1) > 0 && ((IRedstone1bit)te).getBitValue(i^1) > 0)
+                        || worldObj.getRedstonePower(pos.offset(dir), dir) > 0) {
+                    	io[c] |= this.getConfig(i);
                     }
                 }
                 update = false;
@@ -91,22 +95,16 @@ public class Circuit extends AutomatedTile implements IRedstone8bit, IRedstone1b
             byte l2 = io[2], l3 = io[3];
             cpuTick();
             if (io[2] != l2 || io[3] != l3)
-                for (int i = 0; i < 6; i++)
-                {
-                    ForgeDirection dir = ForgeDirection.getOrientation(i);
-                    d1 = this.getBitDirection(i);
-                    d8 = this.getDirection(i);
-                    if (d1 < 1 && d8 < 1) continue;
-                    c = this.getConfig(i);
+                for (int i = 0; i < 6; i++) {
+                	EnumFacing dir = EnumFacing.VALUES[i];
+                    if (this.getDirection(i) <= 0) continue;
                     TileEntity te = Utils.getTileOnSide(this, (byte)i);
-                    if (d8 > 0 && te != null && te instanceof IRedstone8bit && ((IRedstone8bit)te).getDirection(i^1) < 0) {
-                        ((IRedstone8bit)te).setValue(i^1, io[c >> 4], 1);
-                    } else if (d1 > 0) {
-                        if (te != null && te instanceof IRedstone1bit && ((IRedstone1bit)te).getBitDirection(i^1) < 0) {
-                            ((IRedstone1bit)te).setBitValue(i^1, (io[c >> 4] >> ((c & 0xf) - 2) & 1) != 0, 1);
-                        } else {
-                            this.notifyStateChange(xCoord + dir.offsetX, yCoord + dir.offsetY, zCoord + dir.offsetZ);
-                        }
+                    if (te != null && te instanceof IRedstone8bit && ((IRedstone8bit)te).getDirection(i^1) < 0) {
+                        ((IRedstone8bit)te).setValue(i^1, this.getValue(i), 1);
+                    } else if (te != null && te instanceof IRedstone1bit && ((IRedstone1bit)te).getBitDirection(i^1) < 0) {
+                    	((IRedstone1bit)te).setBitValue(i^1, this.getBitValue(i), 1);
+                    } else {
+                    	this.notifyStateChange(pos.offset(dir), dir.getOpposite());
                     }
                 }
         }
@@ -179,27 +177,32 @@ public class Circuit extends AutomatedTile implements IRedstone8bit, IRedstone1b
     
     public int getConfig(int s)
     {
-        return (int)(netData.longs[0] >> ((long)s * 6L) & 0x3fL);
+    	int c;
+    	if (s < 6) {s *= 8; c = 0xff;}
+    	else {s = s * 2 + 36; c = 3;}
+        return (int)(netData.longs[0] >> s) & c;
     }
     
     public void setConfig(int s, int v)
     {
-        netData.longs[0] &= ~(0x3fL << ((long)s * 6L));
-        netData.longs[0] |= ((long)v & 0x3fL) << ((long)s * 6L);
+    	int c;
+    	if (s < 6) {s *= 8; c = 0xff;}
+    	else {s = s * 2 + 36; c = 3;}
+        netData.longs[0] &= ~((long)c << s);
+        netData.longs[0] |= (long)(v & c) << s;
     }
 
     @Override
-    protected void customPlayerCommand(byte cmd, DataInputStream dis, EntityPlayerMP player) throws IOException 
+    protected void customPlayerCommand(byte cmd, PacketBuffer dis, EntityPlayerMP player) throws IOException 
     {
-        if (cmd == 0) Arrays.fill(ram, (byte)0);
+        if (cmd == 2) Arrays.fill(ram, (byte)0);
         else if (cmd == 1) {
             netData.ints[0] = dis.readInt();
             if (netData.ints[0] < 1) netData.ints[0] = 1;
             else if (netData.ints[0] > 1200) netData.ints[0] = 1200;
-        } else if (cmd == 2) {
-            netData.longs[0] = dis.readLong();
-            update = true;
-            worldObj.notifyBlocksOfNeighborChange(xCoord, yCoord, zCoord, this.getBlockType());
+        } else if (cmd == 0) {
+        	netData.longs[0] = dis.readLong();
+            updateCon = update = true;
         }
     }
 
@@ -238,7 +241,7 @@ public class Circuit extends AutomatedTile implements IRedstone8bit, IRedstone1b
     }
 
     @Override
-    public ArrayList<ItemStack> dropItem(int m, int fortune) 
+    public ArrayList<ItemStack> dropItem(IBlockState m, int fortune) 
     {
         ArrayList<ItemStack> list = new ArrayList<ItemStack>();
         ItemStack item = new ItemStack(this.getBlockType());
@@ -281,18 +284,16 @@ public class Circuit extends AutomatedTile implements IRedstone8bit, IRedstone1b
     @Override
     public byte getValue(int s) 
     {
-        int c = this.getConfig(s);
-        int c1 = c & 0xf, c2 = c >> 4;
-        if (c2 >= 2 && c1 == 1) return io[c2];
+    	
+        int c = this.getConfig(s + 6);
+        if (c >= 2) return (byte)(io[c] & this.getConfig(s));
         else return 0;
     }
 
     @Override
     public byte getDirection(int s) 
     {
-        int c = this.getConfig(s);
-        if ((c & 0xf) != 1) return 0;
-        else return (byte)(c < 0x20 ? -1 : 1);
+    	return (netData.longs[0] & 0xffL << (s * 8)) == 0 ? (byte)0 : (netData.longs[0] & 2L << (s * 2 + 48)) == 0 ? (byte)-1 : (byte)1;
     }
 
     @Override
@@ -304,36 +305,31 @@ public class Circuit extends AutomatedTile implements IRedstone8bit, IRedstone1b
     @Override
     public byte getBitDirection(int s) 
     {
-        int c = this.getConfig(s);
-        if ((c & 0xf) >= 2) return c >= 0x20 ? (byte)1 : (byte)-1;
-        else return 0;
+        return this.getDirection(s);
     }
 
     @Override
-    public boolean getBitValue(int s) 
+    public byte getBitValue(int s) 
     {
-        int c = this.getConfig(s);
-        int c1 = c & 0xf, c2 = c >> 4;
-        if (c2 >= 2 && c1 >= 2) return (io[c2] & (1 << (c - 2))) != 0;
-        else return false;
+    	return this.getValue(s) != 0 ? (byte)15 : (byte)0;
     }
 
     @Override
-    public void setBitValue(int s, boolean v, int recursion) 
+    public void setBitValue(int s, byte v, int recursion) 
     {
         update = true;
     }
     
-    private void notifyStateChange(int x, int y, int z)
+    private void notifyStateChange(BlockPos pos, EnumFacing except)
     {
-        worldObj.notifyBlockOfNeighborChange(x, y, z, this.getBlockType());
-        worldObj.notifyBlocksOfNeighborChange(x, y, z, this.getBlockType());
+        worldObj.notifyBlockOfStateChange(pos, this.getBlockType());
+        worldObj.notifyNeighborsOfStateExcept(pos, this.getBlockType(), except);
     }
     
     @Override
     public int redstoneLevel(int s, boolean str) 
     {
-        return this.getBitValue(s) ? 15 : 0;
+        return this.getBitValue(s);
     }
     
     @Override

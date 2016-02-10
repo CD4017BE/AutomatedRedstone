@@ -6,11 +6,10 @@
 
 package cd4017be.circuits.gui;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 
@@ -59,7 +58,7 @@ public class GuiAssembler extends GuiMachine
         this.mc.renderEngine.bindTexture(new ResourceLocation("circuits", "textures/gui/assembler.png"));
         this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);
         this.drawItemConfig(tileEntity, -36, 7);
-        this.drawStringCentered(tileEntity.getInventoryName(), this.guiLeft + this.xSize / 2, this.guiTop + 4, 0x404040);
+        this.drawStringCentered(tileEntity.getName(), this.guiLeft + this.xSize / 2, this.guiTop + 4, 0x404040);
         this.drawStringCentered(StatCollector.translateToLocal("container.inventory"), this.guiLeft + this.xSize / 2, this.guiTop + 76, 0x404040);
         this.drawStringCentered("InOut= " + tileEntity.netData.ints[0], this.guiLeft + 106, this.guiTop + 38, 0x408040);
         this.drawStringCentered("Gates= " + tileEntity.netData.ints[1], this.guiLeft + 106, this.guiTop + 30, 0x408040);
@@ -67,21 +66,17 @@ public class GuiAssembler extends GuiMachine
     }
     
     @Override
-    protected void mouseClicked(int x, int y, int b) 
+    protected void mouseClicked(int x, int y, int b) throws IOException
     {
         this.clickItemConfig(tileEntity, x - this.guiLeft + 36, y - this.guiTop - 7);
         byte a = -1;
-        if (this.func_146978_c(80, 29, 52, 26, x, y)) {
+        if (this.isPointInRegion(80, 29, 52, 26, x, y)) {
             a = 0;
         }
-        if (a >= 0)
-        {
-            try {
-            ByteArrayOutputStream bos = tileEntity.getPacketTargetData();
-            DataOutputStream dos = new DataOutputStream(bos);
-            dos.writeByte(AutomatedTile.CmdOffset + a);
-            BlockGuiHandler.sendPacketToServer(bos);
-            } catch (IOException e){}
+        if (a >= 0) {
+            PacketBuffer dos = tileEntity.getPacketTargetData();
+	        dos.writeByte(AutomatedTile.CmdOffset + a);
+	        BlockGuiHandler.sendPacketToServer(dos);
         }
         super.mouseClicked(x, y, b);
     }

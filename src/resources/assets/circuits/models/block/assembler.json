@@ -1,0 +1,8 @@
+{
+	"parent": "circuits:block/base0",
+    "textures": {
+        "top": "circuits:blocks/assembler0",
+		"bot": "circuits:blocks/assembler1",
+		"side": "circuits:blocks/assembler2"
+    }
+}

@@ -3,21 +3,24 @@ package cd4017be.circuits.tileEntity;
 import java.util.ArrayList;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ITickable;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
-import net.minecraftforge.common.util.ForgeDirection;
 import cd4017be.api.circuits.IRedstone8bit;
 import cd4017be.lib.ModTileEntity;
 import cd4017be.lib.util.Utils;
 
-public class Wireless8bit extends ModTileEntity implements IRedstone8bit 
+public class Wireless8bit extends ModTileEntity implements IRedstone8bit, ITickable
 {
 
 	public int linkX = 0;
@@ -36,10 +39,10 @@ public class Wireless8bit extends ModTileEntity implements IRedstone8bit
         if (item.getItemDamage() == 0) {
             ItemStack drop = new ItemStack(item.getItem(), 1, 2);
             drop.stackTagCompound = new NBTTagCompound();
-            drop.stackTagCompound.setInteger("lx", xCoord);
-            drop.stackTagCompound.setInteger("ly", yCoord);
-            drop.stackTagCompound.setInteger("lz", zCoord);
-            drop.stackTagCompound.setInteger("ld", worldObj.provider.dimensionId);
+            drop.stackTagCompound.setInteger("lx", pos.getX());
+            drop.stackTagCompound.setInteger("ly", pos.getY());
+            drop.stackTagCompound.setInteger("lz", pos.getZ());
+            drop.stackTagCompound.setInteger("ld", worldObj.provider.getDimensionId());
             EntityItem eitem = new EntityItem(worldObj, entity.posX, entity.posY, entity.posZ, drop);
             worldObj.spawnEntityInWorld(eitem);
             if (entity instanceof EntityPlayer) ((EntityPlayer)entity).addChatMessage(new ChatComponentText("The droped Receiver will link to this"));
@@ -55,7 +58,7 @@ public class Wireless8bit extends ModTileEntity implements IRedstone8bit
     }
 
     @Override
-    public ArrayList<ItemStack> dropItem(int m, int fortune) 
+    public ArrayList<ItemStack> dropItem(IBlockState m, int fortune) 
     {
         ArrayList<ItemStack> list = new ArrayList<ItemStack>();
         ItemStack drop = new ItemStack(this.getBlockType(), 1, this.getBlockMetadata() == 0 ? 1 : 2);
@@ -69,13 +72,13 @@ public class Wireless8bit extends ModTileEntity implements IRedstone8bit
     }
 
     @Override
-    public boolean onActivated(EntityPlayer player, int s, float X, float Y, float Z) 
+    public boolean onActivated(EntityPlayer player, EnumFacing s, float X, float Y, float Z) 
     {
         if (worldObj.isRemote) return true;
         if (player.isSneaking() && player.getCurrentEquippedItem() == null && linkTile != null && !linkTile.isInvalid() && linkTile.linkTile == this) {
             ItemStack item = new ItemStack(this.getBlockType(), 1, 0);
-            linkTile.worldObj.setBlockToAir(linkTile.xCoord, linkTile.yCoord, linkTile.zCoord);
-            worldObj.setBlockToAir(xCoord, yCoord, zCoord);
+            linkTile.worldObj.setBlockToAir(linkTile.pos);
+            worldObj.setBlockToAir(pos);
             EntityItem eitem = new EntityItem(worldObj, player.posX, player.posY, player.posZ, item);
             worldObj.spawnEntityInWorld(eitem);
             player.addChatMessage(new ChatComponentText("Both linked 8-bit-Wireless devices removed"));
@@ -88,13 +91,13 @@ public class Wireless8bit extends ModTileEntity implements IRedstone8bit
     public int redstoneLevel(int s, boolean str) 
     {
         if (linkTile == null) return 0;
-        ForgeDirection dir = ForgeDirection.getOrientation(s);
+        EnumFacing dir = EnumFacing.VALUES[s];
         if (str) return 0;
-        return linkTile.worldObj.getIndirectPowerLevelTo(linkX - dir.offsetX, linkY - dir.offsetY, linkZ - dir.offsetZ, s);
+        return linkTile.worldObj.getRedstonePower(new BlockPos(linkX, linkY, linkZ).offset(dir), EnumFacing.VALUES[s]);
     }
 
     @Override
-    public void updateEntity() 
+    public void update() 
     {
     	if (worldObj.isRemote) return;
         if (updateCon) {
@@ -171,14 +174,14 @@ public class Wireless8bit extends ModTileEntity implements IRedstone8bit
         }
         linkTile = null;
         if (world != null) {
-            TileEntity te = world.getTileEntity(linkX, linkY, linkZ);
+            TileEntity te = world.getTileEntity(new BlockPos(linkX, linkY, linkZ));
             if (te != null && te instanceof Wireless8bit) {
                 linkTile = (Wireless8bit)te;
                 linkTile.linkTile = this;
-                linkTile.linkX = xCoord;
-                linkTile.linkY = yCoord;
-                linkTile.linkZ = zCoord;
-                linkTile.linkD = worldObj.provider.dimensionId;
+                linkTile.linkX = pos.getX();
+                linkTile.linkY = pos.getY();
+                linkTile.linkZ = pos.getZ();
+                linkTile.linkD = worldObj.provider.getDimensionId();
             }
         }
     }

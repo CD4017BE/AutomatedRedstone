@@ -1,0 +1,8 @@
+{
+    "variants": {
+        "orient=n": { "model": "circuits:assembler" },
+		"orient=e": { "model": "circuits:assembler" , "y": 90 },
+		"orient=s": { "model": "circuits:assembler" , "y": 180 },
+		"orient=w": { "model": "circuits:assembler" , "y": 270 }
+    }
+}

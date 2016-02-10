@@ -1,6 +1,5 @@
 package cd4017be.circuits.tileEntity;
 
-import java.io.DataInputStream;
 import java.io.IOException;
 
 import net.minecraft.block.Block;
@@ -9,7 +8,10 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
 import cd4017be.api.circuits.ILinkedInventory;
 import cd4017be.api.circuits.IRedstone8bit;
 import cd4017be.lib.TileContainer;
@@ -25,7 +27,7 @@ public class ItemTranslocator extends AutomatedTile implements ILinkedInventory,
 	private int[] linkPos = {0, -1, 0};
 	private TileEntity linkObj;
 	private byte state;
-	private boolean update = true;
+	private boolean update1 = true;
 	private boolean linkUpdate = true;
 	private short counter = 0;
 	
@@ -42,16 +44,16 @@ public class ItemTranslocator extends AutomatedTile implements ILinkedInventory,
 	}
 	
 	@Override
-	public void updateEntity() 
+	public void update() 
 	{
 		if (worldObj.isRemote) return;
-		if (update) this.output(0);
+		if (update1) this.output(0);
 		if (linkUpdate) this.link();
 		counter++;
 		if ((netData.longs[3] >> 47L & 1L) == 0) counter = 0;
 		if (counter >= netData.ints[8]) {
 			counter = 0;
-			this.update();
+			this.update1();
 		}
 	}
 	
@@ -60,7 +62,7 @@ public class ItemTranslocator extends AutomatedTile implements ILinkedInventory,
 	{
 		super.readFromNBT(nbt);
 		state = nbt.getByte("in");
-		update = true;
+		update1 = true;
 		int[] data = nbt.getIntArray("ref");
 		System.arraycopy(data, 0, netData.ints, 0, Math.min(data.length, netData.ints.length));
 		netData.longs[1] = nbt.getLong("cfg1");
@@ -83,7 +85,7 @@ public class ItemTranslocator extends AutomatedTile implements ILinkedInventory,
 	}
 
 	@Override
-	protected void customPlayerCommand(byte cmd, DataInputStream dis, EntityPlayerMP player) throws IOException 
+	protected void customPlayerCommand(byte cmd, PacketBuffer dis, EntityPlayerMP player) throws IOException 
 	{
 		if (cmd < 8) netData.ints[cmd] = dis.readInt();
 		else if (cmd < 16) {
@@ -102,7 +104,7 @@ public class ItemTranslocator extends AutomatedTile implements ILinkedInventory,
 			long p = 32 + s * 2;
 			long x = ((netData.longs[3] >> p & 0x3L) + 1L) % 3L;
 			netData.longs[3] = netData.longs[3] & ~(0x3L << p) | x << p;
-			worldObj.notifyBlocksOfNeighborChange(xCoord, yCoord, zCoord, this.getBlockType());
+			worldObj.notifyNeighborsOfStateChange(pos, this.getBlockType());
 		} else if (cmd == 17) {
 			netData.ints[8] = dis.readInt();
 			 if (netData.ints[8] < 1) netData.ints[8] = 1;
@@ -141,7 +143,7 @@ public class ItemTranslocator extends AutomatedTile implements ILinkedInventory,
 				linkPos[1] = -1;
 			} else {
 				linkPos = ((ILinkedInventory)te).getLinkPos();
-				linkObj = worldObj.getTileEntity(linkPos[0], linkPos[1], linkPos[2]);
+				linkObj = worldObj.getTileEntity(new BlockPos(linkPos[0], linkPos[1], linkPos[2]));
 			}
 			if (linkObj != null && (linkObj instanceof ILinkedInventory || !(linkObj instanceof IInventory))) {
 				linkObj = null;
@@ -149,13 +151,13 @@ public class ItemTranslocator extends AutomatedTile implements ILinkedInventory,
 			}
 		} else {
 			linkObj = te;
-			linkPos = new int[]{te.xCoord, te.yCoord, te.zCoord};
+			linkPos = new int[]{te.getPos().getX(), te.getPos().getY(), te.getPos().getZ()};
 		}
-		if (linkObj != last) worldObj.notifyBlocksOfNeighborChange(xCoord, yCoord, zCoord, getBlockType());
+		if (linkObj != last) worldObj.notifyNeighborsOfStateChange(pos, getBlockType());
 		linkUpdate = false;
 	}
 	
-	private void update()
+	private void update1()
 	{
 		byte mode;
 		boolean neg;
@@ -198,12 +200,12 @@ public class ItemTranslocator extends AutomatedTile implements ILinkedInventory,
         int am0 = am;
         for (int i : sS) {
             ItemStack curItem = src.getStackInSlot(i);
-            if (curItem != null && (type.matches(curItem) ^ neg) && (srcS == null || srcS.canExtractItem(i, curItem, sideS))) {
+            if (curItem != null && (type.matches(curItem) ^ neg) && (srcS == null || srcS.canExtractItem(i, curItem, EnumFacing.VALUES[sideS]))) {
                 int m = Math.min(curItem.getMaxStackSize(), dst.getInventoryStackLimit());
                 int p = -1;
                 for (int j : sD) {
                     ItemStack stack = dst.getStackInSlot(j);
-                    if (stack == null && p == -1 && (dstS == null || dstS.canInsertItem(j, curItem, sideD))) p = j;
+                    if (stack == null && p == -1 && (dstS == null || dstS.canInsertItem(j, curItem, EnumFacing.VALUES[sideD]))) p = j;
                     else if (Utils.itemsEqual(curItem, stack) && stack.stackSize < m) {
                     	int n = Math.min(m - stack.stackSize, am);
                     	ItemStack item = src.decrStackSize(i, n);
@@ -256,7 +258,7 @@ public class ItemTranslocator extends AutomatedTile implements ILinkedInventory,
 	                ((IRedstone8bit)te).setValue(i^1, state, recursion);
 	        }
         }
-        update = false;
+        update1 = false;
 	}
 
 	public byte getDir(int b)
@@ -272,7 +274,7 @@ public class ItemTranslocator extends AutomatedTile implements ILinkedInventory,
 	@Override
     public void onNeighborBlockChange(Block b) 
     {
-        update = true;
+        update1 = true;
         linkUpdate = true;
     }
 	
@@ -293,7 +295,7 @@ public class ItemTranslocator extends AutomatedTile implements ILinkedInventory,
     public void setValue(int s, byte v, int recursion) 
     {
         if (recursion < 16) output(recursion);
-        else update = true;
+        else update1 = true;
     }
 
 	@Override
@@ -319,7 +321,7 @@ public class ItemTranslocator extends AutomatedTile implements ILinkedInventory,
 	}
 
 	@Override
-	public ItemStack getStackInSlotOnClosing(int i) 
+	public ItemStack removeStackFromSlot(int i) 
 	{
 		return null;
 	}

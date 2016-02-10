@@ -1,12 +1,11 @@
 package cd4017be.circuits.gui;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 import org.lwjgl.opengl.GL11;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import cd4017be.circuits.tileEntity.ItemTranslocator;
@@ -82,31 +81,31 @@ public class GuiItemTranslocator extends GuiMachine {
         for (int i = 0; i < 8; i++)
         	this.drawStringCentered("" + tileEntity.netData.ints[i], this.guiLeft + 88 + i / 4 * 99, this.guiTop + 20 + (i % 4) * 18, 0x404040);
         this.drawStringCentered(String.format("%.2f", (float)tileEntity.netData.ints[8] / 20F).concat("s"), this.guiLeft + 79, this.guiTop + 92, 0x404040);
-        this.drawStringCentered(tileEntity.getInventoryName(), this.guiLeft + this.xSize / 2, this.guiTop + 4, 0x404040);
+        this.drawStringCentered(tileEntity.getName(), this.guiLeft + this.xSize / 2, this.guiTop + 4, 0x404040);
         this.drawStringCentered(StatCollector.translateToLocal("container.inventory"), this.guiLeft + this.xSize / 2, this.guiTop + 110, 0x404040);
     }
 
 	@Override
-    protected void mouseClicked(int x, int y, int b) 
+    protected void mouseClicked(int x, int y, int b) throws IOException
     {
     	byte a = -1, d = -1;
-    	if (this.func_146978_c(115, 87, 18, 18, x, y)) {
+    	if (this.isPointInRegion(115, 87, 18, 18, x, y)) {
             a = 18;
-        } else if (this.func_146978_c(187, 87, 18, 18, x, y)) {
+        } else if (this.isPointInRegion(187, 87, 18, 18, x, y)) {
             a = 19;
-        } else if (this.func_146978_c(44, 88, 10, 16, x, y)) {
+        } else if (this.isPointInRegion(44, 88, 10, 16, x, y)) {
             tileEntity.netData.ints[8] -= 20;
             if (tileEntity.netData.ints[8] < 1) tileEntity.netData.ints[8] = 1;
             a = 17;
-        } else if (this.func_146978_c(54, 88, 10, 16, x, y)) {
+        } else if (this.isPointInRegion(54, 88, 10, 16, x, y)) {
             tileEntity.netData.ints[8] -= 1;
             if (tileEntity.netData.ints[8] < 1) tileEntity.netData.ints[8] = 1;
             a = 17;
-        } else if (this.func_146978_c(94, 88, 10, 16, x, y)) {
+        } else if (this.isPointInRegion(94, 88, 10, 16, x, y)) {
             tileEntity.netData.ints[8] += 1;
             if (tileEntity.netData.ints[8] > 1200) tileEntity.netData.ints[8] = 1200;
             a = 17;
-        } else if (this.func_146978_c(104, 88, 10, 16, x, y)) {
+        } else if (this.isPointInRegion(104, 88, 10, 16, x, y)) {
             tileEntity.netData.ints[8] += 20;
             if (tileEntity.netData.ints[8] > 1200) tileEntity.netData.ints[8] = 1200;
             a = 17;
@@ -114,7 +113,7 @@ public class GuiItemTranslocator extends GuiMachine {
     	int k, l;
         for (int i = 0; i < 6 && a < 0; i++) {
             k = 187; l = 107 + i * 15;
-            if (this.func_146978_c(k, l, 18, 14, x, y)) {
+            if (this.isPointInRegion(k, l, 18, 14, x, y)) {
             	a = 16;
             	d = (byte)i;
             	break;
@@ -122,51 +121,47 @@ public class GuiItemTranslocator extends GuiMachine {
         }
         for (int i = 0; i < 8 && a < 0; i++) {
         	k = 7 + i / 4 * 99; l = 15 + (i % 4) * 18;
-        	if (this.func_146978_c(k + 9, l, 9, 9, x, y)) {
+        	if (this.isPointInRegion(k + 9, l, 9, 9, x, y)) {
         		a = (byte)(8 + i);
         		d = 0;
-        	} else if (this.func_146978_c(k + 9, l + 9, 9, 9, x, y)) {
+        	} else if (this.isPointInRegion(k + 9, l + 9, 9, 9, x, y)) {
         		a = (byte)(8 + i);
         		d = 1;
-        	} else if (this.func_146978_c(k + 90, l, 9, 9, x, y)) {
+        	} else if (this.isPointInRegion(k + 90, l, 9, 9, x, y)) {
         		a = (byte)(8 + i);
         		d = 2;
-        	} else if (this.func_146978_c(k + 90, l + 9, 9, 9, x, y)) {
+        	} else if (this.isPointInRegion(k + 90, l + 9, 9, 9, x, y)) {
         		a = (byte)(8 + i);
         		d = 3;
-        	} else if (this.func_146978_c(k + 36, l, 18, 9, x, y)) {
+        	} else if (this.isPointInRegion(k + 36, l, 18, 9, x, y)) {
         		a = (byte)(8 + i);
         		d = 4;
-        	} else if (this.func_146978_c(k + 54, l, 18, 9, x, y)) {
+        	} else if (this.isPointInRegion(k + 54, l, 18, 9, x, y)) {
         		a = (byte)(8 + i);
         		d = 5;
-        	} else if (this.func_146978_c(k + 54, l + 9, 18, 9, x, y)) {
+        	} else if (this.isPointInRegion(k + 54, l + 9, 18, 9, x, y)) {
         		a = (byte)(8 + i);
         		d = 6;
-        	} else if (this.func_146978_c(k + 36, l + 9, 18, 9, x, y)) {
+        	} else if (this.isPointInRegion(k + 36, l + 9, 18, 9, x, y)) {
         		a = (byte)(8 + i);
         		d = 7;
-        	} else if (this.func_146978_c(k + 72, l, 18, 5, x, y)) {
+        	} else if (this.isPointInRegion(k + 72, l, 18, 5, x, y)) {
         		tileEntity.netData.ints[i] += b == 0 ? 1 : 8;
         		if (tileEntity.netData.ints[i] > 64) tileEntity.netData.ints[i] = 64;
         		a = (byte)i;
-        	} else if (this.func_146978_c(k + 72, l + 13, 18, 5, x, y)) {
+        	} else if (this.isPointInRegion(k + 72, l + 13, 18, 5, x, y)) {
         		tileEntity.netData.ints[i] -= b == 0 ? 1 : 8;
         		if (tileEntity.netData.ints[i] < 0) tileEntity.netData.ints[i] = 0;
         		a = (byte)i;
         	}
         }
-        if (a >= 0)
-        {
-            try {
-	            ByteArrayOutputStream bos = tileEntity.getPacketTargetData();
-	            DataOutputStream dos = new DataOutputStream(bos);
-	            dos.writeByte(AutomatedTile.CmdOffset + a);
-	            if (a < 8) dos.writeInt(tileEntity.netData.ints[a]);
-	            else if (a == 17) dos.writeInt(tileEntity.netData.ints[8]);
-	            else if (a < 17)dos.writeByte(d);
-	            BlockGuiHandler.sendPacketToServer(bos);
-            } catch (IOException e){}
+        if (a >= 0) {
+            PacketBuffer dos = tileEntity.getPacketTargetData();
+	        dos.writeByte(AutomatedTile.CmdOffset + a);
+	        if (a < 8) dos.writeInt(tileEntity.netData.ints[a]);
+            else if (a == 17) dos.writeInt(tileEntity.netData.ints[8]);
+            else if (a < 17)dos.writeByte(d);
+	        BlockGuiHandler.sendPacketToServer(dos);
         }
         super.mouseClicked(x, y, b);
     }

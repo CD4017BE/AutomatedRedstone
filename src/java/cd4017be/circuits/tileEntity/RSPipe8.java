@@ -22,13 +22,14 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ITickable;
 
 /**
  *
  * @author CD4017BE
  */
-public class RSPipe8 extends ModTileEntity implements IRedstone8bit, IPipe
+public class RSPipe8 extends ModTileEntity implements IRedstone8bit, IPipe, ITickable
 {
     private byte state;
     private boolean update = false;
@@ -37,7 +38,7 @@ public class RSPipe8 extends ModTileEntity implements IRedstone8bit, IPipe
     private Cover cover = null;
 
     @Override
-    public void updateEntity() 
+    public void update() 
     {
         if (worldObj.isRemote) return;
         if (updateCon) this.updateConnections();
@@ -46,7 +47,7 @@ public class RSPipe8 extends ModTileEntity implements IRedstone8bit, IPipe
     
     private void updateConnections() 
     {
-        ForgeDirection dir;
+        EnumFacing dir;
         TileEntity te;
         boolean lHasOut = getFlowBit(6);
         boolean lHasIn = getFlowBit(14);
@@ -60,8 +61,8 @@ public class RSPipe8 extends ModTileEntity implements IRedstone8bit, IPipe
             lDirOut = this.getFlowBit(i);
             lDirIn = this.getFlowBit(i | 8);
             if (lDirOut && lDirIn) continue;
-            dir = ForgeDirection.getOrientation(i);
-            te = worldObj.getTileEntity(xCoord + dir.offsetX, yCoord + dir.offsetY, zCoord + dir.offsetZ);
+            dir = EnumFacing.VALUES[i];
+            te = worldObj.getTileEntity(pos.offset(dir));
             if (te == null) {
                 setFlowBit(i, false);
                 setFlowBit(i | 8, false);
@@ -108,7 +109,7 @@ public class RSPipe8 extends ModTileEntity implements IRedstone8bit, IPipe
         setFlowBit(6, nHasOut);
         setFlowBit(14, nHasIn);
         if (flow != lFlow) {
-            worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+            worldObj.markBlockForUpdate(pos);
             for (RSPipe8 pipe : updateList) {
                 pipe.onNeighborBlockChange(Blocks.air);
             }
@@ -156,15 +157,16 @@ public class RSPipe8 extends ModTileEntity implements IRedstone8bit, IPipe
     }
 
     @Override
-    public boolean onActivated(EntityPlayer player, int s, float X, float Y, float Z) 
+    public boolean onActivated(EntityPlayer player, EnumFacing dir, float X, float Y, float Z) 
     {
-        ItemStack item = player.getCurrentEquippedItem();
+        int s = dir.getIndex();
+    	ItemStack item = player.getCurrentEquippedItem();
         if (player.isSneaking() && item == null) {
             if (worldObj.isRemote) return true;
             if (cover != null) {
                 player.setCurrentItemOrArmor(0, cover.item);
                 cover = null;
-                worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+                worldObj.markBlockForUpdate(pos);
                 return true;
             }
             X -= 0.5F;
@@ -180,14 +182,14 @@ public class RSPipe8 extends ModTileEntity implements IRedstone8bit, IPipe
             this.setFlowBit(s, lock);
             this.setFlowBit(s | 8, lock);
             this.onNeighborBlockChange(Blocks.air);
-            worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+            worldObj.markBlockForUpdate(pos);
             TileEntity te = Utils.getTileOnSide(this, (byte)s);
             if (te != null && te instanceof RSPipe8) {
                 RSPipe8 pipe = (RSPipe8)te;
                 pipe.setFlowBit(s^1, lock);
                 pipe.setFlowBit(s^1 | 8, lock);
                 pipe.onNeighborBlockChange(Blocks.air);
-                worldObj.markBlockForUpdate(pipe.xCoord, pipe.yCoord, pipe.zCoord);
+                worldObj.markBlockForUpdate(pipe.pos);
             }
             return true;
         } else if (!player.isSneaking() && cover == null && item != null && (cover = Cover.create(item)) != null) {
@@ -195,7 +197,7 @@ public class RSPipe8 extends ModTileEntity implements IRedstone8bit, IPipe
             item.stackSize--;
             if (item.stackSize <= 0) item = null;
             player.setCurrentItemOrArmor(0, item);
-            worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+            worldObj.markBlockForUpdate(pos);
             return true;
         } else return false;
     }
@@ -217,6 +219,7 @@ public class RSPipe8 extends ModTileEntity implements IRedstone8bit, IPipe
         super.writeToNBT(nbt);
         nbt.setShort("flow", flow);
         nbt.setByte("state", state);
+        if (cover != null) cover.write(nbt, "cover");
     }
 
     @Override
@@ -226,7 +229,6 @@ public class RSPipe8 extends ModTileEntity implements IRedstone8bit, IPipe
         flow = nbt.getShort("flow");
         state = nbt.getByte("state");
         cover = Cover.read(nbt, "cover");
-        if (cover != null) cover.write(nbt, "cover");
         updateCon = true;
         update = true;
     }
@@ -234,9 +236,9 @@ public class RSPipe8 extends ModTileEntity implements IRedstone8bit, IPipe
     @Override
     public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) 
     {
-        flow = pkt.func_148857_g().getShort("flow");
-        cover = Cover.read(pkt.func_148857_g(), "cover");
-        worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+        flow = pkt.getNbtCompound().getShort("flow");
+        cover = Cover.read(pkt.getNbtCompound(), "cover");
+        worldObj.markBlockForUpdate(pos);
     }
 
     @Override
@@ -245,7 +247,7 @@ public class RSPipe8 extends ModTileEntity implements IRedstone8bit, IPipe
         NBTTagCompound nbt = new NBTTagCompound();
         nbt.setShort("flow", flow);
         if (cover != null) cover.write(nbt, "cover");
-        return new S35PacketUpdateTileEntity(xCoord, yCoord, zCoord, -1, nbt);
+        return new S35PacketUpdateTileEntity(pos, -1, nbt);
     }
     
     @Override
@@ -253,21 +255,10 @@ public class RSPipe8 extends ModTileEntity implements IRedstone8bit, IPipe
     {
         super.breakBlock();
         if (cover != null) {
-            EntityItem entity = new EntityItem(worldObj, xCoord + 0.5D, yCoord + 0.5D, zCoord + 0.5D, cover.item);
+            EntityItem entity = new EntityItem(worldObj, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, cover.item);
             cover = null;
             worldObj.spawnEntityInWorld(entity);
         }
-    }
-    
-    @Override
-    public int textureForSide(byte s) 
-    {
-        TileEntity p = Utils.getTileOnSide(this, s);
-        boolean b0 = getFlowBit(s), b1 = getFlowBit(s | 8);
-        if (b0 ^ b1 || (!b0 && !b1 && p != null && p instanceof IRedstone8bit))
-        {
-            return (b0?1:0)|(b1?2:0);
-        } else return -1;
     }
     
     @Override
@@ -297,6 +288,16 @@ public class RSPipe8 extends ModTileEntity implements IRedstone8bit, IPipe
     public Cover getCover() 
     {
         return cover;
+    }
+
+    @Override
+    public int textureForSide(byte s) 
+    {
+    	if (s == -1) return 0;
+        TileEntity p = Utils.getTileOnSide(this, s);
+        boolean b0 = getFlowBit(s), b1 = getFlowBit(s | 8);
+        if (b0 ^ b1 || (!b0 && !b1 && p != null && p instanceof IRedstone8bit)) return (b0?1:0)|(b1?2:0);
+        else return -1;
     }
     
 }

@@ -1,11 +1,10 @@
 package cd4017be.circuits.gui;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 
@@ -37,7 +36,7 @@ public class GuiInvReader extends GuiMachine
         this.ySize = 186;
         super.initGui();
         for (int i = 0; i < 8; i++) {
-        	refVal[i] = new GuiTextField(fontRendererObj, this.guiLeft + 53 + i / 4 * 99, this.guiTop + 24 + (i % 4) * 18, 52, 8);
+        	refVal[i] = new GuiTextField(0, fontRendererObj, this.guiLeft + 53 + i / 4 * 99, this.guiTop + 24 + (i % 4) * 18, 52, 8);
         	refVal[i].setEnableBackgroundDrawing(false);
         }
     }
@@ -84,12 +83,12 @@ public class GuiInvReader extends GuiMachine
         	if (c != 0) this.drawTexturedModalRect(x, y, 212, c == -1 ? 0 : 14, 18, 14);
         }
         for (int i = 0; i < refVal.length; i++) refVal[i].drawTextBox(); 
-        this.drawStringCentered(tileEntity.getInventoryName(), this.guiLeft + this.xSize / 2, this.guiTop + 4, 0x404040);
+        this.drawStringCentered(tileEntity.getName(), this.guiLeft + this.xSize / 2, this.guiTop + 4, 0x404040);
         this.drawStringCentered(StatCollector.translateToLocal("container.inventory"), this.guiLeft + this.xSize / 2, this.guiTop + 92, 0x404040);
     }
     
     @Override
-	protected void keyTyped(char c, int k) 
+	protected void keyTyped(char c, int k) throws IOException
     {
 		for (int i = 0; i < refVal.length; i++)
 			if (refVal[i].isFocused()) {
@@ -97,12 +96,10 @@ public class GuiInvReader extends GuiMachine
 				if (k == Keyboard.KEY_RETURN) {
 					refVal[i].setFocused(false);
 					try {
-			            ByteArrayOutputStream bos = tileEntity.getPacketTargetData();
-			            DataOutputStream dos = new DataOutputStream(bos);
+			            PacketBuffer dos = tileEntity.getPacketTargetData();
 			            dos.writeByte(AutomatedTile.CmdOffset + i);
 			            dos.writeInt(Integer.parseInt(refVal[i].getText()));
-			            BlockGuiHandler.sendPacketToServer(bos);
-					} catch (IOException e) {
+			            BlockGuiHandler.sendPacketToServer(dos);
 					} catch (NumberFormatException e) {}
 				}
 				return;
@@ -120,14 +117,14 @@ public class GuiInvReader extends GuiMachine
 	}
 
 	@Override
-    protected void mouseClicked(int x, int y, int b) 
+    protected void mouseClicked(int x, int y, int b) throws IOException
     {
         for (int i = 0; i < 8; i++) refVal[i].mouseClicked(x, y, b);
     	byte a = -1, d = -1;
         int k, l;
         for (int i = 0; i < 6; i++) {
             k = 187; l = 89 + i * 15;
-            if (this.func_146978_c(k, l, 18, 14, x, y)) {
+            if (this.isPointInRegion(k, l, 18, 14, x, y)) {
             	a = 16;
             	d = (byte)i;
             	break;
@@ -135,38 +132,34 @@ public class GuiInvReader extends GuiMachine
         }
         for (int i = 0; i < 8 && a < 0; i++) {
         	k = 7 + i / 4 * 99; l = 15 + (i % 4) * 18;
-        	if (this.func_146978_c(k + 9, l, 9, 9, x, y)) {
+        	if (this.isPointInRegion(k + 9, l, 9, 9, x, y)) {
         		a = (byte)(8 + i);
         		d = 0;
-        	} else if (this.func_146978_c(k + 9, l + 9, 9, 9, x, y)) {
+        	} else if (this.isPointInRegion(k + 9, l + 9, 9, 9, x, y)) {
         		a = (byte)(8 + i);
         		d = 1;
-        	} else if (this.func_146978_c(k + 36, l + 9, 9, 9, x, y)) {
+        	} else if (this.isPointInRegion(k + 36, l + 9, 9, 9, x, y)) {
         		a = (byte)(8 + i);
         		d = 2;
-        	} else if (this.func_146978_c(k + 36, l, 9, 9, x, y)) {
+        	} else if (this.isPointInRegion(k + 36, l, 9, 9, x, y)) {
         		a = (byte)(8 + i);
         		d = 3;
-        	} else if (this.func_146978_c(k + 81, l, 18, 9, x, y)) {
+        	} else if (this.isPointInRegion(k + 81, l, 18, 9, x, y)) {
         		a = (byte)(8 + i);
         		d = 4;
-        	} else if (this.func_146978_c(k + 63, l, 18, 9, x, y)) {
+        	} else if (this.isPointInRegion(k + 63, l, 18, 9, x, y)) {
         		a = (byte)(8 + i);
         		d = 5;
-        	} else if (this.func_146978_c(k + 45, l, 18, 9, x, y)) {
+        	} else if (this.isPointInRegion(k + 45, l, 18, 9, x, y)) {
         		a = (byte)(8 + i);
         		d = 6;
         	}
         }
-        if (a >= 0)
-        {
-            try {
-            ByteArrayOutputStream bos = tileEntity.getPacketTargetData();
-            DataOutputStream dos = new DataOutputStream(bos);
-            dos.writeByte(AutomatedTile.CmdOffset + a);
-            dos.writeByte(d);
-            BlockGuiHandler.sendPacketToServer(bos);
-            } catch (IOException e){}
+        if (a >= 0) {
+            PacketBuffer dos = tileEntity.getPacketTargetData();
+	        dos.writeByte(AutomatedTile.CmdOffset + a);
+	        dos.writeByte(d);
+	        BlockGuiHandler.sendPacketToServer(dos);
         }
         super.mouseClicked(x, y, b);
     }

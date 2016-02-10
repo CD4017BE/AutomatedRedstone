@@ -16,10 +16,9 @@ import net.minecraft.block.material.Material;
  */
 public class BlockRSPipe8 extends BlockPipe
 {
-    
     public BlockRSPipe8(String id, Material m)
     {
-        super(id, m, DefaultItemBlock.class, 0x20, "RSPipe8N", "RSPipe8O", "RSPipe8I", "RSPipe8B");
+        super(id, m, DefaultItemBlock.class, 0x20);
         this.size = 0.5F;
     }
     

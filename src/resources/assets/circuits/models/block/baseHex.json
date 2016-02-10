@@ -1,0 +1,52 @@
+{
+    "textures": {
+        "particle": "#core"
+    },
+    "elements": [
+		{	"from": [0, 4, 4],
+			"to": [16, 12, 12],
+			"faces": {
+				"down":  { "uv": [0, 4, 16, 12], "texture": "#pipe" },
+				"up":    { "uv": [0, 4, 16, 12], "texture": "#pipe" },
+				"north": { "uv": [0, 4, 16, 12], "texture": "#pipe" },
+				"south": { "uv": [0, 4, 16, 12], "texture": "#pipe" },
+				"west":  { "uv": [4, 4, 12, 12], "texture": "#pipe", "cullface": "west" },
+				"east":  { "uv": [4, 4, 12, 12], "texture": "#pipe", "cullface": "east" }
+			}
+		},
+		{	"from": [4, 4, 0],
+			"to": [12, 12, 16],
+			"faces": {
+				"down":  { "uv": [0, 4, 16, 12], "texture": "#pipe", "rotation": 90 },
+				"up":    { "uv": [0, 4, 16, 12], "texture": "#pipe", "rotation": 90 },
+				"north": { "uv": [4, 4, 12, 12], "texture": "#pipe", "cullface": "north" },
+				"south": { "uv": [4, 4, 12, 12], "texture": "#pipe", "cullface": "south" },
+				"west":  { "uv": [0, 4, 16, 12], "texture": "#pipe" },
+				"east":  { "uv": [0, 4, 16, 12], "texture": "#pipe" }
+			}
+		},
+		{	"from": [4, 0, 4],
+			"to": [12, 16, 12],
+			"faces": {
+				"down":  { "uv": [4, 4, 12, 12], "texture": "#pipe", "cullface": "down" },
+				"up":    { "uv": [4, 4, 12, 12], "texture": "#pipe", "cullface": "up" },
+				"north": { "uv": [0, 4, 16, 12], "texture": "#pipe", "rotation": 90 },
+				"south": { "uv": [0, 4, 16, 12], "texture": "#pipe", "rotation": 90 },
+				"west":  { "uv": [0, 4, 16, 12], "texture": "#pipe", "rotation": 90 },
+				"east":  { "uv": [0, 4, 16, 12], "texture": "#pipe", "rotation": 90 }
+			}
+		},
+        {   
+			"from": [2, 2, 2],
+            "to": [14, 14, 14],
+            "faces": {
+                "down":  { "uv": [ 2, 2, 14, 14 ], "texture": "#core" },
+                "up":    { "uv": [ 2, 2, 14, 14 ], "texture": "#core" },
+                "north": { "uv": [ 2, 2, 14, 14 ], "texture": "#core" },
+                "south": { "uv": [ 2, 2, 14, 14 ], "texture": "#core" },
+                "west":  { "uv": [ 2, 2, 14, 14 ], "texture": "#core" },
+                "east":  { "uv": [ 2, 2, 14, 14 ], "texture": "#core" }
+            }
+        }
+    ]
+}

@@ -11,7 +11,6 @@ import cd4017be.lib.BlockItemRegistry;
 import cd4017be.lib.DefaultItemBlock;
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
 
 /**
  *
@@ -33,12 +32,6 @@ public class ItemRSPipe extends DefaultItemBlock
     public int getMetadata(int dmg) 
     {
         return dmg;
-    }
-    
-    @Override
-    public IIcon getIconFromDamage(int m) 
-    {
-    	return this.field_150939_a.getIcon(0, m);
     }
     
 }

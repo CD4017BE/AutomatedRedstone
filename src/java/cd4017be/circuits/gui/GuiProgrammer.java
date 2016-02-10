@@ -6,11 +6,10 @@
 
 package cd4017be.circuits.gui;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraft.util.ResourceLocation;
 
@@ -75,7 +74,7 @@ public class GuiProgrammer extends GuiMachine
         this.drawTexturedModalRect(this.guiLeft + 8, this.guiTop + 25 + n, 176, 0, 8, 12);
         this.drawText();
         this.drawConfig();
-        fontRendererObj.drawString(tileEntity.getInventoryName(), this.guiLeft + 8, this.guiTop + 4, 0x404040);
+        fontRendererObj.drawString(tileEntity.getName(), this.guiLeft + 8, this.guiTop + 4, 0x404040);
         fontRendererObj.drawString(curW == 2 && curY == 32 ? numS : tileEntity.name, this.guiLeft + 96, this.guiTop + 4, 0x404040);
         this.drawStringCentered(tileEntity.message, this.guiLeft + this.xSize / 2, this.guiTop + 91, 0x804040);
     }
@@ -116,11 +115,11 @@ public class GuiProgrammer extends GuiMachine
     }
     
     @Override
-    public void handleMouseInput() 
+    public void handleMouseInput() throws IOException 
     {
-        int d = Mouse.getEventDWheel() / 120;
+        int d = Mouse.getEventDWheel();
         if (d != 0) {
-            Scroll -= d;
+            Scroll -= d > 0 ? 1 : -1;
             if (Scroll > tileEntity.gates.length - 8) Scroll = tileEntity.gates.length - 8;
             if (Scroll < 0) Scroll = 0;
         }
@@ -128,10 +127,10 @@ public class GuiProgrammer extends GuiMachine
     }
     
     @Override
-    protected void mouseClicked(int x, int y, int b) 
+    protected void mouseClicked(int x, int y, int b) throws IOException
     {
         super.mouseClicked(x, y, b);
-        if (this.func_146978_c(89, 25, 52, 64, x, y)) {
+        if (this.isPointInRegion(89, 25, 52, 64, x, y)) {
             this.sendCurrentChange();
             curW = 0;
             curY = (x - this.guiLeft - 89) / 13 * 8 + (y - this.guiTop - 25) / 8;
@@ -139,13 +138,13 @@ public class GuiProgrammer extends GuiMachine
             numS = this.getConfig(curY);
             curW = 2;
             curX = numS.length();
-        } else if (this.func_146978_c(18, 25, 60, 64, x, y)) {
+        } else if (this.isPointInRegion(18, 25, 60, 64, x, y)) {
             this.sendCurrentChange();
             curW = 1;
             curY = (y - this.guiTop - 25) / 8 + Scroll;
             if (curY >= tileEntity.gates.length) curY = tileEntity.gates.length - 1;
             curX = tileEntity.gates[curY].length();
-        } else if (this.func_146978_c(88, 4, 80, 8, x, y)){
+        } else if (this.isPointInRegion(88, 4, 80, 8, x, y)){
             this.sendCurrentChange();
             curW = 2;
             curY = 32;
@@ -155,17 +154,17 @@ public class GuiProgrammer extends GuiMachine
             this.sendCurrentChange();
             curW = 0;
         }
-        if (this.func_146978_c(152, 37, 16, 16, x, y)) {
+        if (this.isPointInRegion(152, 37, 16, 16, x, y)) {
             this.sendCMD((byte)1);
-        } else if (this.func_146978_c(152, 73, 16, 16, x, y)) {
+        } else if (this.isPointInRegion(152, 73, 16, 16, x, y)) {
             this.sendCMD((byte)0);
-        } else if (this.func_146978_c(151, 15, 18, 18, x, y)) {
+        } else if (this.isPointInRegion(151, 15, 18, 18, x, y)) {
             //Help Screen
         }
     }
 
     @Override
-    protected void keyTyped(char c, int k) 
+    protected void keyTyped(char c, int k) throws IOException 
     {
         if (curW == 1) {
             try {
@@ -243,50 +242,41 @@ public class GuiProgrammer extends GuiMachine
         } else super.keyTyped(c, k);
     }
     
-    private void sendCurrentChange()
+    private void sendCurrentChange() throws IOException
     {
         try{
         if (curW == 1) {
-            ByteArrayOutputStream bos = tileEntity.getPacketTargetData();
-            DataOutputStream dos = new DataOutputStream(bos);
+            PacketBuffer dos = tileEntity.getPacketTargetData();
             dos.writeByte(AutomatedTile.CmdOffset + 2);
             dos.writeByte(curY);
-            dos.writeUTF(tileEntity.gates[curY]);
-            BlockGuiHandler.sendPacketToServer(bos);
+            dos.writeString(tileEntity.gates[curY]);
+            BlockGuiHandler.sendPacketToServer(dos);
         } else if (curW == 2) {
-            ByteArrayOutputStream bos = tileEntity.getPacketTargetData();
-            DataOutputStream dos = new DataOutputStream(bos);
+            PacketBuffer dos = tileEntity.getPacketTargetData();
             dos.writeByte(AutomatedTile.CmdOffset + (curY < 16 ? 6 : curY < 32 ? 5 : 7));
             if (curY < 32) {
                 dos.writeByte(curY % 16);
                 dos.writeByte(Short.parseShort(numS));
-            } else dos.writeUTF(numS);
-            BlockGuiHandler.sendPacketToServer(bos);
+            } else dos.writeString(numS);
+            BlockGuiHandler.sendPacketToServer(dos);
         }
-        } catch(IOException e) {
         } catch(NumberFormatException e) {
         } catch(ArrayIndexOutOfBoundsException e) {}
     }
     
-    private void sendCMD(byte cmd)
+    private void sendCMD(byte cmd) throws IOException
     {
-        try {
-            ByteArrayOutputStream bos = tileEntity.getPacketTargetData();
-            DataOutputStream dos = new DataOutputStream(bos);
-            dos.writeByte(AutomatedTile.CmdOffset + cmd);
-            BlockGuiHandler.sendPacketToServer(bos);
-        } catch(IOException e) {}
+    	PacketBuffer dos = tileEntity.getPacketTargetData();
+    	dos.writeByte(AutomatedTile.CmdOffset + cmd);
+    	BlockGuiHandler.sendPacketToServer(dos);
     }
     
-    private void sendAddRemove(int cmd, int l)
+    private void sendAddRemove(int cmd, int l) throws IOException
     {
-        try {
-            ByteArrayOutputStream bos = tileEntity.getPacketTargetData();
-            DataOutputStream dos = new DataOutputStream(bos);
-            dos.writeByte(AutomatedTile.CmdOffset + cmd);
-            dos.writeByte(l);
-            BlockGuiHandler.sendPacketToServer(bos);
-        } catch(IOException e) {}
+    	PacketBuffer dos = tileEntity.getPacketTargetData();
+    	dos.writeByte(AutomatedTile.CmdOffset + cmd);
+    	dos.writeByte(l);
+    	BlockGuiHandler.sendPacketToServer(dos);
     }
     
 }

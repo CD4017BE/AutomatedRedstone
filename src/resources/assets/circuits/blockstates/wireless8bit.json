@@ -1,0 +1,6 @@
+{
+    "variants": {
+        "type=0": { "model": "circuits:wireless8bitI" },
+		"type=1": { "model": "circuits:wireless8bitO" }
+    }
+}

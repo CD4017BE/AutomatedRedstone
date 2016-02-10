@@ -6,23 +6,10 @@
 
 package cd4017be.circuits.tileEntity;
 
-import dan200.computercraft.api.lua.ILuaContext;
-import dan200.computercraft.api.lua.LuaException;
-import dan200.computercraft.api.peripheral.IComputerAccess;
-import dan200.computercraft.api.peripheral.IPeripheral;
-import cpw.mods.fml.common.Optional;
-import cpw.mods.fml.common.Optional.Interface;
+import net.minecraftforge.fml.common.Optional;
+import net.minecraftforge.fml.common.Optional.Interface;
 
-import java.util.ArrayList;
-
-import li.cil.oc.api.machine.Arguments;
-import li.cil.oc.api.machine.Callback;
-import li.cil.oc.api.machine.Context;
-import li.cil.oc.api.network.Environment;
-import li.cil.oc.api.network.Message;
-import li.cil.oc.api.network.Node;
 import cd4017be.api.circuits.IRedstone8bit;
-import cd4017be.api.computers.ComputerAPI;
 import cd4017be.lib.ModTileEntity;
 import cd4017be.lib.util.Utils;
 import net.minecraft.block.Block;
@@ -32,24 +19,26 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ITickable;
 
 /**
  *
  * @author CD4017BE
  */
 @Optional.InterfaceList(value = {@Interface(iface = "dan200.computercraft.api.peripheral.IPeripheral", modid = "ComputerCraft"), @Interface(iface = "li.cil.oc.api.network.Environment", modid = "OpenComputers")})
-public class Display8bit extends ModTileEntity implements IRedstone8bit, IPeripheral, Environment
+public class Display8bit extends ModTileEntity implements IRedstone8bit, ITickable //, IPeripheral, Environment TODO reimplement
 {
     private boolean update;
     public byte state;
     public byte dspType;
 
     @Override
-    public boolean onActivated(EntityPlayer player, int s, float X, float Y, float Z) 
+    public boolean onActivated(EntityPlayer player, EnumFacing s, float X, float Y, float Z) 
     {
-        if (!player.isSneaking() && s == worldObj.getBlockMetadata(xCoord, yCoord, zCoord)) {
+        if (!player.isSneaking() && s.getIndex() == this.getBlockMetadata() - 2) {
             dspType = (byte)((dspType + 1) % 3); 
-            worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
+            this.markUpdate();
             return true;
         } else return false;
     }
@@ -57,8 +46,8 @@ public class Display8bit extends ModTileEntity implements IRedstone8bit, IPeriph
     @Override
     public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) 
     {
-        state = pkt.func_148857_g().getByte("state");
-        dspType = pkt.func_148857_g().getByte("dsp");
+        state = pkt.getNbtCompound().getByte("state");
+        dspType = pkt.getNbtCompound().getByte("dsp");
     }
 
     @Override
@@ -67,13 +56,12 @@ public class Display8bit extends ModTileEntity implements IRedstone8bit, IPeriph
         NBTTagCompound nbt = new NBTTagCompound();
         nbt.setByte("state", state);
         nbt.setByte("dsp", dspType);
-        return new S35PacketUpdateTileEntity(xCoord, yCoord, zCoord, -1, nbt);
+        return new S35PacketUpdateTileEntity(pos, -1, nbt);
     }
 
     @Override
-    public void updateEntity() 
+    public void update() 
     {
-        super.updateEntity();
         if (worldObj.isRemote) return;
         if (update) {
             byte lstate = state;
@@ -85,8 +73,8 @@ public class Display8bit extends ModTileEntity implements IRedstone8bit, IPeriph
                 }
             }
             if (state != lstate) {
-                worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
-                this.updateEvent();
+                this.markUpdate();
+                //this.updateEvent(); //TODO reimplement
             }
         }
     }
@@ -133,6 +121,7 @@ public class Display8bit extends ModTileEntity implements IRedstone8bit, IPeriph
     }
     
     //---------------- Computer APIs --------------------
+    /* TODO reimplement
     
     private ArrayList<Object> listeners = new ArrayList<Object>();
     
@@ -230,4 +219,6 @@ public class Display8bit extends ModTileEntity implements IRedstone8bit, IPeriph
     public Object[] getInput(Context cont, Arguments args) {
     	return new Object[]{state};
     }
+    
+    */
 }

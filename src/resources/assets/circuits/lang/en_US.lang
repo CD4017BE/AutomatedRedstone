@@ -9,7 +9,8 @@ tile.cd4017be.rsp1bit:1.name=1-bit Redstone-Wire output
 tile.cd4017be.rsp1bit:2.name=1-bit Redstone-Wire input
 tile.cd4017be.lever8bit.name=8-bit Lever
 tile.cd4017be.display8bit.name=8-bit Display
-tile.cd4017be.rsInterface.name=8-bit-Port Redstone Adapter
+tile.cd4017be.logicConv.name=Logic Signal Converter
+tile.cd4017be.calcConv.name=Arithmetic Signal Converter
 tile.cd4017be.wireless8bit:0.name=Interdimensional 8-bit wireless Port
 tile.cd4017be.wireless8bit:1.name=Linked 8-bit wireless Transmitter
 tile.cd4017be.wireless8bit:2.name=Linked 8-bit wireless Receiver
@@ -42,12 +43,15 @@ item.cd4017be.circuitPlan.tip=Stores programm sourcecode for later use.\nPut pap
 //Inventory names
 gui.cd4017be.programmer.name=Circuit Programm:
 gui.cd4017be.assembler.name=Assembler
-gui.cd4017be.circuit.name=Redstone Circuit
-gui.cd4017be.rsInterface.name=Redstone Adapter
+gui.cd4017be.circuit.name=Circuit
+gui.cd4017be.logicConv.name=Connect
+gui.cd4017be.calcConv.name=Connect
 gui.cd4017be.invReader.name=Inventory Sensor
 gui.cd4017be.itemTranslocator.name=Item Translocator
 //Gui tooltips
 gui.cd4017be.rs.dir=Signal direction
+gui.cd4017be.rs.filter=Hex-AND-Gate
+gui.cd4017be.rs.const=constant
 gui.cd4017be.rs.channel=Signal channel
 gui.cd4017be.filter.neg=Invert filter?
 gui.cd4017be.filter.ore=Use Ore-Dictionary?
@@ -63,7 +67,8 @@ gui.cd4017be.program.o1=output bits 0-7
 gui.cd4017be.program.o2=output bits 8-15
 gui.cd4017be.program.name=program name
 gui.cd4017be.program.info=Available commands:\n"+" = OR-gate\n"-" = NOR-gate\n"&" = AND-gate\n"*" = NAND-gate\n"/" = XOR-gate\n"\" = XNOR-gate\n"%" = Input\n"# = " = compare equal\n"# < " = compare lesser\n"# > " = compare greater
-gui.cd4017be.circuit.io=Circuit IO-Byte
+gui.cd4017be.circuit.io=Circuit IO-Byte\nblue: input\ngreen: output
+gui.cd4017be.circuit.timer=Tick interval
 gui.cd4017be.invRead.inv=Neighbor inventory
 gui.cd4017be.invRead.invS=Access side
 gui.cd4017be.invRead.comp=Compare mode

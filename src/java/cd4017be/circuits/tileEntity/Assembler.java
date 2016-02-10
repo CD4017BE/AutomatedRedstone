@@ -6,9 +6,16 @@
 
 package cd4017be.circuits.tileEntity;
 
-import java.io.DataInputStream;
 import java.io.IOException;
 
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.PacketBuffer;
 import cd4017be.circuits.item.ItemCircuit;
 import cd4017be.lib.BlockItemRegistry;
 import cd4017be.lib.TileContainer;
@@ -18,13 +25,6 @@ import cd4017be.lib.templates.IAutomatedInv;
 import cd4017be.lib.templates.Inventory;
 import cd4017be.lib.templates.Inventory.Component;
 import cd4017be.lib.templates.SlotOutput;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraft.inventory.Slot;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 
 /**
  *
@@ -40,7 +40,7 @@ public class Assembler extends AutomatedTile implements IAutomatedInv
     }
 
     @Override
-    protected void customPlayerCommand(byte cmd, DataInputStream dis, EntityPlayerMP player) throws IOException 
+    protected void customPlayerCommand(byte cmd, PacketBuffer dis, EntityPlayerMP player) throws IOException 
     {
         if (cmd == 0 && inventory.items[7] == null && inventory.items[6] != null && inventory.items[6].getItem() instanceof ItemCircuit) {
             ItemStack item = this.decrStackSize(6, 1);
@@ -62,9 +62,9 @@ public class Assembler extends AutomatedTile implements IAutomatedInv
     }
 
     @Override
-    public void updateEntity() 
+    public void update() 
     {
-        super.updateEntity();
+        super.update();
         if (worldObj.isRemote) return;
         if (inventory.items[1] == null && inventory.items[0] != null && inventory.items[0].getItem() instanceof ItemCircuit) inventory.items[1] = this.decrStackSize(0, 1);
         ItemStack item = inventory.items[1];

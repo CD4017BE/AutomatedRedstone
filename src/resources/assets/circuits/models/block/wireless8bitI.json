@@ -1,0 +1,7 @@
+{
+	"parent": "circuits:block/baseHex",
+    "textures": {
+        "core": "circuits:blocks/wireless8bitCore",
+		"pipe": "circuits:blocks/wireless8bitI"
+    }
+}

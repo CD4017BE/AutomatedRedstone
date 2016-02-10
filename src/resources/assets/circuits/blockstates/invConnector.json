@@ -1,0 +1,10 @@
+{
+    "variants": {
+		"dir=down": { "model": "circuits:InvConB" },
+		"dir=up": { "model": "circuits:InvConB" },
+		"dir=north": { "model": "circuits:InvConB" },
+		"dir=south": { "model": "circuits:InvConB" },
+		"dir=east": { "model": "circuits:InvConB" },
+		"dir=west": { "model": "circuits:InvConB" }
+	}
+}

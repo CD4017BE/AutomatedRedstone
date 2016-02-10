@@ -20,10 +20,9 @@ import net.minecraft.item.ItemStack;
 public class ItemProgramm extends DefaultItem
 {
     
-    public ItemProgramm(String id, String tex)
+    public ItemProgramm(String id)
     {
         super(id);
-        this.setTextureName(tex);
         this.setCreativeTab(RedstoneCircuits.tabCircuits);
     }
 

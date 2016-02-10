@@ -1,0 +1,7 @@
+{
+    "variants": {
+		"type=0": { "model": "circuits:RSPipe1N" },
+		"type=1": { "model": "circuits:RSPipe1I" },
+		"type=2": { "model": "circuits:RSPipe1O" }
+    }
+}
