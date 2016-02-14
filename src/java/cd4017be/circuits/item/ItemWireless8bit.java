@@ -19,8 +19,8 @@ public class ItemWireless8bit extends DefaultItemBlock
     @Override
     public void addInformation(ItemStack item, EntityPlayer player, List list, boolean f) 
     {
-        if (item.getItemDamage() != 0 && item.stackTagCompound != null) {
-            list.add(String.format("Linked: x= %d ,y= %d ,z= %d in dim %d", item.stackTagCompound.getInteger("lx"), item.stackTagCompound.getInteger("ly"), item.stackTagCompound.getInteger("lz"), item.stackTagCompound.getInteger("ld")));
+        if (item.getItemDamage() != 0 && item.getTagCompound() != null) {
+            list.add(String.format("Linked: x= %d ,y= %d ,z= %d in dim %d", item.getTagCompound().getInteger("lx"), item.getTagCompound().getInteger("ly"), item.getTagCompound().getInteger("lz"), item.getTagCompound().getInteger("ld")));
         }
         super.addInformation(item, player, list, f);
     }

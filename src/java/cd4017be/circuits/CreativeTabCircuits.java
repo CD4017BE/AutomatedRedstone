@@ -38,7 +38,7 @@ public class CreativeTabCircuits extends CreativeTabs
     @Override
 	public Item getTabIconItem() 
 	{
-		return BlockItemRegistry.itemId("tile.circuit");
+		return Item.getItemFromBlock(BlockItemRegistry.blockId("circuit"));
 	}
     
 }

@@ -101,28 +101,28 @@ public class Programmer extends AutomatedTile implements ISidedInventory
                 counter = Arrays.copyOf(defaultArray, defaultArray.length);
                 gates = new String[]{""};
                 name = "";
-            } else if (inventory.items[0].getItem() == BlockItemRegistry.itemId("item.circuitPlan") && inventory.items[0].stackTagCompound != null) {
-                this.load(inventory.items[0].stackTagCompound);
+            } else if (inventory.items[0].getItem() == BlockItemRegistry.itemId("circuitPlan") && inventory.items[0].getTagCompound() != null) {
+                this.load(inventory.items[0].getTagCompound());
                 message = "Programm Loaded";
             }
         } else if (cmd == 1 && inventory.items[0] != null) {
             if (inventory.items[0].getItem() == Items.paper) inventory.items[0] = BlockItemRegistry.stack("item.circuitPlan", inventory.items[0].stackSize);
             else if (inventory.items[0].getItem() instanceof ItemCircuit) {
-                if (inventory.items[0].stackTagCompound == null) inventory.items[0].stackTagCompound = new NBTTagCompound();
+                if (inventory.items[0].getTagCompound() == null) inventory.items[0].setTagCompound(new NBTTagCompound());
                 NBTTagCompound code = this.write();
                 if (!message.equals("Compiling successfull")) {
                     this.markUpdate();
                     return;
                 }
                 int n = code.getTagList("Src", 8).tagCount();
-                if ((inventory.items[0].stackTagCompound.getByte("Gates") & 0xff) < n) {
+                if ((inventory.items[0].getTagCompound().getByte("Gates") & 0xff) < n) {
                     message = "Not enought Gates: " + n + " needed!";
                     this.markUpdate();
                     return;
                 } n = 0;
                 for (byte b : code.getByteArray("Out"))
                     if (b >= 0) n++;
-                if ((inventory.items[0].stackTagCompound.getByte("InOut") & 0xff) < n) {
+                if ((inventory.items[0].getTagCompound().getByte("InOut") & 0xff) < n) {
                     message = "Not enought IO-Ports: " + n + " needed!";
                     this.markUpdate();
                     return;
@@ -131,7 +131,7 @@ public class Programmer extends AutomatedTile implements ISidedInventory
                 for (int j = 0; j < 8; j++) {
                     if (b[j] >= 0 || b[j + 8] >= 0) n++;
                 }
-                if ((inventory.items[0].stackTagCompound.getByte("Count") & 0xff) < n) {
+                if ((inventory.items[0].getTagCompound().getByte("Count") & 0xff) < n) {
                     message = "Not enought Counter: " + n + " needed!";
                     this.markUpdate();
                     return;
@@ -141,10 +141,10 @@ public class Programmer extends AutomatedTile implements ISidedInventory
                 progr.setByteArray("code", code.getByteArray("Data"));
                 progr.setByteArray("out", code.getByteArray("Out"));
                 progr.setByteArray("cnt", code.getByteArray("Count"));
-                inventory.items[0].stackTagCompound.setTag("Progr", progr);
+                inventory.items[0].getTagCompound().setTag("Progr", progr);
             }
-            else if (inventory.items[0].getItem() != BlockItemRegistry.itemId("item.circuitPlan")) return;
-            else inventory.items[0].stackTagCompound = this.write();
+            else if (inventory.items[0].getItem() != BlockItemRegistry.itemId("circuitPlan")) return;
+            else inventory.items[0].setTagCompound(this.write());
         } else if (cmd == 2) { //setLine
             byte l = dis.readByte();
             if (l >= 0 && l < gates.length) gates[l] = dis.readStringFromBuffer(40);

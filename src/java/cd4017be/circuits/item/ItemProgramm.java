@@ -29,8 +29,8 @@ public class ItemProgramm extends DefaultItem
     @Override
     public void addInformation(ItemStack item, EntityPlayer player, List list, boolean par4) 
     {
-        if (item.stackTagCompound != null) {
-            list.add(item.stackTagCompound.getString("name"));
+        if (item.getTagCompound() != null) {
+            list.add(item.getTagCompound().getString("name"));
         }
         super.addInformation(item, player, list, par4);
     }

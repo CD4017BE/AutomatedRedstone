@@ -38,19 +38,19 @@ public class Wireless8bit extends ModTileEntity implements IRedstone8bit, ITicka
         if (worldObj.isRemote) return;
         if (item.getItemDamage() == 0) {
             ItemStack drop = new ItemStack(item.getItem(), 1, 2);
-            drop.stackTagCompound = new NBTTagCompound();
-            drop.stackTagCompound.setInteger("lx", pos.getX());
-            drop.stackTagCompound.setInteger("ly", pos.getY());
-            drop.stackTagCompound.setInteger("lz", pos.getZ());
-            drop.stackTagCompound.setInteger("ld", worldObj.provider.getDimensionId());
+            drop.setTagCompound(new NBTTagCompound());
+            drop.getTagCompound().setInteger("lx", pos.getX());
+            drop.getTagCompound().setInteger("ly", pos.getY());
+            drop.getTagCompound().setInteger("lz", pos.getZ());
+            drop.getTagCompound().setInteger("ld", worldObj.provider.getDimensionId());
             EntityItem eitem = new EntityItem(worldObj, entity.posX, entity.posY, entity.posZ, drop);
             worldObj.spawnEntityInWorld(eitem);
             if (entity instanceof EntityPlayer) ((EntityPlayer)entity).addChatMessage(new ChatComponentText("The droped Receiver will link to this"));
-        } else if (item.stackTagCompound != null) {
-            linkX = item.stackTagCompound.getInteger("lx");
-            linkY = item.stackTagCompound.getInteger("ly");
-            linkZ = item.stackTagCompound.getInteger("lz");
-            linkD = item.stackTagCompound.getInteger("ld");
+        } else if (item.getTagCompound() != null) {
+            linkX = item.getTagCompound().getInteger("lx");
+            linkY = item.getTagCompound().getInteger("ly");
+            linkZ = item.getTagCompound().getInteger("lz");
+            linkD = item.getTagCompound().getInteger("ld");
             link(true);
             if (linkTile != null && entity instanceof EntityPlayer) ((EntityPlayer)entity).addChatMessage(new ChatComponentText(String.format("Link found in dimension %d at position %d , %d , %d", linkD, linkX, linkY, linkZ)));
             else if (entity instanceof EntityPlayer) ((EntityPlayer)entity).addChatMessage(new ChatComponentText("Error: Link not Found!"));
@@ -62,11 +62,11 @@ public class Wireless8bit extends ModTileEntity implements IRedstone8bit, ITicka
     {
         ArrayList<ItemStack> list = new ArrayList<ItemStack>();
         ItemStack drop = new ItemStack(this.getBlockType(), 1, this.getBlockMetadata() == 0 ? 1 : 2);
-        drop.stackTagCompound = new NBTTagCompound();
-        drop.stackTagCompound.setInteger("lx", linkX);
-        drop.stackTagCompound.setInteger("ly", linkY);
-        drop.stackTagCompound.setInteger("lz", linkZ);
-        drop.stackTagCompound.setInteger("ld", linkD);
+        drop.setTagCompound(new NBTTagCompound());
+        drop.getTagCompound().setInteger("lx", linkX);
+        drop.getTagCompound().setInteger("ly", linkY);
+        drop.getTagCompound().setInteger("lz", linkZ);
+        drop.getTagCompound().setInteger("ld", linkD);
         list.add(drop);
         return list;
     }

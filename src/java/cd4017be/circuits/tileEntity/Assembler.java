@@ -44,18 +44,18 @@ public class Assembler extends AutomatedTile implements IAutomatedInv
     {
         if (cmd == 0 && inventory.items[7] == null && inventory.items[6] != null && inventory.items[6].getItem() instanceof ItemCircuit) {
             ItemStack item = this.decrStackSize(6, 1);
-            if (item.stackTagCompound == null) item.stackTagCompound = new NBTTagCompound();
-            int n = item.stackTagCompound.getByte("InOut") & 0xff;
+            if (item.getTagCompound() == null) item.setTagCompound(new NBTTagCompound());
+            int n = item.getTagCompound().getByte("InOut") & 0xff;
             int x = this.getInOut(n);
-            item.stackTagCompound.setByte("InOut", (byte)(n + x));
+            item.getTagCompound().setByte("InOut", (byte)(n + x));
             this.removeInOut(x);
-            n = item.stackTagCompound.getByte("Gates") & 0xff;
+            n = item.getTagCompound().getByte("Gates") & 0xff;
             x = this.getGates(n);
-            item.stackTagCompound.setByte("Gates", (byte)(n + x));
+            item.getTagCompound().setByte("Gates", (byte)(n + x));
             this.removeGates(x);
-            n = item.stackTagCompound.getByte("Count") & 0xff;
+            n = item.getTagCompound().getByte("Count") & 0xff;
             x = this.getCount(n);
-            item.stackTagCompound.setByte("Count", (byte)(n + x));
+            item.getTagCompound().setByte("Count", (byte)(n + x));
             this.removeCount(x);
             this.setInventorySlotContents(7, item);
         }
@@ -70,9 +70,9 @@ public class Assembler extends AutomatedTile implements IAutomatedInv
         ItemStack item = inventory.items[1];
         if (item != null) {
             int n0, n1, n2;
-            if (item.stackTagCompound != null) {
+            if (item.getTagCompound() != null) {
                 int n;
-                n0 = item.stackTagCompound.getByte("Gates") & 0xff;
+                n0 = item.getTagCompound().getByte("Gates") & 0xff;
                 if (n0 > 0) {
                     if (inventory.items[3] == null) {
                         n = Math.min(n0, 64);
@@ -82,9 +82,9 @@ public class Assembler extends AutomatedTile implements IAutomatedInv
                         inventory.items[3].stackSize += n;
                     } else n = 0;
                     n0 -= n;
-                    item.stackTagCompound.setByte("Gates", (byte)n0);
+                    item.getTagCompound().setByte("Gates", (byte)n0);
                 }
-                n1 = item.stackTagCompound.getByte("InOut") & 0xff;
+                n1 = item.getTagCompound().getByte("InOut") & 0xff;
                 if (n1 > 0) {
                     if (inventory.items[4] == null) {
                         n = Math.min(n1, 64);
@@ -94,9 +94,9 @@ public class Assembler extends AutomatedTile implements IAutomatedInv
                         inventory.items[4].stackSize += n;
                     } else n = 0;
                     n1 -= n;
-                    item.stackTagCompound.setByte("InOut", (byte)n1);
+                    item.getTagCompound().setByte("InOut", (byte)n1);
                 }
-                n2 = item.stackTagCompound.getByte("Count") & 0xff;
+                n2 = item.getTagCompound().getByte("Count") & 0xff;
                 if (n2 > 0) {
                     if (inventory.items[5] == null) {
                         n = Math.min(n2, 32);
@@ -106,7 +106,7 @@ public class Assembler extends AutomatedTile implements IAutomatedInv
                         inventory.items[4].stackSize += n * 2;
                     } else n = 0;
                     n2 -= n;
-                    item.stackTagCompound.setByte("Count", (byte)n2);
+                    item.getTagCompound().setByte("Count", (byte)n2);
                 }
                 this.slotChange(inventory.items[6], inventory.items[6], 6);
             } else n0 = n1 = n2 = 0;
@@ -114,7 +114,7 @@ public class Assembler extends AutomatedTile implements IAutomatedInv
                 if (inventory.items[2] == null) {
                     inventory.items[2] = BlockItemRegistry.stack("tile.circuit", 1);
                     inventory.items[1] = null;
-                } else if (inventory.items[2].stackSize < 64 && inventory.items[2].getItem() == Item.getItemFromBlock(BlockItemRegistry.blockId("tile.circuit"))) {
+                } else if (inventory.items[2].stackSize < 64 && inventory.items[2].getItem() == Item.getItemFromBlock(BlockItemRegistry.blockId("circuit"))) {
                     inventory.items[2].stackSize++;
                     inventory.items[1] = null;
                 }
@@ -180,10 +180,10 @@ public class Assembler extends AutomatedTile implements IAutomatedInv
     public void slotChange(ItemStack oldItem, ItemStack newItem, int i) 
     {
         if (i >= 3 && i <= 6) {
-            if (inventory.items[6] != null && inventory.items[6].getItem() instanceof ItemCircuit && inventory.items[6].stackTagCompound != null) {
-                netData.ints[0] = inventory.items[6].stackTagCompound.getByte("InOut") & 0xff;
-                netData.ints[1] = inventory.items[6].stackTagCompound.getByte("Gates") & 0xff;
-                netData.ints[2] = inventory.items[6].stackTagCompound.getByte("Count") & 0xff;
+            if (inventory.items[6] != null && inventory.items[6].getItem() instanceof ItemCircuit && inventory.items[6].getTagCompound() != null) {
+                netData.ints[0] = inventory.items[6].getTagCompound().getByte("InOut") & 0xff;
+                netData.ints[1] = inventory.items[6].getTagCompound().getByte("Gates") & 0xff;
+                netData.ints[2] = inventory.items[6].getTagCompound().getByte("Count") & 0xff;
             } else {
                 netData.ints[0] = 0;//InOut
                 netData.ints[1] = 0;//Gates

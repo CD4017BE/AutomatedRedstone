@@ -245,17 +245,17 @@ public class Circuit extends AutomatedTile implements IRedstone8bit, IRedstone1b
     {
         ArrayList<ItemStack> list = new ArrayList<ItemStack>();
         ItemStack item = new ItemStack(this.getBlockType());
-        item.stackTagCompound = new NBTTagCompound();
-        item.stackTagCompound.setByte("InOut", (byte)(var & 0xff));
-        item.stackTagCompound.setByte("Gates", (byte)(var >> 8 & 0xff));
-        item.stackTagCompound.setByte("Count", (byte)(var >> 16 & 0xff));
+        item.setTagCompound(new NBTTagCompound());
+        item.getTagCompound().setByte("InOut", (byte)(var & 0xff));
+        item.getTagCompound().setByte("Gates", (byte)(var >> 8 & 0xff));
+        item.getTagCompound().setByte("Count", (byte)(var >> 16 & 0xff));
         if (code.length > 0) {
             NBTTagCompound nbt = new NBTTagCompound();
             nbt.setString("name", name);
             nbt.setByteArray("code", code);
             nbt.setByteArray("cnt", Arrays.copyOfRange(obj, 0, 16));
             nbt.setByteArray("out", Arrays.copyOfRange(obj, 16, 32));
-            item.stackTagCompound.setTag("Progr", nbt);
+            item.getTagCompound().setTag("Progr", nbt);
         }
         list.add(item);
         return list;
@@ -264,13 +264,13 @@ public class Circuit extends AutomatedTile implements IRedstone8bit, IRedstone1b
     @Override
     public void onPlaced(EntityLivingBase entity, ItemStack item) 
     {
-        if (item.stackTagCompound != null) {
+        if (item.getTagCompound() != null) {
             var = 0;
-            var |= item.stackTagCompound.getByte("InOut") & 0xff;
-            var |= item.stackTagCompound.getByte("Gates") << 8 & 0xff00;
-            var |= item.stackTagCompound.getByte("Count") << 16 & 0xff0000;
-            if (item.stackTagCompound.hasKey("Progr")) {
-                NBTTagCompound nbt = item.stackTagCompound.getCompoundTag("Progr");
+            var |= item.getTagCompound().getByte("InOut") & 0xff;
+            var |= item.getTagCompound().getByte("Gates") << 8 & 0xff00;
+            var |= item.getTagCompound().getByte("Count") << 16 & 0xff0000;
+            if (item.getTagCompound().hasKey("Progr")) {
+                NBTTagCompound nbt = item.getTagCompound().getCompoundTag("Progr");
                 code = nbt.getByteArray("code");
                 byte[] b = nbt.getByteArray("out");
                 System.arraycopy(b, 0, obj, 16, Math.min(16, b.length));

@@ -45,7 +45,7 @@ import net.minecraft.creativetab.CreativeTabs;
  *
  * @author CD4017BE
  */
-@Mod(modid="Circuits", name="Automated Redstone", version="2.1.0")
+@Mod(modid="Circuits", name="Automated Redstone", version="3.0.0")
 public class RedstoneCircuits 
 {
     // The instance of your mod that Forge uses.

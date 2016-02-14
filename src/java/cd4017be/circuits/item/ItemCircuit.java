@@ -30,12 +30,12 @@ public class ItemCircuit extends DefaultItemBlock
     @Override
     public void addInformation(ItemStack item, EntityPlayer player, List list, boolean par4) 
     {
-        if (item.stackTagCompound != null) {
-            list.add(String.format("InOut: %d", item.stackTagCompound.getByte("InOut") & 0xff));
-            list.add(String.format("Gates: %d", item.stackTagCompound.getByte("Gates") & 0xff));
-            list.add(String.format("Count: %d", item.stackTagCompound.getByte("Count") & 0xff));
-            if (item.stackTagCompound.hasKey("Progr")) {
-                list.add(item.stackTagCompound.getCompoundTag("Progr").getString("name"));
+        if (item.getTagCompound() != null) {
+            list.add(String.format("InOut: %d", item.getTagCompound().getByte("InOut") & 0xff));
+            list.add(String.format("Gates: %d", item.getTagCompound().getByte("Gates") & 0xff));
+            list.add(String.format("Count: %d", item.getTagCompound().getByte("Count") & 0xff));
+            if (item.getTagCompound().hasKey("Progr")) {
+                list.add(item.getTagCompound().getCompoundTag("Progr").getString("name"));
             }
         }
         super.addInformation(item, player, list, par4);
