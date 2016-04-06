@@ -19,7 +19,7 @@ plugins {
 }
 */
 
-version = "1.8.9-3.0.0"
+version = "1.8.9-3.0.1"
 group= "com.cd4017be.circuits" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "AutomatedRedstone"
 
@@ -61,7 +61,8 @@ artifacts {
 }
 
 dependencies {
-	compile files('C:/Users/CD4017BE/Minecraft Modding/Mods-1.7.10/CD4017BE_lib/build/libs/CD4017BE_lib-1.8.9-3.0.0-deobf.jar')
+	compile files('C:/Users/CD4017BE/Minecraft Modding/Mods-1.7.10/CD4017BE_lib/build/libs/CD4017BE_lib-1.8.9-3.0.1-deobf.jar')
+	compile files('C:/Users/CD4017BE/Minecraft Modding/Mods-1.7.10/CD4017BE_lib/libs//CD4017BE_lib/libs/OpenComputers-MC1.8.9-1.5.22.7-dev-api.jar')
 	//compile files('C:/Users/CD4017BE/Minecraft Modding/Mods-1.7.10/CD4017BE_lib/libs/ComputerCraft1.75.jar')
 }
 

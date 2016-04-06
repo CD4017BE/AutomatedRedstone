@@ -6,10 +6,18 @@
 
 package cd4017be.circuits.tileEntity;
 
+import java.util.ArrayList;
+
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
+import li.cil.oc.api.network.Environment;
+import li.cil.oc.api.network.Message;
+import li.cil.oc.api.network.Node;
 import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.common.Optional.Interface;
-
 import cd4017be.api.circuits.IRedstone8bit;
+import cd4017be.api.computers.ComputerAPI;
 import cd4017be.lib.ModTileEntity;
 import cd4017be.lib.util.Utils;
 import net.minecraft.block.Block;
@@ -27,7 +35,7 @@ import net.minecraft.util.ITickable;
  * @author CD4017BE
  */
 @Optional.InterfaceList(value = {@Interface(iface = "dan200.computercraft.api.peripheral.IPeripheral", modid = "ComputerCraft"), @Interface(iface = "li.cil.oc.api.network.Environment", modid = "OpenComputers")})
-public class Display8bit extends ModTileEntity implements IRedstone8bit, ITickable //, IPeripheral, Environment TODO reimplement
+public class Display8bit extends ModTileEntity implements IRedstone8bit, ITickable, Environment //, IPeripheral TODO reimplement
 {
     private boolean update;
     public byte state;
@@ -74,7 +82,7 @@ public class Display8bit extends ModTileEntity implements IRedstone8bit, ITickab
             }
             if (state != lstate) {
                 this.markUpdate();
-                //this.updateEvent(); //TODO reimplement
+                this.updateEvent();
             }
         }
     }
@@ -121,7 +129,6 @@ public class Display8bit extends ModTileEntity implements IRedstone8bit, ITickab
     }
     
     //---------------- Computer APIs --------------------
-    /* TODO reimplement
     
     private ArrayList<Object> listeners = new ArrayList<Object>();
     
@@ -130,6 +137,7 @@ public class Display8bit extends ModTileEntity implements IRedstone8bit, ITickab
             ComputerAPI.sendEvent(computer, "in8bit", state);
     }
     
+    /* TODO reimplement
     //ComputerCraft:
     
     @Optional.Method(modid = "ComputerCraft")
@@ -175,7 +183,8 @@ public class Display8bit extends ModTileEntity implements IRedstone8bit, ITickab
     {
         return this.hashCode() == peripheral.hashCode();
     }
-
+    */
+    
     //OpenComputers:
     
     private Object node = ComputerAPI.newOCnode(this, "RedstoneCircuits-In8bit", false);
@@ -220,5 +229,4 @@ public class Display8bit extends ModTileEntity implements IRedstone8bit, ITickab
     	return new Object[]{state};
     }
     
-    */
 }

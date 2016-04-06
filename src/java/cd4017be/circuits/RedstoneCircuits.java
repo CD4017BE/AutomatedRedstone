@@ -6,6 +6,7 @@
 
 package cd4017be.circuits;
 
+import cd4017be.api.computers.ComputerAPI;
 import cd4017be.circuits.block.BlockInvConnector;
 import cd4017be.circuits.block.BlockRSPipe1;
 import cd4017be.circuits.block.BlockRSPipe8;
@@ -45,7 +46,7 @@ import net.minecraft.creativetab.CreativeTabs;
  *
  * @author CD4017BE
  */
-@Mod(modid="Circuits", name="Automated Redstone", version="3.0.0")
+@Mod(modid="Circuits", name="Automated Redstone", version="3.0.1")
 public class RedstoneCircuits 
 {
     // The instance of your mod that Forge uses.
@@ -75,7 +76,7 @@ public class RedstoneCircuits
         proxy.registerRenderers();
         proxy.registerGUIs();
         proxy.registerRecipes();
-        //ComputerAPI.register();//TODO reimplement
+        ComputerAPI.register();
     }
     
     @Mod.EventHandler
