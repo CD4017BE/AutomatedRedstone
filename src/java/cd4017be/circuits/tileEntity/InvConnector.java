@@ -10,12 +10,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.ITickable;
 import cd4017be.api.circuits.ILinkedInventory;
 import cd4017be.lib.ModTileEntity;
@@ -97,20 +98,19 @@ public class InvConnector extends ModTileEntity implements ILinkedInventory, IPi
 	}
 	
 	@Override
-    public boolean onActivated(EntityPlayer player, EnumFacing s, float X, float Y, float Z) 
+    public boolean onActivated(EntityPlayer player, EnumHand hand, ItemStack item, EnumFacing s, float X, float Y, float Z) 
     {
-        ItemStack item = player.getCurrentEquippedItem();
         if (player.isSneaking() && item == null) {
             if (worldObj.isRemote) return true;
             if (cover != null) {
-                player.setCurrentItemOrArmor(0, cover.item);
+                this.dropStack(cover.item);
                 cover = null;
                 this.markUpdate();
                 return true;
             }
             IInventory inv = this.getLinkInv();
-            if (inv == null) player.addChatMessage(new ChatComponentText("Not Linked!"));
-            else player.addChatMessage(new ChatComponentText(String.format("Linked to %s at %d, %d, %d", inv.getName(), linkPos[0], linkPos[1], linkPos[2])));
+            if (inv == null) player.addChatMessage(new TextComponentString("Not Linked!"));
+            else player.addChatMessage(new TextComponentString(String.format("Linked to %s at %d, %d, %d", inv.getName(), linkPos[0], linkPos[1], linkPos[2])));
             return true;
         } else if (item == null) {
         	if (!worldObj.isRemote) this.connect();
@@ -119,7 +119,7 @@ public class InvConnector extends ModTileEntity implements ILinkedInventory, IPi
             if (worldObj.isRemote) return true;
             item.stackSize--;
             if (item.stackSize <= 0) item = null;
-            player.setCurrentItemOrArmor(0, item);
+            player.setHeldItem(hand, item);
             this.markUpdate();
             return true;
         } else return false;
@@ -229,7 +229,7 @@ public class InvConnector extends ModTileEntity implements ILinkedInventory, IPi
 	}
 	
 	@Override
-    public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) 
+    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) 
     {
         conDir = pkt.getNbtCompound().getByte("dir");
         linkPos[1] = pkt.getNbtCompound().getBoolean("link") ? 0 : -1;
@@ -244,7 +244,7 @@ public class InvConnector extends ModTileEntity implements ILinkedInventory, IPi
         nbt.setShort("dir", conDir);
         nbt.setBoolean("link", linkPos[1] >= 0);
         if (cover != null) cover.write(nbt, "cover");
-        return new S35PacketUpdateTileEntity(pos, -1, nbt);
+        return new SPacketUpdateTileEntity(pos, -1, nbt);
     }
     
     @Override
@@ -324,9 +324,9 @@ public class InvConnector extends ModTileEntity implements ILinkedInventory, IPi
 	public void clear() {}
 
 	@Override
-	public IChatComponent getDisplayName() {
+	public ITextComponent getDisplayName() {
 		IInventory inv = this.getLinkInv();
-		return inv == null ? new ChatComponentText("No Connection") : inv.getDisplayName();
+		return inv == null ? new TextComponentString("No Connection") : inv.getDisplayName();
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package cd4017be.circuits.block;
 
 import java.util.ArrayList;
 
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyDirection;
@@ -14,9 +15,9 @@ public class BlockInvConnector extends BlockPipe
 {
 	public static final PropertyDirection Facing = PropertyDirection.create("dir");
 	
-	public BlockInvConnector(String id, Material m) 
+	public BlockInvConnector(String id, Material m, SoundType sound) 
 	{
-		super(id, m, DefaultItemBlock.class, 0x20);
+		super(id, m, sound, DefaultItemBlock.class, 0x20);
 		this.size = 0.375F;
 		this.setDefaultState(this.blockState.getBaseState().withProperty(Facing, EnumFacing.DOWN));
 	}

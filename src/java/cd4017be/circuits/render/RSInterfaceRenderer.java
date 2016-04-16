@@ -10,7 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -33,7 +33,7 @@ public class RSInterfaceRenderer extends TileEntitySpecialRenderer<ModTileEntity
     private void renderStateBinary(byte state, int tex, int h)
     {
         manager.renderEngine.bindTexture(new ResourceLocation("circuits", "textures/blocks/displayOvl.png"));
-        WorldRenderer t = Tessellator.getInstance().getWorldRenderer();
+        VertexBuffer t = Tessellator.getInstance().getBuffer();
         t.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
         for (int i = 0; i < 8; i++)
         	this.renderFace(t, tex | (state >> i & 1), 4 * (i % 4), h * (i / 4) + 8 - h, 4, 8);
@@ -46,7 +46,7 @@ public class RSInterfaceRenderer extends TileEntitySpecialRenderer<ModTileEntity
     	if (hex) digits = new byte[]{(byte)(state & 0xf), (byte)(state >> 4), 0};
     	else digits = new byte[]{(byte)(state % 10), (byte)((state / 10) % 10), (byte)(state / 100)};
     	manager.renderEngine.bindTexture(new ResourceLocation("circuits", "textures/blocks/displayOvl.png"));
-    	WorldRenderer t = Tessellator.getInstance().getWorldRenderer();
+    	VertexBuffer t = Tessellator.getInstance().getBuffer();
         t.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
         int n = 0;
         float dx = 20F / (float)(format.length + 1), x = 16F;
@@ -78,7 +78,7 @@ public class RSInterfaceRenderer extends TileEntitySpecialRenderer<ModTileEntity
         GL11.glPopMatrix();
     }
     
-    private void renderFace(WorldRenderer t, int idx, float x, float y, float w, float h) {
+    private void renderFace(VertexBuffer t, int idx, float x, float y, float w, float h) {
     	float tw = 0.125F, th = 0.25F, tx = (float)(idx % 8) * tw, ty = (float)(idx / 8) * th;
     	t.pos(x, y + h, -0.25F).tex(tx, ty + th).endVertex();
         t.pos(x + w, y + h, -0.25F).tex(tx + tw, ty + th).endVertex();

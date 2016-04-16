@@ -10,9 +10,10 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.ITickable;
 import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
@@ -42,18 +43,18 @@ public class Wireless8bit extends ModTileEntity implements IRedstone8bit, ITicka
             drop.getTagCompound().setInteger("lx", pos.getX());
             drop.getTagCompound().setInteger("ly", pos.getY());
             drop.getTagCompound().setInteger("lz", pos.getZ());
-            drop.getTagCompound().setInteger("ld", worldObj.provider.getDimensionId());
+            drop.getTagCompound().setInteger("ld", worldObj.provider.getDimension());
             EntityItem eitem = new EntityItem(worldObj, entity.posX, entity.posY, entity.posZ, drop);
             worldObj.spawnEntityInWorld(eitem);
-            if (entity instanceof EntityPlayer) ((EntityPlayer)entity).addChatMessage(new ChatComponentText("The droped Receiver will link to this"));
+            if (entity instanceof EntityPlayer) ((EntityPlayer)entity).addChatMessage(new TextComponentString("The droped Receiver will link to this"));
         } else if (item.getTagCompound() != null) {
             linkX = item.getTagCompound().getInteger("lx");
             linkY = item.getTagCompound().getInteger("ly");
             linkZ = item.getTagCompound().getInteger("lz");
             linkD = item.getTagCompound().getInteger("ld");
             link(true);
-            if (linkTile != null && entity instanceof EntityPlayer) ((EntityPlayer)entity).addChatMessage(new ChatComponentText(String.format("Link found in dimension %d at position %d , %d , %d", linkD, linkX, linkY, linkZ)));
-            else if (entity instanceof EntityPlayer) ((EntityPlayer)entity).addChatMessage(new ChatComponentText("Error: Link not Found!"));
+            if (linkTile != null && entity instanceof EntityPlayer) ((EntityPlayer)entity).addChatMessage(new TextComponentString(String.format("Link found in dimension %d at position %d , %d , %d", linkD, linkX, linkY, linkZ)));
+            else if (entity instanceof EntityPlayer) ((EntityPlayer)entity).addChatMessage(new TextComponentString("Error: Link not Found!"));
         }
     }
 
@@ -72,16 +73,16 @@ public class Wireless8bit extends ModTileEntity implements IRedstone8bit, ITicka
     }
 
     @Override
-    public boolean onActivated(EntityPlayer player, EnumFacing s, float X, float Y, float Z) 
+    public boolean onActivated(EntityPlayer player, EnumHand hand, ItemStack item, EnumFacing s, float X, float Y, float Z) 
     {
         if (worldObj.isRemote) return true;
-        if (player.isSneaking() && player.getCurrentEquippedItem() == null && linkTile != null && !linkTile.isInvalid() && linkTile.linkTile == this) {
-            ItemStack item = new ItemStack(this.getBlockType(), 1, 0);
+        if (player.isSneaking() && player.getHeldItemMainhand() == null && linkTile != null && !linkTile.isInvalid() && linkTile.linkTile == this) {
+            ItemStack stack = new ItemStack(this.getBlockType(), 1, 0);
             linkTile.worldObj.setBlockToAir(linkTile.pos);
             worldObj.setBlockToAir(pos);
-            EntityItem eitem = new EntityItem(worldObj, player.posX, player.posY, player.posZ, item);
+            EntityItem eitem = new EntityItem(worldObj, player.posX, player.posY, player.posZ, stack);
             worldObj.spawnEntityInWorld(eitem);
-            player.addChatMessage(new ChatComponentText("Both linked 8-bit-Wireless devices removed"));
+            player.addChatMessage(new TextComponentString("Both linked 8-bit-Wireless devices removed"));
             return true;
         }
         return false;
@@ -181,7 +182,7 @@ public class Wireless8bit extends ModTileEntity implements IRedstone8bit, ITicka
                 linkTile.linkX = pos.getX();
                 linkTile.linkY = pos.getY();
                 linkTile.linkZ = pos.getZ();
-                linkTile.linkD = worldObj.provider.getDimensionId();
+                linkTile.linkD = worldObj.provider.getDimension();
             }
         }
     }

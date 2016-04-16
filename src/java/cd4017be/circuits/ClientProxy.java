@@ -14,7 +14,7 @@ import cd4017be.lib.BlockItemRegistry;
 import cd4017be.lib.TileBlockRegistry;
 import cd4017be.lib.render.ModelPipe;
 import cd4017be.lib.render.SpecialModelLoader;
-import net.minecraft.util.EnumWorldBlockLayer;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import static cd4017be.circuits.Objects.*;
 
@@ -38,7 +38,7 @@ public class ClientProxy extends CommonProxy
         TileBlockRegistry.registerGui(itemTranslocator, GuiItemTranslocator.class);
         TileBlockRegistry.registerGui(display8bit, GuiDisplay8bit.class);
         
-        invConnector.setBlockLayer(EnumWorldBlockLayer.CUTOUT);
+        invConnector.setBlockLayer(BlockRenderLayer.CUTOUT);
         
         SpecialModelLoader.setMod("circuits");
         SpecialModelLoader.registerBlockModel(rsp1bit, new ModelPipe("circuits:rsp1bit", 3, 3));

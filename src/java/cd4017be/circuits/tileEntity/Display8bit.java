@@ -23,12 +23,14 @@ import cd4017be.lib.ModTileEntity;
 import cd4017be.lib.util.Utils;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.ITickable;
 
 /**
@@ -59,7 +61,7 @@ public class Display8bit extends ModTileEntity implements IRedstone8bit, ITickab
 	}
 
 	@Override
-    public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt)
+    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) 
     {
         state = pkt.getNbtCompound().getByte("state");
         dspType = pkt.getNbtCompound().getByte("dsp");
@@ -77,7 +79,7 @@ public class Display8bit extends ModTileEntity implements IRedstone8bit, ITickab
         nbt.setString("t0", text0);
         nbt.setString("t1", text1);
         nbt.setString("form", format);
-        return new S35PacketUpdateTileEntity(pos, -1, nbt);
+        return new SPacketUpdateTileEntity(pos, -1, nbt);
     }
 
     @Override
