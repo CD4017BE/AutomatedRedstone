@@ -31,6 +31,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.ITickable;
 
 /**
