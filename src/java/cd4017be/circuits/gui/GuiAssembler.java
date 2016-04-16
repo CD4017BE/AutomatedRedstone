@@ -11,7 +11,7 @@ import java.io.IOException;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.text.translation.I18n;
 
 import org.lwjgl.opengl.GL11;
 
@@ -59,7 +59,7 @@ public class GuiAssembler extends GuiMachine
         this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);
         this.drawItemConfig(tileEntity, -36, 7);
         this.drawStringCentered(tileEntity.getName(), this.guiLeft + this.xSize / 2, this.guiTop + 4, 0x404040);
-        this.drawStringCentered(StatCollector.translateToLocal("container.inventory"), this.guiLeft + this.xSize / 2, this.guiTop + 76, 0x404040);
+        this.drawStringCentered(I18n.translateToLocal("container.inventory"), this.guiLeft + this.xSize / 2, this.guiTop + 76, 0x404040);
         this.drawStringCentered("InOut= " + tileEntity.netData.ints[0], this.guiLeft + 106, this.guiTop + 38, 0x408040);
         this.drawStringCentered("Gates= " + tileEntity.netData.ints[1], this.guiLeft + 106, this.guiTop + 30, 0x408040);
         this.drawStringCentered("Count= " + tileEntity.netData.ints[2], this.guiLeft + 106, this.guiTop + 46, 0x408040);

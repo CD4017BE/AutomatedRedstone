@@ -7,7 +7,7 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.text.translation.I18n;
 import cd4017be.circuits.tileEntity.ItemTranslocator;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.TileContainer;
@@ -82,7 +82,7 @@ public class GuiItemTranslocator extends GuiMachine {
         	this.drawStringCentered("" + tileEntity.netData.ints[i], this.guiLeft + 88 + i / 4 * 99, this.guiTop + 20 + (i % 4) * 18, 0x404040);
         this.drawStringCentered(String.format("%.2f", (float)tileEntity.netData.ints[8] / 20F).concat("s"), this.guiLeft + 79, this.guiTop + 92, 0x404040);
         this.drawStringCentered(tileEntity.getName(), this.guiLeft + this.xSize / 2, this.guiTop + 4, 0x404040);
-        this.drawStringCentered(StatCollector.translateToLocal("container.inventory"), this.guiLeft + this.xSize / 2, this.guiTop + 110, 0x404040);
+        this.drawStringCentered(I18n.translateToLocal("container.inventory"), this.guiLeft + this.xSize / 2, this.guiTop + 110, 0x404040);
     }
 
 	@Override

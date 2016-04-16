@@ -20,9 +20,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.ITickable;
 
 /**
@@ -109,7 +110,7 @@ public class RSPipe8 extends ModTileEntity implements IRedstone8bit, IPipe, ITic
         setFlowBit(6, nHasOut);
         setFlowBit(14, nHasIn);
         if (flow != lFlow) {
-            worldObj.markBlockForUpdate(pos);
+            this.markUpdate();
             for (RSPipe8 pipe : updateList) {
                 pipe.onNeighborBlockChange(Blocks.air);
             }
@@ -157,16 +158,15 @@ public class RSPipe8 extends ModTileEntity implements IRedstone8bit, IPipe, ITic
     }
 
     @Override
-    public boolean onActivated(EntityPlayer player, EnumFacing dir, float X, float Y, float Z) 
+    public boolean onActivated(EntityPlayer player, EnumHand hand, ItemStack item, EnumFacing dir, float X, float Y, float Z) 
     {
         int s = dir.getIndex();
-    	ItemStack item = player.getCurrentEquippedItem();
         if (player.isSneaking() && item == null) {
             if (worldObj.isRemote) return true;
             if (cover != null) {
-                player.setCurrentItemOrArmor(0, cover.item);
+                this.dropStack(cover.item);
                 cover = null;
-                worldObj.markBlockForUpdate(pos);
+                this.markUpdate();
                 return true;
             }
             X -= 0.5F;
@@ -182,22 +182,22 @@ public class RSPipe8 extends ModTileEntity implements IRedstone8bit, IPipe, ITic
             this.setFlowBit(s, lock);
             this.setFlowBit(s | 8, lock);
             this.onNeighborBlockChange(Blocks.air);
-            worldObj.markBlockForUpdate(pos);
+            this.markUpdate();
             TileEntity te = Utils.getTileOnSide(this, (byte)s);
             if (te != null && te instanceof RSPipe8) {
                 RSPipe8 pipe = (RSPipe8)te;
                 pipe.setFlowBit(s^1, lock);
                 pipe.setFlowBit(s^1 | 8, lock);
                 pipe.onNeighborBlockChange(Blocks.air);
-                worldObj.markBlockForUpdate(pipe.pos);
+                pipe.markUpdate();
             }
             return true;
         } else if (!player.isSneaking() && cover == null && item != null && (cover = Cover.create(item)) != null) {
             if (worldObj.isRemote) return true;
             item.stackSize--;
             if (item.stackSize <= 0) item = null;
-            player.setCurrentItemOrArmor(0, item);
-            worldObj.markBlockForUpdate(pos);
+            player.setHeldItem(hand, item);
+            this.markUpdate();
             return true;
         } else return false;
     }
@@ -234,11 +234,11 @@ public class RSPipe8 extends ModTileEntity implements IRedstone8bit, IPipe, ITic
     }
 
     @Override
-    public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) 
+    public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) 
     {
         flow = pkt.getNbtCompound().getShort("flow");
         cover = Cover.read(pkt.getNbtCompound(), "cover");
-        worldObj.markBlockForUpdate(pos);
+        this.markUpdate();
     }
 
     @Override
@@ -247,7 +247,7 @@ public class RSPipe8 extends ModTileEntity implements IRedstone8bit, IPipe, ITic
         NBTTagCompound nbt = new NBTTagCompound();
         nbt.setShort("flow", flow);
         if (cover != null) cover.write(nbt, "cover");
-        return new S35PacketUpdateTileEntity(pos, -1, nbt);
+        return new SPacketUpdateTileEntity(pos, -1, nbt);
     }
     
     @Override

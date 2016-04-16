@@ -11,6 +11,7 @@ import java.util.List;
 
 import cd4017be.circuits.item.ItemRSPipe;
 import cd4017be.lib.templates.BlockPipe;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyInteger;
@@ -31,9 +32,9 @@ public class BlockRSPipe1 extends BlockPipe
     public static final byte ID_Extraction = 2;
     public static final byte ID_Injection = 1;
     
-    public BlockRSPipe1(String id, Material m)
+    public BlockRSPipe1(String id, Material m, SoundType sound)
     {
-        super(id, m, ItemRSPipe.class, 0x30);
+        super(id, m, sound, ItemRSPipe.class, 0x30);
         this.setDefaultState(this.getBlockState().getBaseState().withProperty(prop, 0));
         this.size = 0.25F;
     }

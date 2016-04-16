@@ -8,7 +8,7 @@ package cd4017be.circuits.render;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -31,7 +31,7 @@ public class RSInterfaceRenderer extends TileEntitySpecialRenderer<ModTileEntity
     private void renderStateBinary(byte state, int tex)
     {
         manager.renderEngine.bindTexture(new ResourceLocation("circuits", "textures/blocks/displayOvl.png"));
-        WorldRenderer t = Tessellator.getInstance().getWorldRenderer();
+        VertexBuffer t = Tessellator.getInstance().getBuffer();
         t.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
         for (int i = 0; i < 8; i++) {
         	this.renderFace(t, tex | (state >> i & 1), 4 * (i % 4), 8 * (i / 4), 4, 8);
@@ -51,7 +51,7 @@ public class RSInterfaceRenderer extends TileEntitySpecialRenderer<ModTileEntity
     private void renderText(byte state, boolean hex)
     {
     	manager.renderEngine.bindTexture(new ResourceLocation("circuits", "textures/blocks/displayOvl.png"));
-    	WorldRenderer t = Tessellator.getInstance().getWorldRenderer();
+    	VertexBuffer t = Tessellator.getInstance().getBuffer();
         t.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
         if (hex) {
         	this.renderFace(t, (state >> 4 & 0xf) | 16, 2, 4, 4, 8);
@@ -83,7 +83,7 @@ public class RSInterfaceRenderer extends TileEntitySpecialRenderer<ModTileEntity
          */
     }
     
-    private void renderFace(WorldRenderer t, int idx, float x, float y, float w, float h) {
+    private void renderFace(VertexBuffer t, int idx, float x, float y, float w, float h) {
     	float tw = 0.125F, th = 0.25F, tx = (float)(idx % 8) * tw, ty = (float)(idx / 8) * th;
     	t.pos(x, y + h, -0.25F).tex(tx, ty + th).endVertex();
         t.pos(x + w, y + h, -0.25F).tex(tx + tw, ty + th).endVertex();

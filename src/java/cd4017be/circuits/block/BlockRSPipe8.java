@@ -8,6 +8,7 @@ package cd4017be.circuits.block;
 
 import cd4017be.lib.DefaultItemBlock;
 import cd4017be.lib.templates.BlockPipe;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 
 /**
@@ -16,9 +17,9 @@ import net.minecraft.block.material.Material;
  */
 public class BlockRSPipe8 extends BlockPipe
 {
-    public BlockRSPipe8(String id, Material m)
+    public BlockRSPipe8(String id, Material m, SoundType sound)
     {
-        super(id, m, DefaultItemBlock.class, 0x20);
+        super(id, m, sound, DefaultItemBlock.class, 0x20);
         this.size = 0.5F;
     }
     
