@@ -1,0 +1,6 @@
+#LaTeX build files:
+*.aux
+*.txt
+*.synctex.*
+*.toc
+*.log
