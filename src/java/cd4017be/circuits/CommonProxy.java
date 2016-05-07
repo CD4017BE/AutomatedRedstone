@@ -6,7 +6,23 @@
 
 package cd4017be.circuits;
 
+import static cd4017be.circuits.Objects.*;
 import static cd4017be.lib.BlockItemRegistry.stack;
+import cd4017be.circuits.tileEntity.ArithmeticConverter;
+import cd4017be.circuits.tileEntity.Assembler;
+import cd4017be.circuits.tileEntity.Circuit;
+import cd4017be.circuits.tileEntity.Display8bit;
+import cd4017be.circuits.tileEntity.InvConnector;
+import cd4017be.circuits.tileEntity.InvReader;
+import cd4017be.circuits.tileEntity.ItemTranslocator;
+import cd4017be.circuits.tileEntity.Lever8bit;
+import cd4017be.circuits.tileEntity.LogicConverter;
+import cd4017be.circuits.tileEntity.Programmer;
+import cd4017be.circuits.tileEntity.RSPipe1;
+import cd4017be.circuits.tileEntity.RSPipe8;
+import cd4017be.circuits.tileEntity.Wireless8bit;
+import cd4017be.lib.TileBlockRegistry;
+import cd4017be.lib.TileContainer;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -24,7 +40,21 @@ public class CommonProxy
     
     public void registerRenderers() {}
     
-    public void registerGUIs() {}
+    public void registerBlocks() {
+    	TileBlockRegistry.register(programmer, Programmer.class, TileContainer.class);
+        TileBlockRegistry.register(assembler, Assembler.class, TileContainer.class);
+        TileBlockRegistry.register(circuit, Circuit.class, TileContainer.class);
+        TileBlockRegistry.register(rsp8bit, RSPipe8.class, null);
+        TileBlockRegistry.register(rsp1bit, RSPipe1.class, null);
+        TileBlockRegistry.register(lever8bit, Lever8bit.class, null);
+        TileBlockRegistry.register(display8bit, Display8bit.class, null);
+        TileBlockRegistry.register(logicConv, LogicConverter.class, TileContainer.class);
+        TileBlockRegistry.register(calcConv, ArithmeticConverter.class, TileContainer.class);
+        TileBlockRegistry.register(wireless8bit, Wireless8bit.class, null);
+        TileBlockRegistry.register(invReader, InvReader.class, TileContainer.class);
+        TileBlockRegistry.register(itemTranslocator, ItemTranslocator.class, TileContainer.class);
+        TileBlockRegistry.register(invConnector, InvConnector.class, null);
+    }
     
     public void registerRecipes()
     {

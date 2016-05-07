@@ -13,25 +13,10 @@ import cd4017be.circuits.block.BlockRSPipe8;
 import cd4017be.circuits.block.BlockWireless8bit;
 import cd4017be.circuits.item.ItemCircuit;
 import cd4017be.circuits.item.ItemProgramm;
-import cd4017be.circuits.tileEntity.ArithmeticConverter;
-import cd4017be.circuits.tileEntity.Assembler;
-import cd4017be.circuits.tileEntity.Circuit;
-import cd4017be.circuits.tileEntity.Display8bit;
-import cd4017be.circuits.tileEntity.InvConnector;
-import cd4017be.circuits.tileEntity.InvReader;
-import cd4017be.circuits.tileEntity.ItemTranslocator;
-import cd4017be.circuits.tileEntity.Lever8bit;
-import cd4017be.circuits.tileEntity.Programmer;
-import cd4017be.circuits.tileEntity.RSPipe1;
-import cd4017be.circuits.tileEntity.RSPipe8;
-import cd4017be.circuits.tileEntity.LogicConverter;
-import cd4017be.circuits.tileEntity.Wireless8bit;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.BlockItemRegistry;
 import cd4017be.lib.DefaultItemBlock;
 import cd4017be.lib.TileBlock;
-import cd4017be.lib.TileBlockRegistry;
-import cd4017be.lib.TileContainer;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -41,6 +26,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
+import static cd4017be.circuits.Objects.*;
 
 /**
  *
@@ -74,7 +60,6 @@ public class RedstoneCircuits
     	BlockItemRegistry.setMod("circuits");
         BlockGuiHandler.registerMod(this);
         proxy.registerRenderers();
-        proxy.registerGUIs();
         proxy.registerRecipes();
         ComputerAPI.register();
     }
@@ -87,23 +72,24 @@ public class RedstoneCircuits
     
     private void initBlocks()
     {
-        TileBlockRegistry.register((TileBlock)(TileBlock.create("programmer", Material.wood, DefaultItemBlock.class, 0x1).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F).setStepSound(Block.soundTypeWood)), Programmer.class, TileContainer.class);
-        TileBlockRegistry.register((TileBlock)(TileBlock.create("assembler", Material.rock, DefaultItemBlock.class, 0x1).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F).setStepSound(Block.soundTypeStone)), Assembler.class, TileContainer.class);
-        TileBlockRegistry.register((TileBlock)(TileBlock.create("circuit", Material.rock, ItemCircuit.class, 0x50).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F).setStepSound(Block.soundTypeStone)), Circuit.class, TileContainer.class);
-        TileBlockRegistry.register((TileBlock)(new BlockRSPipe8("rsp8bit", Material.iron).setCreativeTab(tabCircuits).setHardness(1.0F).setResistance(10F).setStepSound(Block.soundTypeMetal)), RSPipe8.class, null);
-        TileBlockRegistry.register((TileBlock)(new BlockRSPipe1("rsp1bit", Material.iron).setCreativeTab(tabCircuits).setHardness(1.0F).setResistance(10F).setStepSound(Block.soundTypeMetal)), RSPipe1.class, null);
-        TileBlockRegistry.register((TileBlock)(TileBlock.create("lever8bit", Material.rock, DefaultItemBlock.class, 0x1).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F).setStepSound(Block.soundTypeStone)), Lever8bit.class, null);
-        TileBlockRegistry.register((TileBlock)(TileBlock.create("display8bit", Material.rock, DefaultItemBlock.class, 0x1).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F).setStepSound(Block.soundTypeStone)), Display8bit.class, null);
-        TileBlockRegistry.register((TileBlock)(TileBlock.create("logicConv", Material.rock, DefaultItemBlock.class, 0x30).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F).setStepSound(Block.soundTypeStone)), LogicConverter.class, TileContainer.class);
-        TileBlockRegistry.register((TileBlock)(TileBlock.create("calcConv", Material.rock, DefaultItemBlock.class, 0x30).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F).setStepSound(Block.soundTypeStone)), ArithmeticConverter.class, TileContainer.class);
-        TileBlockRegistry.register((TileBlock)(new BlockWireless8bit("wireless8bit").setCreativeTab(tabCircuits).setHardness(2.0F).setResistance(20F).setStepSound(Block.soundTypeMetal)), Wireless8bit.class, null);
-        TileBlockRegistry.register((TileBlock)(TileBlock.create("invReader", Material.rock, DefaultItemBlock.class, 0x0).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F).setStepSound(Block.soundTypeStone)), InvReader.class, TileContainer.class);
-        TileBlockRegistry.register((TileBlock)(TileBlock.create("itemTranslocator", Material.rock, DefaultItemBlock.class, 0x0).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F).setStepSound(Block.soundTypeStone)), ItemTranslocator.class, TileContainer.class);
-        TileBlockRegistry.register((TileBlock)(new BlockInvConnector("invConnector", Material.glass).setCreativeTab(tabCircuits).setHardness(0.5F).setResistance(10F).setStepSound(Block.soundTypeGlass)), InvConnector.class, null);
+        (programmer = TileBlock.create("programmer", Material.wood, DefaultItemBlock.class, 0x1)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F).setStepSound(Block.soundTypeWood);
+    	(assembler = TileBlock.create("assembler", Material.rock, DefaultItemBlock.class, 0x1)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F).setStepSound(Block.soundTypeStone);
+    	(circuit = TileBlock.create("circuit", Material.rock, ItemCircuit.class, 0x50)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F).setStepSound(Block.soundTypeStone);
+    	(rsp8bit = new BlockRSPipe8("rsp8bit", Material.iron)).setCreativeTab(tabCircuits).setHardness(1.0F).setResistance(10F).setStepSound(Block.soundTypeMetal);
+    	(rsp1bit = new BlockRSPipe1("rsp1bit", Material.iron)).setCreativeTab(tabCircuits).setHardness(1.0F).setResistance(10F).setStepSound(Block.soundTypeMetal);
+    	(lever8bit = TileBlock.create("lever8bit", Material.rock, DefaultItemBlock.class, 0x1)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F).setStepSound(Block.soundTypeStone);
+    	(display8bit = TileBlock.create("display8bit", Material.rock, DefaultItemBlock.class, 0x1)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F).setStepSound(Block.soundTypeStone);
+    	(logicConv = TileBlock.create("logicConv", Material.rock, DefaultItemBlock.class, 0x30)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F).setStepSound(Block.soundTypeStone);
+    	(calcConv = TileBlock.create("calcConv", Material.rock, DefaultItemBlock.class, 0x30)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F).setStepSound(Block.soundTypeStone);
+    	(wireless8bit = new BlockWireless8bit("wireless8bit")).setCreativeTab(tabCircuits).setHardness(2.0F).setResistance(20F).setStepSound(Block.soundTypeMetal);
+    	(invReader = TileBlock.create("invReader", Material.rock, DefaultItemBlock.class, 0x0)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F).setStepSound(Block.soundTypeStone);
+    	(itemTranslocator = TileBlock.create("itemTranslocator", Material.rock, DefaultItemBlock.class, 0x0)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F).setStepSound(Block.soundTypeStone);
+    	(invConnector = new BlockInvConnector("invConnector", Material.glass)).setCreativeTab(tabCircuits).setHardness(0.5F).setResistance(10F).setStepSound(Block.soundTypeGlass);
+    	proxy.registerBlocks();
     }
     
     private void initItems()
     {
-        new ItemProgramm("circuitPlan");
+    	circuitPlan = new ItemProgramm("circuitPlan");
     }
 }

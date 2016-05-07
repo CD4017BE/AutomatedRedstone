@@ -1,7 +1,28 @@
 {
     "variants": {
-		"type=0": { "model": "circuits:RSPipe1N" },
-		"type=1": { "model": "circuits:RSPipe1I" },
-		"type=2": { "model": "circuits:RSPipe1O" }
+		"type=0": { "model": "circuits:rsp1bit" },
+		"type=1": { "model": "circuits:rsp1bit" },
+		"type=2": { "model": "circuits:rsp1bit" },
+		"core0": { "model": "circuits:RSPipe1N_core"},
+		"con0n": { "model": "circuits:RSPipe1N_con" },
+		"con0e": { "model": "circuits:RSPipe1N_con" , "y": 90 },
+		"con0s": { "model": "circuits:RSPipe1N_con" , "y": 180 },
+		"con0w": { "model": "circuits:RSPipe1N_con" , "y": 270 },
+		"con0b": { "model": "circuits:RSPipe1N_con" , "x": 90 },
+		"con0t": { "model": "circuits:RSPipe1N_con" , "x": 270 },
+		"core1": { "model": "circuits:RSPipe1I_core"},
+		"con1n": { "model": "circuits:RSPipe1I_con" },
+		"con1e": { "model": "circuits:RSPipe1I_con" , "y": 90 },
+		"con1s": { "model": "circuits:RSPipe1I_con" , "y": 180 },
+		"con1w": { "model": "circuits:RSPipe1I_con" , "y": 270 },
+		"con1b": { "model": "circuits:RSPipe1I_con" , "x": 90 },
+		"con1t": { "model": "circuits:RSPipe1I_con" , "x": 270 },
+		"core2": { "model": "circuits:RSPipe1O_core"},
+		"con2n": { "model": "circuits:RSPipe1O_con" },
+		"con2e": { "model": "circuits:RSPipe1O_con" , "y": 90 },
+		"con2s": { "model": "circuits:RSPipe1O_con" , "y": 180 },
+		"con2w": { "model": "circuits:RSPipe1O_con" , "y": 270 },
+		"con2b": { "model": "circuits:RSPipe1O_con" , "x": 90 },
+		"con2t": { "model": "circuits:RSPipe1O_con" , "x": 270 }
     }
 }
