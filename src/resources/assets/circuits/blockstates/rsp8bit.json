@@ -2,23 +2,8 @@
     "variants": {
 		"normal": { "model": "circuits:rsp8bit"},
 		"core0": { "model": "circuits:RSPipe8N_core"},
-		"con0n": { "model": "circuits:RSPipe8N_con" },
-		"con0e": { "model": "circuits:RSPipe8N_con" , "y": 90 },
-		"con0s": { "model": "circuits:RSPipe8N_con" , "y": 180 },
-		"con0w": { "model": "circuits:RSPipe8N_con" , "y": 270 },
-		"con0b": { "model": "circuits:RSPipe8N_con" , "x": 90 },
-		"con0t": { "model": "circuits:RSPipe8N_con" , "x": 270 },
-		"con1n": { "model": "circuits:RSPipe8I_con" },
-		"con1e": { "model": "circuits:RSPipe8I_con" , "y": 90 },
-		"con1s": { "model": "circuits:RSPipe8I_con" , "y": 180 },
-		"con1w": { "model": "circuits:RSPipe8I_con" , "y": 270 },
-		"con1b": { "model": "circuits:RSPipe8I_con" , "x": 90 },
-		"con1t": { "model": "circuits:RSPipe8I_con" , "x": 270 },
-		"con2n": { "model": "circuits:RSPipe8O_con" },
-		"con2e": { "model": "circuits:RSPipe8O_con" , "y": 90 },
-		"con2s": { "model": "circuits:RSPipe8O_con" , "y": 180 },
-		"con2w": { "model": "circuits:RSPipe8O_con" , "y": 270 },
-		"con2b": { "model": "circuits:RSPipe8O_con" , "x": 90 },
-		"con2t": { "model": "circuits:RSPipe8O_con" , "x": 270 }
+		"con0": { "model": "circuits:RSPipe8N_con" },
+		"con1": { "model": "circuits:RSPipe8I_con" },
+		"con2": { "model": "circuits:RSPipe8O_con" }
     }
 }

@@ -31,7 +31,7 @@ sourceSets {
 }
 
 minecraft {
-    version = "${mc_version}-${forge_version}"
+    version = "${mc_version}-${forge_version}-${mc_version}"
     runDir = "run"
     
     // the mappings can be changed at any time, and must be in the following format.

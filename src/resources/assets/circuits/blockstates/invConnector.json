@@ -7,23 +7,8 @@
 		"dir=east": { "model": "circuits:invConnector" },
 		"dir=west": { "model": "circuits:invConnector" },
 		"core0": { "model": "circuits:InvConB_core"},
-		"con0n": { "model": "circuits:InvConB_con" },
-		"con0e": { "model": "circuits:InvConB_con" , "y": 90 },
-		"con0s": { "model": "circuits:InvConB_con" , "y": 180 },
-		"con0w": { "model": "circuits:InvConB_con" , "y": 270 },
-		"con0b": { "model": "circuits:InvConB_con" , "x": 90 },
-		"con0t": { "model": "circuits:InvConB_con" , "x": 270 },
-		"con1n": { "model": "circuits:InvConC_con" },
-		"con1e": { "model": "circuits:InvConC_con" , "y": 90 },
-		"con1s": { "model": "circuits:InvConC_con" , "y": 180 },
-		"con1w": { "model": "circuits:InvConC_con" , "y": 270 },
-		"con1b": { "model": "circuits:InvConC_con" , "x": 90 },
-		"con1t": { "model": "circuits:InvConC_con" , "x": 270 },
-		"con2n": { "model": "circuits:InvConL_con" },
-		"con2e": { "model": "circuits:InvConL_con" , "y": 90 },
-		"con2s": { "model": "circuits:InvConL_con" , "y": 180 },
-		"con2w": { "model": "circuits:InvConL_con" , "y": 270 },
-		"con2b": { "model": "circuits:InvConL_con" , "x": 90 },
-		"con2t": { "model": "circuits:InvConL_con" , "x": 270 }
+		"con0": { "model": "circuits:InvConB_con" },
+		"con1": { "model": "circuits:InvConC_con" },
+		"con2": { "model": "circuits:InvConL_con" }
 	}
 }
