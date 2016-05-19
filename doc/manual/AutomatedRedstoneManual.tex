@@ -144,8 +144,7 @@ For creating circuits in the assembler put the citcuit item into the top right s
 \includegraphics[width = \textwidth]{assembler_gui}\\
 \it About the colored tab on the very left read section 2.1 "Machine Configuration" in the Inductive Automation Manual. \rm\\
 
-When placed the circuit block has 16 1-bit channels for each input and output, so to use all of them with only 6 available block faces, you would need to use 8-bit wire or place multiple circuits next to each other.
-Therefore they are bundled into four 8-bit chunks (2 in + 2 out). 
+When placed, the circuit block has 16 1-bit channels for each input and output, so to use all of them with only 6 available block faces, you would need to use 8-bit wire or place multiple circuits next to each other. Therefore they are bundled into four 8-bit chunks (2 in + 2 out).
 
 In the circuits's GUI you can set for each block face, which 8-bit chunk to use and a HEX-AND-gate filter that should be applied (like in \bf logic signal converter\rm ). So applying a normal redstone signal will set all bits contained in the filter to on and for output a redstone signal will be emitted if at least one of the bits contained in the filter is on.
 
@@ -159,36 +158,67 @@ Finally the circuit's outputs will be set to the state of the individual gates t
 The operation tick interval can be set in the circuit's GUI. It also contains a ON/OFF button to run or pause updating and a RESET button to set all gates to off.
 
 \subsection{Programming}
-\it not finished yet, just copy pasted from curse!\rm\\
-Logic Gates:
-The logic gates are defined on the left side of the circuit programmer GUI.
-Every line defines one of the following logic gates:
-OR-gate ($+$): output on if any given input on.
-NOR-gate ($-$): output off if any given input on.
-AND-gate ($\&$): output on if all given inputs on.
-NAND-gate ($*$): output off if all given inputs on.
-XOR-gate ($/$): output on if an uneven number of given inputs on.
-XNOR-gate ($\backslash$): output on if an even number of given inputs on.
-Input-port ($\% $): output on if the given input channel of the circuit receives a redstone signal.
-$x = k (\# = )$: output on if the given byte equals the given number.
-$x < k (\# < )$: output on if the given byte is smaller than the given number.
-$x > k (\# > )$: output on if the given byte is greater than the given number.
-The line starts with the logic gate symbol (shown in brackets) and is followed by zero or more parameters which are seperated by colons (,).
-For the OR,NOR,AND,NAND,XOR and XNOR command every parameter is a number in range 0-127 that defines which bit of the circuit's logic RAM to use as input for this gate.
-For logic gates the bit ID is the same as the line number in the program and for counters the bit ID is 64 + (counter number * 8) + counter bit.
-The Input command requires one number in range 0-15 as parameter that defines which of the 16 input channels to use.
-The comparator commands require a number in range 0-15 as parameter before the comparator sign that defines which 8-bit-block of the circuit's logic RAM to use, and a number in range 0-255 as parameter after the comparator sign that defines the number to compare that 8-bit-block with.
-Counter:
-Every counter will increase its value by 1 every circuit tick if its set-bit is on.
-If the value of a counter reaches 256 or if its reset-bit is on it will be set back to 0.
-The set and reset bits of all the 8 counters can be set in the first two columns on the right of the GUI.
-Set them to -1 if a counter is not used.
-Output:
-The numbers in the third and fourth column on the right of the GUI define which bit of the circuit's logic RAM to use for each of the 16 output channels.
-Set it to -1 if a output channel is not used.
+To actually tell the circuit what it should do, you need to apply a program to it in the \bf Circuit Programmer\rm :\\
+\includegraphics[width = \textwidth]{programmer_gui}\\
+\it This shows it's GUI with a RS-Latch setup as example. The colored arrows and texts are edited to illustrate the signal flow. \rm\\
+Gates are defined on the left part of the GUI with the following syntax. Each line defines one gate and has to start with one character representing it's type and is directly (no whitespace) followed by its parameters. 
 
+For logic gates the parameters are the gate numbers that should be used as input, separated by colons ',' (also no whitespace). For redstone input it's the number of the circuit's input channel that this gate should be set to. And for the 8-bit comparator it's the number of the 8-bit chunk of gates (= number of it's first contained gate divided by 8), whose numerical representation should be compared, followed by the comparator character, followed by a decimal number in range 0-255 to compare with. All currently available gate types are listed in this table:\\
+\begin{tabular}{|c|c|l|l|} \hline
+\bf Type & \bf Ch & \bf Parameters & \bf Function \\\hline
+RS input & $\%$ & input channel & Active if channel receives redstone signal \\\hline
+OR gate & $+$ & 0-15 inputs & Active if any input active, otherwise inactive \\\hline
+NOR gate & $-$ & 0-15 inputs & Inactive if any input active, otherwise active \\\hline
+AND gate & $\&$ & 0-15 inputs & Inactive if any input inactive, otherwise active \\\hline
+NAND gate & $*$ & 0-15 inputs & Active if any input inactive, otherwise inactive \\\hline
+XOR gate & $/$ & 0-15 inputs & Active if uneven number of inputs active \\\hline
+XNOR gate & $\backslash$ & 0-15 inputs & Active if even number of inputs active \\\hline
+8-bit Comp. & $\#$ & input$=$number & Active if 8-bit input equal to number \\\hline
+8-bit Comp. & $\#$ & input$<$number & Active if 8-bit input smaller than number \\\hline
+8-bit Comp. & $\#$ & input$>$number & Active if 8-bit input greater than number \\\hline
+\end{tabular}\\
+
+The up to 8 counters of the circuit are defined in the columns on the right marked with 'CS' and 'CR'. The 'CS' (Counter SET) column gets the gate number that need to be active for the individual counter to count up by one. And the 'CR' (Counter RESET) column gets the gate number that needs to be active to set the counter back to zero. If reset gate is set to '$-1$' the counter will only go back to zero if it reaches an 8-bit integer overflow ($>255$). Set both values to '$-1$' for counters you don't use (every counter costs 2 netherquartz).
+
+As already mentioned before each counter occupies 8 gates to store its value, where counter 1 uses gates $64-71$, counter 2 uses $72-79$ and so on ($64 + counterId * 8$). These gates can be referenced in the program like any other gate, but the most common way is to use the 8-bit compare gate to check if the counter value is below, above or equal to a certain number. In this case the 8-bit chunk number for the comparator gate is simply the counter  number plus 8.\\
+
+And the last two columns marked with 'O1' and 'O2' define which gate should be used for which output channel, where 'O1' defines channels $0-7$ and 'O2' defines channels $8-15$. Set outputs to '-1' if you're not using them (every output costs a lever).\\
+
+To put your settings onto a circuit, just give it a name in the line on top, put the circuit into the only available slot and click the save button. If everything is fine you should get a "Compiling successful" message and the tooltip of the circuit should show the program name you have set. If your gate definitions contain errors you get a message that tells "Compile error" with the line that was wrong. Otherwise if your circuit is missing gates, counter or outputs required to execute your settings you get a message that tells you what is missing.
+
+To store your settings for later use you can also save it on a piece of paper and later load it into the programmer again by clicking the load button. If you don't need a circuit program anymore just put the item into the crafting grid to get the paper back.
 
 \subsection{Example programms}
-\it comming soon!\rm
+A \bf timer \rm that emits a 1 tick redstone signal every 150 ticks and resets if receiving a signal:
+\begin{lstlisting}
+Gates:
+0: %0		get input signal
+1: #8=149	check if counter reached 149
+2: +0,1		reset counter if it reached 149 or input active
+3: -0		increase counter if input not active
+Counter 0: CS=3 CR=2
+Outputs: 1	emit signal if counter reached 149
+Total cost: 4 redstone dust, 2 netherquartz, 1 lever
+\end{lstlisting}
+A \bf clock \rm that displays time in minutes and seconds on two 8-bit Displays. Input signal on channel 0 lets the clock run and signal on channel 1 resets it. (Circuit tick interval must be set to 0.05s):
+\begin{lstlisting}
+Gates:
+0: %0		get run signal
+1: %1		get reset signal
+2: #8=19	check if 19 ticks have passed
+3: #9=59	check if 59 seconds have passed
+4: &2,3		reset second counter after 59.95s
+5: +1,4		or if receiving reset signal
+6: +1,2		reset tick counter after 19 ticks or reset signal
+Counter 0: CS=0 CR=6	counting ticks
+Counter 1: CS=2 CR=5	counting seconds
+Counter 2: CS=4 CR=1	counting minutes
+Outputs: 
+72 - 77		to display seconds (6-bit)
+80 - 87		to display minutes (8-bit)
+Total cost: 7 redstone dust, 6 netherquartz, 14 lever
+\end{lstlisting}
+
+\it there will be probably added more in the future \rm
 
 \end{document}
