@@ -40,8 +40,8 @@ public class GuiCircuit extends GuiMachine
     @Override
     public void initGui() 
     {
-        this.xSize = 50;
-        this.ySize = 103;
+        this.xSize = 86;
+        this.ySize = 96;
         super.initGui();
     }
     
@@ -49,9 +49,13 @@ public class GuiCircuit extends GuiMachine
 	protected void drawGuiContainerForegroundLayer(int mx, int my) 
     {
 		super.drawGuiContainerForegroundLayer(mx, my);
-		this.drawInfo(8, 20, 34, 8, "\\i", "circuit.timer");
-		this.drawInfo(21, 42, 14, 54, "\\i", "rs.filter");
-		this.drawInfo(11, 42, 9, 54, "\\i", "circuit.io");
+		this.drawInfo(44, 20, 34, 8, "\\i", "circuit.timer");
+		this.drawInfo(57, 35, 14, 54, "\\i", "rs.filter");
+		this.drawInfo(47, 35, 9, 54, "\\i", "circuit.io");
+		if (this.isPointInRegion(48, 36, 7, 52, mx, my)) {
+			int s = (my - guiTop - 36) / 9;
+			this.drawSideCube(-64, 32, s, (byte)(tileEntity.getConfig(s + 6) / 2 + 2));
+		}
 	}
     
     @Override
@@ -60,14 +64,25 @@ public class GuiCircuit extends GuiMachine
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.mc.renderEngine.bindTexture(new ResourceLocation("circuits", "textures/gui/circuit.png"));
         this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);
-        if (tileEntity.getConfig(12) != 0) this.drawTexturedModalRect(this.guiLeft + 7, this.guiTop + 33, 50, 36, 17, 9);
+        if (tileEntity.getConfig(12) != 0) this.drawTexturedModalRect(this.guiLeft + 7, this.guiTop + 15, 86, 36, 17, 9);
         int x, y;
         for (int i = 0; i < 6; i++)
-            this.drawTexturedModalRect(this.guiLeft + 11, this.guiTop + 42 + i * 9, 50, tileEntity.getConfig(i + 6) * 9, 9, 9);
+            this.drawTexturedModalRect(this.guiLeft + 47, this.guiTop + 35 + i * 9, 86, tileEntity.getConfig(i + 6) * 9, 9, 9);
+        int n = tileEntity.var >> 8 & 0xff;
+        x = guiLeft + 8; y = guiTop + 25;
+        for (int i = 0; i < n; i++) {
+        	int j = i % 8, k = i / 8;
+        	this.drawTexturedModalRect(x + j * 4, y + k * 4, 86 + (tileEntity.ram[k] >> j & 1) * 4, 45, 4, 4);
+        }
+        for (int k = 8; k < 16; k++) {
+        	if ((tileEntity.var >> (k + 16) & 1) != 0) 
+        		for (int j = 0; j < 8; j++)
+        			this.drawTexturedModalRect(x + j * 4, y + k * 4, 86 + (tileEntity.ram[k] >> j & 1) * 4, 49, 4, 4);
+        }
         String s;
-        x = guiLeft + 22;
+        x = guiLeft + 58;
         for (int i = 0; i < 6; i++) {
-        	y = guiTop + 43 + i * 9;
+        	y = guiTop + 36 + i * 9;
         	if (i == sel) text.draw(x, y, 0x80ffff, 0xffff8080);
         	else {
         		s = String.format("%02X", tileEntity.getConfig(i));
@@ -75,7 +90,7 @@ public class GuiCircuit extends GuiMachine
         	}
         }
         this.drawStringCentered(tileEntity.getName(), this.guiLeft + this.xSize / 2, this.guiTop + 4, 0x404040);
-        this.drawStringCentered(String.format("%.2f", (float)tileEntity.netData.ints[0] / 20F).concat("s"), this.guiLeft + 25, this.guiTop + 20, 0x404040);
+        this.drawStringCentered(String.format("%.2f", (float)tileEntity.netData.ints[0] / 20F).concat("s"), this.guiLeft + 61, this.guiTop + 20, 0x404040);
         
     }
     
@@ -113,34 +128,34 @@ public class GuiCircuit extends GuiMachine
     protected void mouseClicked(int x, int y, int b) throws IOException
     {
     	byte a = -1;
-        int k = (y - this.guiTop - 42) / 9;
+        int k = (y - this.guiTop - 35) / 9;
         if (k < 0 || k >= 6) k = -1;
-        if (this.isPointInRegion(25, 33, 18, 9, x, y)) {
+        if (this.isPointInRegion(25, 15, 18, 9, x, y)) {
             a = 2;
-        } else if (this.isPointInRegion(7, 28, 18, 5, x, y)) {
+        } else if (this.isPointInRegion(43, 28, 18, 5, x, y)) {
             tileEntity.netData.ints[0] -= 20;
             if (tileEntity.netData.ints[0] < 1) tileEntity.netData.ints[0] = 1;
             a = 1;
-        } else if (this.isPointInRegion(25, 28, 18, 5, x, y)) {
+        } else if (this.isPointInRegion(61, 28, 18, 5, x, y)) {
             tileEntity.netData.ints[0] -= 1;
             if (tileEntity.netData.ints[0] < 1) tileEntity.netData.ints[0] = 1;
             a = 1;
-        } else if (this.isPointInRegion(25, 15, 18, 5, x, y)) {
+        } else if (this.isPointInRegion(61, 15, 18, 5, x, y)) {
             tileEntity.netData.ints[0] += 1;
             if (tileEntity.netData.ints[0] > 1200) tileEntity.netData.ints[0] = 1200;
             a = 1;
-        } else if (this.isPointInRegion(7, 15, 18, 5, x, y)) {
+        } else if (this.isPointInRegion(43, 15, 18, 5, x, y)) {
             tileEntity.netData.ints[0] += 20;
             if (tileEntity.netData.ints[0] > 1200) tileEntity.netData.ints[0] = 1200;
             a = 1;
-        } else if (this.isPointInRegion(11, 42, 9, 54, x, y)) {
+        } else if (this.isPointInRegion(47, 35, 9, 54, x, y)) {
         	tileEntity.setConfig(k + 6, (tileEntity.getConfig(k + 6) + 1) % 4);
         	a = 0;
-        } else if (this.isPointInRegion(7, 33, 18, 9, x, y)) {
+        } else if (this.isPointInRegion(7, 15, 18, 9, x, y)) {
             tileEntity.netData.longs[0] ^= 1L << 60;
             a = 0;
         }
-        if (!this.isPointInRegion(21, 42, 14, 54, x, y)) k = -1;
+        if (!this.isPointInRegion(57, 35, 14, 54, x, y)) k = -1;
         if (k != sel) this.setTextField(k);
         else if (a >= 0) this.sendCurrentChange(a);
         else super.mouseClicked(x, y, b);
