@@ -9,9 +9,11 @@ package cd4017be.circuits.tileEntity;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import cd4017be.api.circuits.IRedstone1bit;
 import cd4017be.api.circuits.IRedstone8bit;
+import cd4017be.lib.TileContainer;
 import cd4017be.lib.TileEntityData;
 import cd4017be.lib.templates.AutomatedTile;
 import cd4017be.lib.util.Utils;
@@ -19,6 +21,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.ICrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
@@ -46,21 +49,22 @@ public class Circuit extends AutomatedTile implements IRedstone8bit, IRedstone1b
     @Override
     public String getName() 
     {
-        return super.getName() + (name.length() > 0 ? " (".concat(name).concat(")") : "");
+        return name.length() > 0 ? "\"" + name + "\"" : super.getName();
     }
     
     //CPU
-    private final byte[] io = new byte[4];//byte 0,1 input; byte 2,3 output
-    private final byte[] ram = new byte[16];//byte 0-7 gates; byte 8-15 counter
+    public final byte[] io = new byte[4];//byte 0,1 input; byte 2,3 output
+    public final byte[] ram = new byte[16];//byte 0-7 gates; byte 8-15 counter
     //Programm
-    private final byte[] obj = new byte[32];//byte 0-15 counter-bit-pointer; byte 16-31 output-bit-pointer 
-    private byte[] code = new byte[0];//Programm Bytecode
+    public final byte[] obj = new byte[32];//byte 0-15 counter-bit-pointer; byte 16-31 output-bit-pointer 
+    public byte[] code = new byte[0];//Programm Bytecode
     //Item
     public String name = "";
-    private int var;
+    public int var;
     private short timer = 0;
     private boolean update;
     private boolean updateCon;
+    private boolean ticked = true;
     
     @Override
     public void update() 
@@ -107,6 +111,7 @@ public class Circuit extends AutomatedTile implements IRedstone8bit, IRedstone1b
                     	this.notifyStateChange(pos.offset(dir), dir.getOpposite());
                     }
                 }
+            ticked = true;
         }
     }
     
@@ -237,7 +242,7 @@ public class Circuit extends AutomatedTile implements IRedstone8bit, IRedstone1b
         timer = nbt.getShort("timer");
         netData.ints[0] = nbt.getInteger("tick");
         netData.longs[0] = nbt.getLong("cfg");
-        update = true;
+        update = ticked = true;
     }
 
     @Override
@@ -276,12 +281,49 @@ public class Circuit extends AutomatedTile implements IRedstone8bit, IRedstone1b
                 System.arraycopy(b, 0, obj, 16, Math.min(16, b.length));
                 b = nbt.getByteArray("cnt");
                 System.arraycopy(b, 0, obj, 0, Math.min(16, b.length));
+                for (int i = 0; i < 8; i++) 
+                	if (obj[i] >= 0) var |= 1 << (24 + i);
                 name = nbt.getString("name");
             }
         }
     }
 
     @Override
+	public boolean detectAndSendChanges(TileContainer container, List<ICrafting> crafters, PacketBuffer dos) throws IOException {
+    	if (!ticked) {
+    		dos.writeByte(0);
+    		return false;
+    	}
+		ticked = false;
+		int n = var >> 8 & 0xff;
+		dos.writeByte(n);
+		for (int i = 0; i < (n + 7) / 8; i++) dos.writeByte(ram[i]);
+		n = var >> 24 & 0xff;
+		dos.writeByte(n);
+		for (int i = 0; i < 8; i++)
+			if ((n >> i & 1) != 0)
+				dos.writeByte(ram[i | 8]);
+		dos.writeString(name);
+    	return true;
+	}
+
+	@Override
+	public void updateNetData(PacketBuffer dis, TileContainer container) throws IOException {
+		super.updateNetData(dis, container);
+		int n = dis.readByte() & 0xff;
+		if (n == 0) return;
+		var &= 0x00ff00ff;
+		var |= n << 8;
+		for (int i = 0; i < (n + 7) / 8; i++) ram[i] = dis.readByte();
+		n = dis.readByte() & 0xff;
+		var |= n << 24;
+		for (int i = 0; i < 8; i++)
+			if ((n >> i & 1) != 0)
+				ram[i | 8] = dis.readByte();
+		name = dis.readStringFromBuffer(32);
+	}
+
+	@Override
     public byte getValue(int s) 
     {
     	

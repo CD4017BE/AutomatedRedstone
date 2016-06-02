@@ -45,6 +45,10 @@ public class GuiArithmeticConverter extends GuiMachine
 		this.drawInfo(21, 15, 28, 9, "\\i", "rs.const");
 		this.drawInfo(11, 24, 9, 54, "\\i", "rs.dir");
 		this.drawInfo(21, 24, 20, 54, "\\i", "rs.filter");
+		if (this.isPointInRegion(12, 25, 7, 52, mx, my)) {
+			int s = (my - guiTop - 25) / 9;
+			this.drawSideCube(-64, 15, s, (byte)(tileEntity.getConfig(s | 8) + 2));
+		}
 	}
 
 	@Override

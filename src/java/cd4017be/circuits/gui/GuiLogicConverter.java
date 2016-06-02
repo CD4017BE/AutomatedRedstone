@@ -51,6 +51,10 @@ public class GuiLogicConverter extends GuiMachine
 		super.drawGuiContainerForegroundLayer(mx, my);
 		this.drawInfo(11, 15, 9, 54, "\\i", "rs.dir");
 		this.drawInfo(21, 15, 14, 54, "\\i", "rs.filter");
+		if (this.isPointInRegion(12, 16, 7, 52, mx, my)) {
+			int s = (my - guiTop - 16) / 9;
+			this.drawSideCube(-64, 5, s, (byte)((tileEntity.getConfig(6) >> s & 1) + 2));
+		}
 	}
     
     @Override

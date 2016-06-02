@@ -57,18 +57,17 @@ public class GuiAssembler extends GuiMachine
         GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
         this.mc.renderEngine.bindTexture(new ResourceLocation("circuits", "textures/gui/assembler.png"));
         this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);
-        this.drawItemConfig(tileEntity, -36, 7);
         this.drawStringCentered(tileEntity.getName(), this.guiLeft + this.xSize / 2, this.guiTop + 4, 0x404040);
         this.drawStringCentered(I18n.translateToLocal("container.inventory"), this.guiLeft + this.xSize / 2, this.guiTop + 76, 0x404040);
         this.drawStringCentered("InOut= " + tileEntity.netData.ints[0], this.guiLeft + 106, this.guiTop + 38, 0x408040);
         this.drawStringCentered("Gates= " + tileEntity.netData.ints[1], this.guiLeft + 106, this.guiTop + 30, 0x408040);
         this.drawStringCentered("Count= " + tileEntity.netData.ints[2], this.guiLeft + 106, this.guiTop + 46, 0x408040);
+        super.drawGuiContainerBackgroundLayer(var1, var2, var3);
     }
     
     @Override
     protected void mouseClicked(int x, int y, int b) throws IOException
     {
-        this.clickItemConfig(tileEntity, x - this.guiLeft + 36, y - this.guiTop - 7);
         byte a = -1;
         if (this.isPointInRegion(80, 29, 52, 26, x, y)) {
             a = 0;
