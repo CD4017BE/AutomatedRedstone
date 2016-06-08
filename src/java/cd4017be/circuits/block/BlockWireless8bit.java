@@ -12,7 +12,7 @@ public class BlockWireless8bit extends TileBlock {
 	public static final PropertyInteger prop = PropertyInteger.create("type", 0, 1);
 	
 	public BlockWireless8bit(String id) {
-		super(id, Material.iron, SoundType.METAL, ItemWireless8bit.class, 0x70);
+		super(id, Material.IRON, SoundType.METAL, ItemWireless8bit.class, 0x70);
 		this.setDefaultState(this.blockState.getBaseState().withProperty(prop, 0));
 	}
 

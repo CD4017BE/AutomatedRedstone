@@ -73,15 +73,15 @@ public class ItemTranslocator extends AutomatedTile implements ILinkedInventory,
 	}
 
 	@Override
-	public void writeToNBT(NBTTagCompound nbt) 
+	public NBTTagCompound writeToNBT(NBTTagCompound nbt) 
 	{
-		super.writeToNBT(nbt);
 		nbt.setByte("in", state);
 		nbt.setIntArray("ref", netData.ints);
 		nbt.setLong("cfg1", netData.longs[1]);
 		nbt.setLong("cfg2", netData.longs[2]);
 		nbt.setLong("cfg3", netData.longs[3]);
 		nbt.setShort("count", counter);
+        return super.writeToNBT(nbt);
 	}
 
 	@Override

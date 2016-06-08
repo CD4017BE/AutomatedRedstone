@@ -25,7 +25,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
-import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -61,7 +60,7 @@ public class Display8bit extends ModTileEntity implements IRedstone8bit, ITickab
     }
 
     @Override
-    public Packet getDescriptionPacket() 
+    public SPacketUpdateTileEntity getUpdatePacket() 
     {
         NBTTagCompound nbt = new NBTTagCompound();
         nbt.setByte("state", state);
@@ -96,11 +95,11 @@ public class Display8bit extends ModTileEntity implements IRedstone8bit, ITickab
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) 
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) 
     {
-        super.writeToNBT(nbt);
         nbt.setByte("state", state);
         nbt.setByte("mode", dspType);
+        return super.writeToNBT(nbt);
     }
 
     @Override

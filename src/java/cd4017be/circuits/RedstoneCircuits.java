@@ -77,19 +77,19 @@ public class RedstoneCircuits
     
     private void initBlocks()
     {
-        (programmer = TileBlock.create("programmer", Material.wood, SoundType.WOOD, DefaultItemBlock.class, 0x1)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F);
-    	(assembler = TileBlock.create("assembler", Material.rock, SoundType.STONE, DefaultItemBlock.class, 0x1)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F);
-    	(circuit = TileBlock.create("circuit", Material.rock, SoundType.STONE, ItemCircuit.class, 0x50)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F);
-    	(rsp8bit = new BlockRSPipe8("rsp8bit", Material.iron, SoundType.METAL)).setCreativeTab(tabCircuits).setHardness(1.0F).setResistance(10F);
-    	(rsp1bit = new BlockRSPipe1("rsp1bit", Material.iron, SoundType.METAL)).setCreativeTab(tabCircuits).setHardness(1.0F).setResistance(10F);
-    	(lever8bit = TileBlock.create("lever8bit", Material.rock, SoundType.STONE, DefaultItemBlock.class, 0x1)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F);
-    	(display8bit = TileBlock.create("display8bit", Material.rock, SoundType.STONE, DefaultItemBlock.class, 0x1)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F);
-    	(logicConv = TileBlock.create("logicConv", Material.rock, SoundType.STONE, DefaultItemBlock.class, 0x30)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F);
-    	(calcConv = TileBlock.create("calcConv", Material.rock, SoundType.STONE, DefaultItemBlock.class, 0x30)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F);
+        (programmer = TileBlock.create("programmer", Material.WOOD, SoundType.WOOD, DefaultItemBlock.class, 0x1)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F);
+    	(assembler = TileBlock.create("assembler", Material.ROCK, SoundType.STONE, DefaultItemBlock.class, 0x1)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F);
+    	(circuit = TileBlock.create("circuit", Material.ROCK, SoundType.STONE, ItemCircuit.class, 0x50)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F);
+    	(rsp8bit = new BlockRSPipe8("rsp8bit", Material.IRON, SoundType.METAL)).setCreativeTab(tabCircuits).setHardness(1.0F).setResistance(10F);
+    	(rsp1bit = new BlockRSPipe1("rsp1bit", Material.IRON, SoundType.METAL)).setCreativeTab(tabCircuits).setHardness(1.0F).setResistance(10F);
+    	(lever8bit = TileBlock.create("lever8bit", Material.ROCK, SoundType.STONE, DefaultItemBlock.class, 0x1)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F);
+    	(display8bit = TileBlock.create("display8bit", Material.ROCK, SoundType.STONE, DefaultItemBlock.class, 0x1)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F);
+    	(logicConv = TileBlock.create("logicConv", Material.ROCK, SoundType.STONE, DefaultItemBlock.class, 0x30)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F);
+    	(calcConv = TileBlock.create("calcConv", Material.ROCK, SoundType.STONE, DefaultItemBlock.class, 0x30)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F);
     	(wireless8bit = new BlockWireless8bit("wireless8bit")).setCreativeTab(tabCircuits).setHardness(2.0F).setResistance(20F);
-    	(invReader = TileBlock.create("invReader", Material.rock, SoundType.STONE, DefaultItemBlock.class, 0x0)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F);
-    	(itemTranslocator = TileBlock.create("itemTranslocator", Material.rock, SoundType.STONE, DefaultItemBlock.class, 0x0)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F);
-    	(invConnector = new BlockInvConnector("invConnector", Material.glass, SoundType.GLASS)).setCreativeTab(tabCircuits).setHardness(0.5F).setResistance(10F);
+    	(invReader = TileBlock.create("invReader", Material.ROCK, SoundType.STONE, DefaultItemBlock.class, 0x0)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F);
+    	(itemTranslocator = TileBlock.create("itemTranslocator", Material.ROCK, SoundType.STONE, DefaultItemBlock.class, 0x0)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F);
+    	(invConnector = new BlockInvConnector("invConnector", Material.GLASS, SoundType.GLASS)).setCreativeTab(tabCircuits).setHardness(0.5F).setResistance(10F);
     	proxy.registerBlocks();
     }
     

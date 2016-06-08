@@ -24,7 +24,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
 import net.minecraft.network.NetworkManager;
-import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 
@@ -62,10 +61,10 @@ public class Programmer extends AutomatedTile implements ISidedInventory
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) 
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) 
     {
-        super.writeToNBT(nbt);
         this.save(nbt);
+        return super.writeToNBT(nbt);
     }
 
     @Override
@@ -83,7 +82,7 @@ public class Programmer extends AutomatedTile implements ISidedInventory
     }
 
     @Override
-    public Packet getDescriptionPacket() 
+    public SPacketUpdateTileEntity getUpdatePacket()
     {
         NBTTagCompound nbt = new NBTTagCompound();
         this.save(nbt);
@@ -96,7 +95,7 @@ public class Programmer extends AutomatedTile implements ISidedInventory
     {
         message = "";
         if (cmd == 0 && inventory.items[0] != null) {
-            if (inventory.items[0].getItem() == Items.paper) {
+            if (inventory.items[0].getItem() == Items.PAPER) {
                 outputs = Arrays.copyOf(defaultArray, defaultArray.length);
                 counter = Arrays.copyOf(defaultArray, defaultArray.length);
                 gates = new String[]{""};
@@ -106,7 +105,7 @@ public class Programmer extends AutomatedTile implements ISidedInventory
                 message = "Programm Loaded";
             }
         } else if (cmd == 1 && inventory.items[0] != null) {
-            if (inventory.items[0].getItem() == Items.paper) inventory.items[0] = BlockItemRegistry.stack("item.circuitPlan", inventory.items[0].stackSize);
+            if (inventory.items[0].getItem() == Items.PAPER) inventory.items[0] = BlockItemRegistry.stack("item.circuitPlan", inventory.items[0].stackSize);
             else if (inventory.items[0].getItem() instanceof ItemCircuit) {
                 if (inventory.items[0].getTagCompound() == null) inventory.items[0].setTagCompound(new NBTTagCompound());
                 NBTTagCompound code = this.write();

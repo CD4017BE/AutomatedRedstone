@@ -76,8 +76,8 @@ public class Assembler extends AutomatedTile implements IAutomatedInv
                 if (n0 > 0) {
                     if (inventory.items[3] == null) {
                         n = Math.min(n0, 64);
-                        inventory.items[3] = new ItemStack(Items.redstone, n);
-                    } else if (inventory.items[3].getItem() == Items.redstone) {
+                        inventory.items[3] = new ItemStack(Items.REDSTONE, n);
+                    } else if (inventory.items[3].getItem() == Items.REDSTONE) {
                         n = Math.min(n0, 64 - inventory.items[3].stackSize);
                         inventory.items[3].stackSize += n;
                     } else n = 0;
@@ -88,8 +88,8 @@ public class Assembler extends AutomatedTile implements IAutomatedInv
                 if (n1 > 0) {
                     if (inventory.items[4] == null) {
                         n = Math.min(n1, 64);
-                        inventory.items[4] = new ItemStack(Blocks.lever, n);
-                    } else if (inventory.items[4].getItem() == Item.getItemFromBlock(Blocks.lever)) {
+                        inventory.items[4] = new ItemStack(Blocks.LEVER, n);
+                    } else if (inventory.items[4].getItem() == Item.getItemFromBlock(Blocks.LEVER)) {
                         n = Math.min(n1, 64 - inventory.items[4].stackSize);
                         inventory.items[4].stackSize += n;
                     } else n = 0;
@@ -100,8 +100,8 @@ public class Assembler extends AutomatedTile implements IAutomatedInv
                 if (n2 > 0) {
                     if (inventory.items[5] == null) {
                         n = Math.min(n2, 32);
-                        inventory.items[5] = new ItemStack(Items.quartz, n * 2);
-                    } else if (inventory.items[5].getItem() == Items.quartz) {
+                        inventory.items[5] = new ItemStack(Items.QUARTZ, n * 2);
+                    } else if (inventory.items[5].getItem() == Items.QUARTZ) {
                         n = Math.min(n2, (64 - inventory.items[4].stackSize) / 2);
                         inventory.items[4].stackSize += n * 2;
                     } else n = 0;
@@ -147,9 +147,9 @@ public class Assembler extends AutomatedTile implements IAutomatedInv
     {
         int[] pi = container.getPlayerInv();
         if (s < pi[0] || s >= pi[1]) return pi;
-        else if (item.getItem() == Items.redstone) return new int[]{2, 3};
-        else if (item.getItem() == Item.getItemFromBlock(Blocks.lever)) return new int[]{3, 4};
-        else if (item.getItem() == Items.quartz) return new int[]{4, 5};
+        else if (item.getItem() == Items.REDSTONE) return new int[]{2, 3};
+        else if (item.getItem() == Item.getItemFromBlock(Blocks.LEVER)) return new int[]{3, 4};
+        else if (item.getItem() == Items.QUARTZ) return new int[]{4, 5};
         else if (item.getItem() instanceof ItemCircuit) return new int[]{5, 6};
         else return null;
     }
@@ -158,9 +158,9 @@ public class Assembler extends AutomatedTile implements IAutomatedInv
     public boolean canInsert(ItemStack item, int cmp, int i) 
     {
         if (item == null) return true;
-        else if (i == 3) return item.getItem() == Items.redstone;
-        else if (i == 4) return item.getItem() == Item.getItemFromBlock(Blocks.lever);
-        else if (i == 5) return item.getItem() == Items.quartz;
+        else if (i == 3) return item.getItem() == Items.REDSTONE;
+        else if (i == 4) return item.getItem() == Item.getItemFromBlock(Blocks.LEVER);
+        else if (i == 5) return item.getItem() == Items.QUARTZ;
         else return true;
     }
 
@@ -197,7 +197,7 @@ public class Assembler extends AutomatedTile implements IAutomatedInv
     
     private int getInOut(int x)
     {
-        int n = inventory.items[4] != null && inventory.items[4].getItem() == Item.getItemFromBlock(Blocks.lever) ? inventory.items[4].stackSize : 0;
+        int n = inventory.items[4] != null && inventory.items[4].getItem() == Item.getItemFromBlock(Blocks.LEVER) ? inventory.items[4].stackSize : 0;
         if (n + x > 16) n = 16 - x;
         return n;
     }
@@ -209,7 +209,7 @@ public class Assembler extends AutomatedTile implements IAutomatedInv
     
     private int getGates(int x)
     {
-        int n = inventory.items[3] != null && inventory.items[3].getItem() == Items.redstone ? inventory.items[3].stackSize : 0;
+        int n = inventory.items[3] != null && inventory.items[3].getItem() == Items.REDSTONE ? inventory.items[3].stackSize : 0;
         if (n + x > 128) n = 128 - x;
         return n;
     }
@@ -221,7 +221,7 @@ public class Assembler extends AutomatedTile implements IAutomatedInv
     
     private int getCount(int x)
     {
-        int n = inventory.items[5] != null && inventory.items[5].getItem() == Items.quartz ? inventory.items[5].stackSize / 2 : 0;
+        int n = inventory.items[5] != null && inventory.items[5].getItem() == Items.QUARTZ ? inventory.items[5].stackSize / 2 : 0;
         if (n + x > 8) n = 8 - x;
         return n;
     }
