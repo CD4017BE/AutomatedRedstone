@@ -31,7 +31,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.ITickable;
 
 /**
@@ -72,7 +71,7 @@ public class Display8bit extends ModTileEntity implements IRedstone8bit, ITickab
     }
 
     @Override
-    public Packet getDescriptionPacket()
+    public SPacketUpdateTileEntity getUpdatePacket() 
     {
         NBTTagCompound nbt = new NBTTagCompound();
         nbt.setByte("state", state);
@@ -116,15 +115,15 @@ public class Display8bit extends ModTileEntity implements IRedstone8bit, ITickab
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) 
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) 
     {
-        super.writeToNBT(nbt);
         if (node != null) ComputerAPI.saveNode(node, nbt);
         nbt.setByte("state", state);
         nbt.setByte("mode", dspType);
         nbt.setString("t0", text0);
         nbt.setString("t1", text1);
         nbt.setString("form", format);
+        return super.writeToNBT(nbt);
     }
 
     @Override

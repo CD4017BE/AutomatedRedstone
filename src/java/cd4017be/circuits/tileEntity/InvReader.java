@@ -55,14 +55,14 @@ public class InvReader extends AutomatedTile implements IRedstone8bit, ISidedInv
 	}
 
 	@Override
-	public void writeToNBT(NBTTagCompound nbt) 
+	public NBTTagCompound writeToNBT(NBTTagCompound nbt) 
 	{
-		super.writeToNBT(nbt);
 		nbt.setByte("in", input);
 		nbt.setByte("out", output);
 		nbt.setIntArray("ref", netData.ints);
 		nbt.setLong("cfg1", netData.longs[1]);
 		nbt.setLong("cfg2", netData.longs[2]);
+        return super.writeToNBT(nbt);
 	}
 
 	@Override

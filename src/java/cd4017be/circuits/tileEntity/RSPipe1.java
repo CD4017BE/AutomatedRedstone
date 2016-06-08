@@ -20,7 +20,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
-import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -117,7 +116,7 @@ public class RSPipe1 extends ModTileEntity implements IRedstone1bit, IPipe, ITic
         if (flow != lFlow) {
             this.markUpdate();
             for (RSPipe1 pipe : updateList) {
-                pipe.onNeighborBlockChange(Blocks.air);
+                pipe.onNeighborBlockChange(Blocks.AIR);
             }
             update = true;
         }
@@ -202,14 +201,14 @@ public class RSPipe1 extends ModTileEntity implements IRedstone1bit, IPipe, ITic
             boolean lock = !(this.getFlowBit(s) && this.getFlowBit(s | 8));
             this.setFlowBit(s, lock);
             this.setFlowBit(s | 8, lock);
-            this.onNeighborBlockChange(Blocks.air);
+            this.onNeighborBlockChange(Blocks.AIR);
             this.markUpdate();
             TileEntity te = Utils.getTileOnSide(this, (byte)s);
             if (te != null && te instanceof RSPipe1) {
                 RSPipe1 pipe = (RSPipe1)te;
                 pipe.setFlowBit(s^1, lock);
                 pipe.setFlowBit(s^1 | 8, lock);
-                pipe.onNeighborBlockChange(Blocks.air);
+                pipe.onNeighborBlockChange(Blocks.AIR);
                 pipe.markUpdate();
             }
             return true;
@@ -235,12 +234,12 @@ public class RSPipe1 extends ModTileEntity implements IRedstone1bit, IPipe, ITic
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) 
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) 
     {
-        super.writeToNBT(nbt);
         nbt.setShort("flow", flow);
         nbt.setByte("state", state);
         if (cover != null) cover.write(nbt, "cover");
+        return super.writeToNBT(nbt);
     }
 
     @Override
@@ -263,7 +262,7 @@ public class RSPipe1 extends ModTileEntity implements IRedstone1bit, IPipe, ITic
     }
 
     @Override
-    public Packet getDescriptionPacket() 
+    public SPacketUpdateTileEntity getUpdatePacket()
     {
         NBTTagCompound nbt = new NBTTagCompound();
         nbt.setShort("flow", flow);

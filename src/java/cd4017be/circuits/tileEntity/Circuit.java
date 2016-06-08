@@ -223,9 +223,8 @@ public class Circuit extends AutomatedTile implements IRedstone8bit, IRedstone1b
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) 
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) 
     {
-        super.writeToNBT(nbt);
         if (node != null) ComputerAPI.saveNode(node, nbt);
         nbt.setByteArray("ram", ram);
         nbt.setByteArray("io", io);
@@ -236,6 +235,7 @@ public class Circuit extends AutomatedTile implements IRedstone8bit, IRedstone1b
         nbt.setInteger("tick", netData.ints[0]);
         nbt.setLong("cfg", netData.longs[0]);
         nbt.setShort("timer", timer);
+        return super.writeToNBT(nbt);
     }
 
     @Override

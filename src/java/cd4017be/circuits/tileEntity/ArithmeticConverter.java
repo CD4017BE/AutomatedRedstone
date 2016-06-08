@@ -41,11 +41,11 @@ public class ArithmeticConverter extends AutomatedTile implements IRedstone8bit,
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) 
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) 
     {
-        super.writeToNBT(nbt);
         nbt.setLong("cfg", netData.longs[0]);
         nbt.setShort("state", state);
+        return super.writeToNBT(nbt);
     }
 
     @Override

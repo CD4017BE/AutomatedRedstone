@@ -121,14 +121,14 @@ public class Wireless8bit extends ModTileEntity implements IRedstone8bit, ITicka
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) 
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) 
     {
-        super.writeToNBT(nbt);
         nbt.setByte("state", state);
         nbt.setInteger("lx", linkX);
         nbt.setInteger("ly", linkY);
         nbt.setInteger("lz", linkZ);
         nbt.setInteger("ld", linkD);
+        return super.writeToNBT(nbt);
     }
 
     @Override

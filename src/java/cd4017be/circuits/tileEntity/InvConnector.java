@@ -9,7 +9,6 @@ import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
-import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -57,11 +56,11 @@ public class InvConnector extends ModTileEntity implements ILinkedInventory, IPi
 	}
 
 	@Override
-	public void writeToNBT(NBTTagCompound nbt) 
+	public NBTTagCompound writeToNBT(NBTTagCompound nbt) 
 	{
-		super.writeToNBT(nbt);
 		nbt.setByte("dir", conDir);
 		if (cover != null) cover.write(nbt, "cover");
+        return super.writeToNBT(nbt);
 	}
 
 	@Override
@@ -238,7 +237,7 @@ public class InvConnector extends ModTileEntity implements ILinkedInventory, IPi
     }
 
     @Override
-    public Packet getDescriptionPacket() 
+    public SPacketUpdateTileEntity getUpdatePacket()
     {
         NBTTagCompound nbt = new NBTTagCompound();
         nbt.setShort("dir", conDir);

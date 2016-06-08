@@ -69,7 +69,7 @@ public class Lever8bit extends ModTileEntity implements IRedstone8bit, ITickable
     }
 
     @Override
-    public Packet getDescriptionPacket() 
+    public SPacketUpdateTileEntity getUpdatePacket()
     {
         NBTTagCompound nbt = new NBTTagCompound();
         nbt.setByte("state", state);
@@ -93,11 +93,11 @@ public class Lever8bit extends ModTileEntity implements IRedstone8bit, ITickable
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound nbt) 
+    public NBTTagCompound writeToNBT(NBTTagCompound nbt) 
     {
-        super.writeToNBT(nbt);
         if (node != null) ComputerAPI.saveNode(node, nbt);
         nbt.setByte("state", state);
+        return super.writeToNBT(nbt);
     }
 
     @Override
