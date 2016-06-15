@@ -1,0 +1,20 @@
+@INIT
+WILDCARD = 32767;
+add("shapeless", it("minecraft:paper"), it("item.circuitPlan"));
+add("shaped", it("tile.programmer"), "012/343/555", it("minecraft:feather"), it("minecraft:paper"), "dyeBlack", "dustRedstone", it("minecraft:crafting_table"), it("minecraft:wooden_slab", 1, WILDCARD));
+add("shaped", it("tile.assembler"), "010/232/010", "dustRedstone", it("minecraft:piston"), it("minecraft:chest"), it("minecraft:crafting_table"));
+add("shaped", it("tile.circuit"), " 0 /010/ 0 ", it("minecraft:stone_slab"), "blockGlass");
+add("shaped", it("tile.lever8bit"), "000/121/000", it("minecraft:lever"), it("minecraft:stone_slab"), it("tile.rsp8bit"));
+add("shaped", it("tile.display8bit"), "000/121/000", "dustGlowstone", it("minecraft:stone_slab"), it("tile.rsp8bit"));
+add("shaped", it("tile.rsp8bit"), "000/010/000", it("rsp1bitN"), "nuggetGold");
+add("shaped", it("tile.logicConv"), "010/232", it("minecraft:redstone_torch"), "dustRedstone", it("minecraft:stone_slab"), it("tile.rsp8bit"));
+add("shaped", it("tile.calcConv"), "010/232", it("minecraft:redstone_torch"), "dustRedstone", it("minecraft:comparator"), it("tile.rsp8bit"));
+add("shaped", it("rsp1bitN", 12), "000/111/000", it("minecraft:iron_bars"), "dustRedstone");
+add("shaped", it("rsp1bitI", 2), "001", it("rsp1bitN"), "dustRedstone");
+add("shaped", it("rsp1bitO", 2), "001", it("rsp1bitN"), it("minecraft:redstone_torch"));
+add("shaped", it("tile.wireless8bit"), "010/232/010", it("minecraft:obsidian"), it("minecraft:ender_eye"), it("tile.rsp8bit"), "blockQuartz");
+add("shapeless", it("tile.wireless8bit"), it("tile.wireless8bit"), it("tile.wireless8bit", 2));
+add("shaped", it("tile.invConnector", 12), "000/121/000", "gemQuartz", "blockGlass", it("minecraft:ender_pearl"));
+add("shaped", it("tile.invReader"), "010/232/040", it("minecraft:stone_slab"), it("minecraft:comparator"), "dustRedstone", it("minecraft:chest"), it("tile.rsp8bit"));
+add("shaped", it("tile.itemTranslocator"), "010/232/040", it("minecraft:stone_slab"), it("minecraft:comparator"), it("minecraft:piston"), it("tile.invConnector"), it("tile.rsp8bit"));
+if(hasit("RstMetall")) {add("shaped", it("rsp1bitN", 8), "000", it("RstMetall"));}
