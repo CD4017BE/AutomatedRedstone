@@ -7,6 +7,7 @@
 package cd4017be.circuits;
 
 import cd4017be.api.computers.ComputerAPI;
+import cd4017be.api.recipes.RecipeAPI;
 import cd4017be.circuits.block.BlockInvConnector;
 import cd4017be.circuits.block.BlockRSPipe1;
 import cd4017be.circuits.block.BlockRSPipe8;
@@ -15,6 +16,7 @@ import cd4017be.circuits.item.ItemCircuit;
 import cd4017be.circuits.item.ItemProgramm;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.BlockItemRegistry;
+import cd4017be.lib.ConfigurationFile;
 import cd4017be.lib.DefaultItemBlock;
 import cd4017be.lib.TileBlock;
 import net.minecraftforge.fml.common.Mod;
@@ -44,14 +46,17 @@ public class RedstoneCircuits
     public static CommonProxy proxy;
     
     public static CreativeTabs tabCircuits;
+    private static final String recipeFile = "automatedRedstone.rcp";
     
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event) 
     {
-        BlockItemRegistry.setMod("circuits");
+        ConfigurationFile.init(event, recipeFile, "/assets/circuits/config/recipes.rcp");
+    	BlockItemRegistry.setMod("circuits");
         tabCircuits = new CreativeTabCircuits("circuits");
         initBlocks();
         initItems();
+        RecipeAPI.loadRecipes(recipeFile, RecipeAPI.PRE_INIT);
     }
     
     @Mod.EventHandler
@@ -60,14 +65,14 @@ public class RedstoneCircuits
     	BlockItemRegistry.setMod("circuits");
         BlockGuiHandler.registerMod(this);
         proxy.registerRenderers();
-        proxy.registerRecipes();
+        RecipeAPI.loadRecipes(recipeFile, RecipeAPI.INIT);
         ComputerAPI.register();
     }
     
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event)
     {
-        
+    	RecipeAPI.loadRecipes(recipeFile, RecipeAPI.POST_INIT);
     }
     
     private void initBlocks()
