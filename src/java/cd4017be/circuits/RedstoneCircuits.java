@@ -34,7 +34,7 @@ import static cd4017be.circuits.Objects.*;
  *
  * @author CD4017BE
  */
-@Mod(modid="Circuits", name="Automated Redstone", version="4.0.0")
+@Mod(modid="Circuits", useMetadata = true)
 public class RedstoneCircuits 
 {
     // The instance of your mod that Forge uses.
