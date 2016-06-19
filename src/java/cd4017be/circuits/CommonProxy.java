@@ -47,7 +47,7 @@ public class CommonProxy
         TileBlockRegistry.register(rsp8bit, RSPipe8.class, null);
         TileBlockRegistry.register(rsp1bit, RSPipe1.class, null);
         TileBlockRegistry.register(lever8bit, Lever8bit.class, null);
-        TileBlockRegistry.register(display8bit, Display8bit.class, null);
+        TileBlockRegistry.register(display8bit, Display8bit.class, TileContainer.class);
         TileBlockRegistry.register(logicConv, LogicConverter.class, TileContainer.class);
         TileBlockRegistry.register(calcConv, ArithmeticConverter.class, TileContainer.class);
         TileBlockRegistry.register(wireless8bit, Wireless8bit.class, null);

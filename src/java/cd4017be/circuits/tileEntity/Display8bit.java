@@ -6,6 +6,7 @@
 
 package cd4017be.circuits.tileEntity;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import li.cil.oc.api.machine.Arguments;
@@ -21,13 +22,13 @@ import cd4017be.api.computers.ComputerAPI;
 import cd4017be.lib.ModTileEntity;
 import cd4017be.lib.util.Utils;
 import net.minecraft.block.Block;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 
 /**
@@ -37,33 +38,45 @@ import net.minecraft.util.ITickable;
 @Optional.InterfaceList(value = {@Interface(iface = "dan200.computercraft.api.peripheral.IPeripheral", modid = "ComputerCraft"), @Interface(iface = "li.cil.oc.api.network.Environment", modid = "OpenComputers")})
 public class Display8bit extends ModTileEntity implements IRedstone8bit, ITickable, Environment //, IPeripheral TODO reimplement
 {
-    private boolean update;
+    private static String[] defaultFormat = {"", "##", "###"};
+	private boolean update;
     public byte state;
     public byte dspType;
+    public String text0 = "", text1 = "";
+    public String format = "";
 
     @Override
-    public boolean onActivated(EntityPlayer player, EnumFacing s, float X, float Y, float Z) 
-    {
-        if (!player.isSneaking() && s.getIndex() == this.getBlockMetadata() - 2) {
-            dspType = (byte)((dspType + 1) % 3); 
-            this.markUpdate();
-            return true;
-        } else return false;
-    }
+	public void onPlayerCommand(PacketBuffer data, EntityPlayerMP player) throws IOException {
+    	byte cmd = data.readByte();
+    	if (cmd == 0) text0 = data.readStringFromBuffer(16);
+    	else if (cmd == 1) format = data.readStringFromBuffer(3);
+    	else if (cmd == 2) text1 = data.readStringFromBuffer(16);
+    	else if (cmd == 3) {
+    		dspType = (byte)(data.readByte() % 3);
+    		format = defaultFormat[dspType];
+    	}
+    	this.markUpdate();
+	}
 
-    @Override
-    public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) 
+	@Override
+    public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt)
     {
         state = pkt.getNbtCompound().getByte("state");
         dspType = pkt.getNbtCompound().getByte("dsp");
+        text0 = pkt.getNbtCompound().getString("t0");
+        text1 = pkt.getNbtCompound().getString("t1");
+        format = pkt.getNbtCompound().getString("form");
     }
 
     @Override
-    public Packet getDescriptionPacket() 
+    public Packet getDescriptionPacket()
     {
         NBTTagCompound nbt = new NBTTagCompound();
         nbt.setByte("state", state);
         nbt.setByte("dsp", dspType);
+        nbt.setString("t0", text0);
+        nbt.setString("t1", text1);
+        nbt.setString("form", format);
         return new S35PacketUpdateTileEntity(pos, -1, nbt);
     }
 
@@ -99,6 +112,9 @@ public class Display8bit extends ModTileEntity implements IRedstone8bit, ITickab
         super.writeToNBT(nbt);
         nbt.setByte("state", state);
         nbt.setByte("mode", dspType);
+        nbt.setString("t0", text0);
+        nbt.setString("t1", text1);
+        nbt.setString("form", format);
     }
 
     @Override
@@ -107,6 +123,9 @@ public class Display8bit extends ModTileEntity implements IRedstone8bit, ITickab
         super.readFromNBT(nbt);
         state = nbt.getByte("state");
         dspType = nbt.getByte("mode");
+        text0 = nbt.getString("t0");
+        text1 = nbt.getString("t1");
+        format = nbt.getString("form");
         update = true;
     }
     

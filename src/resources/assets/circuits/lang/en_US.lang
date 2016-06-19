@@ -48,11 +48,15 @@ gui.cd4017be.logicConv.name=Connect
 gui.cd4017be.calcConv.name=Connect
 gui.cd4017be.invReader.name=Inventory Sensor
 gui.cd4017be.itemTranslocator.name=Item Translocator
+gui.cd4017be.display8bit.name=Display
 //Gui tooltips
 gui.cd4017be.rs.dir=Signal direction
 gui.cd4017be.rs.filter=Hex-AND-Gate
 gui.cd4017be.rs.const=constant
 gui.cd4017be.rs.channel=Signal channel
+gui.cd4017be.display8bit.text=Text rendered on display
+gui.cd4017be.display8bit.mode=Number type
+gui.cd4017be.display8bit.format=Number format:\n# displays next digit,\n0-9 A-F . : - %\ndisplay themselfes and\nanything else is placeholder.
 gui.cd4017be.filter.neg=Invert filter?
 gui.cd4017be.filter.ore=Use Ore-Dictionary?
 gui.cd4017be.filter.nbt=Check NBT data?

@@ -36,6 +36,7 @@ public class ClientProxy extends CommonProxy
         TileBlockRegistry.registerGui(calcConv, GuiArithmeticConverter.class);
         TileBlockRegistry.registerGui(invReader, GuiInvReader.class);
         TileBlockRegistry.registerGui(itemTranslocator, GuiItemTranslocator.class);
+        TileBlockRegistry.registerGui(display8bit, GuiDisplay8bit.class);
         
         invConnector.setBlockLayer(EnumWorldBlockLayer.CUTOUT);
         

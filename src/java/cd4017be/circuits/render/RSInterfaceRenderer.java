@@ -7,6 +7,8 @@
 package cd4017be.circuits.render;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.entity.RenderManager;
@@ -28,59 +30,52 @@ public class RSInterfaceRenderer extends TileEntitySpecialRenderer<ModTileEntity
 {
     private final RenderManager manager = Minecraft.getMinecraft().getRenderManager();
     
-    private void renderStateBinary(byte state, int tex)
+    private void renderStateBinary(byte state, int tex, int h)
     {
         manager.renderEngine.bindTexture(new ResourceLocation("circuits", "textures/blocks/displayOvl.png"));
         WorldRenderer t = Tessellator.getInstance().getWorldRenderer();
         t.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
-        for (int i = 0; i < 8; i++) {
-        	this.renderFace(t, tex | (state >> i & 1), 4 * (i % 4), 8 * (i / 4), 4, 8);
-        	/*
-        	float tsx = 0.125F, tsy = 0.25F;
-        	float tx = (tex | (state >> i & 1)) * tsx;
-            float ty = 0;
-            t.pos((i % 4) * -0.25F + 0.25F, (i / 4) * -0.5F + 1F, -0.53125F).tex(tx, ty).endVertex();
-            t.pos((i % 4) * -0.25F + 0.5F, (i / 4) * -0.5F + 1F, -0.53125F).tex(tx + tsx, ty).endVertex();
-            t.pos((i % 4) * -0.25F + 0.5F, (i / 4) * -0.5F + 0.5F, -0.53125F).tex(tx + tsx, ty + tsy).endVertex();
-            t.pos((i % 4) * -0.25F + 0.25F, (i / 4) * -0.5F + 0.5F, -0.53125F).tex(tx, ty + tsy).endVertex();
-            */
+        for (int i = 0; i < 8; i++)
+        	this.renderFace(t, tex | (state >> i & 1), 4 * (i % 4), h * (i / 4) + 8 - h, 4, 8);
+        Tessellator.getInstance().draw();
+    }
+    
+    private void renderState(char[] format, int state, boolean hex)
+    {
+    	byte[] digits;
+    	if (hex) digits = new byte[]{(byte)(state & 0xf), (byte)(state >> 4), 0};
+    	else digits = new byte[]{(byte)(state % 10), (byte)((state / 10) % 10), (byte)(state / 100)};
+    	manager.renderEngine.bindTexture(new ResourceLocation("circuits", "textures/blocks/displayOvl.png"));
+    	WorldRenderer t = Tessellator.getInstance().getWorldRenderer();
+        t.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
+        int n = 0;
+        float dx = 20F / (float)(format.length + 1), x = 16F;
+        for (int i = format.length - 1; i >= 0; i--) {
+        	int d;
+        	char c = format[i];
+        	if (c == '#') d = digits[n++] + 8;
+        	else if (c >= '0' && c <= '9') d = c - '0' + 8;
+        	else if (c >= 'a' && c <= 'f') d = c - 'a' + 18;
+        	else if (c >= 'A' && c <= 'F') d = c - 'A' + 18;
+        	else if (c == ':') d = 24;
+        	else if (c == '.') d = 25;
+        	else if (c == '-') d = 26;
+        	else if (c == '%') d = 27;
+        	else d = 28;
+        	this.renderFace(t, d, x -= dx, 4, 4, 8);
         }
         Tessellator.getInstance().draw();
     }
     
-    private void renderText(byte state, boolean hex)
-    {
-    	manager.renderEngine.bindTexture(new ResourceLocation("circuits", "textures/blocks/displayOvl.png"));
-    	WorldRenderer t = Tessellator.getInstance().getWorldRenderer();
-        t.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
-        if (hex) {
-        	this.renderFace(t, (state >> 4 & 0xf) | 16, 2, 4, 4, 8);
-        	this.renderFace(t, (state & 0xf) | 16, 10, 4, 4, 8);
-        } else {
-        	int n = state & 0xff;
-        	this.renderFace(t, n / 100 | 16, 1, 4, 4, 8);
-        	this.renderFace(t, (n / 10) % 10 | 16, 6, 4, 4, 8);
-        	this.renderFace(t, n % 10 | 16, 11, 4, 4, 8);
-        }
-        Tessellator.getInstance().draw();
-    	
-        /*
-    	String s = hex ? Integer.toHexString(state & 0xff) : Integer.toString(state & 0xff);
-        FontRenderer fr = manager.getFontRenderer();
-        GL11.glTranslatef(0.5F, 1F, -0.53125F);
-        //GL11.glCullFace(GL11.GL_FRONT);
-        if (hex) {
-            GL11.glScalef(-0.0625F, -0.0625F, 0F);
-            s = s.toUpperCase();
-            if (s.length() < 2) s = "0".concat(s);
-            fr.drawString(s.substring(0, 1), 1, 4, 0xffff00);
-            fr.drawString(s.substring(1), 9, 4, 0xffff00);
-        } else {
-            GL11.glScalef(-0.05F, -0.0625F, 0F);
-            fr.drawString(s, 19 - fr.getStringWidth(s), 4, 0xffff00);
-        }
-        //GL11.glCullFace(GL11.GL_BACK);
-         */
+    private void renderText(String s, float y) {
+    	FontRenderer fr = manager.getFontRenderer();
+        float w = fr.getStringWidth(s);
+        float scale = Math.min(0.375F, 14F / w);
+        GL11.glPushMatrix();
+        GL11.glTranslatef(8F - w * 0.5F * scale, y + 1.5F - 4F * scale, -0.25F);
+    	GL11.glScalef(scale, scale, 0F);
+        fr.drawString(s, 0, 0, 0xffff00);
+        GL11.glPopMatrix();
     }
     
     private void renderFace(WorldRenderer t, int idx, float x, float y, float w, float h) {
@@ -95,20 +90,22 @@ public class RSInterfaceRenderer extends TileEntitySpecialRenderer<ModTileEntity
 	public void renderTileEntityAt(ModTileEntity te, double x, double y, double z, float partialTicks, int destroyStage) {
 		GL11.glPushMatrix();
         GL11.glTranslated(x + 0.5D, y + 0.5D, z + 0.5D);
-        GL11.glColor4f(1, 1, 1, 1);
-        GL11.glDisable(GL11.GL_LIGHTING);
+        GlStateManager.color(1, 1, 1, 1);
+        GlStateManager.disableLighting();
         int s = te.getBlockMetadata();
         float a = s == 4 ? 0F : s == 5 ? 180F : s == 6 ? 90F : -90F;
         GL11.glRotatef(a, 0, 1, 0);
         GL11.glScalef(-0.0625F, -0.0625F, 0.0625F);
         GL11.glTranslatef(-8F, -8F, -8F);
         if (te instanceof Lever8bit) {
-            this.renderStateBinary(((Lever8bit)te).state, 0);
+            this.renderStateBinary(((Lever8bit)te).state, 0, 8);
         } else if (te instanceof Display8bit) {
             Display8bit dsp = (Display8bit)te;
-            if (dsp.dspType == 0) this.renderStateBinary(dsp.state, 2);
-            else if (dsp.dspType == 1) this.renderText(dsp.state, true);
-            else this.renderText(dsp.state, false);
+            if (dsp.dspType == 0) this.renderStateBinary(dsp.state, 2, 4);
+            else if (dsp.dspType == 1) this.renderState(dsp.format.toCharArray(), dsp.state & 0xff, true);
+            else this.renderState(dsp.format.toCharArray(), dsp.state & 0xff, false);
+            if (!dsp.text0.isEmpty()) this.renderText(dsp.text0, 1);
+            if (!dsp.text1.isEmpty()) this.renderText(dsp.text1, 12);
         }
         GL11.glPopMatrix();
 	}
