@@ -11,8 +11,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
+import li.cil.oc.api.network.Environment;
+import li.cil.oc.api.network.Message;
+import li.cil.oc.api.network.Node;
 import cd4017be.api.circuits.IRedstone1bit;
 import cd4017be.api.circuits.IRedstone8bit;
+import cd4017be.api.computers.ComputerAPI;
 import cd4017be.lib.TileContainer;
 import cd4017be.lib.TileEntityData;
 import cd4017be.lib.templates.AutomatedTile;
@@ -28,12 +35,15 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraftforge.fml.common.Optional;
+import net.minecraftforge.fml.common.Optional.Interface;
 
 /**
  *
  * @author CD4017BE
  */
-public class Circuit extends AutomatedTile implements IRedstone8bit, IRedstone1bit
+@Optional.InterfaceList(value = {@Interface(iface = "dan200.computercraft.api.peripheral.IPeripheral", modid = "ComputerCraft"), @Interface(iface = "li.cil.oc.api.network.Environment", modid = "OpenComputers")})
+public class Circuit extends AutomatedTile implements IRedstone8bit, IRedstone1bit, Environment
 {
 	
     public Circuit()
@@ -378,6 +388,61 @@ public class Circuit extends AutomatedTile implements IRedstone8bit, IRedstone1b
     public void onNeighborBlockChange(Block b) 
     {
         update = true;
+    }
+
+    //OpenComputers:
+    
+    private Object node = ComputerAPI.newOCnode(this, "RedstoneCircuits-Out8bit", false);
+    
+    @Override
+	public void invalidate() {
+		super.invalidate();
+		ComputerAPI.removeOCnode(node);
+	}
+
+	@Override
+	public void onChunkUnload() {
+		super.onChunkUnload();
+		ComputerAPI.removeOCnode(node);
+	}
+
+	@Optional.Method(modid = "OpenComputers")
+	@Override
+	public Node node() {
+		return (Node)node;
+	}
+
+    @Optional.Method(modid = "OpenComputers")
+	@Override
+	public void onConnect(Node node) {}
+
+    @Optional.Method(modid = "OpenComputers")
+	@Override
+	public void onDisconnect(Node node) {}
+
+    @Optional.Method(modid = "OpenComputers")
+	@Override
+	public void onMessage(Message message) {}
+    
+    @Optional.Method(modid = "OpenComputers")
+    @Callback(doc = "function(pos:int):int returns the 8 logic gate states at given byte position" ,direct = true)
+    public Object[] getByte(Context cont, Arguments args) {
+    	int id = args.checkInteger(0);
+    	if (id >= 0 && id < ram.length) return new Object[]{(int)ram[id]};
+    	else throw new IndexOutOfBoundsException();
+    }
+    
+    @Optional.Method(modid = "OpenComputers")
+    @Callback(doc = "function(pos:int, val:int[, mask:int]) sets the 8 logic gate states at given byte position. Use mask to only set specific bits" ,direct = true)
+    public Object[] setByte(Context cont, Arguments args) {
+    	int id = args.checkInteger(0);
+    	int f = args.optInteger(2, 0xff);
+    	int n = args.checkInteger(1) & f;
+    	if (id >= 0 && id < ram.length) {
+    		ram[id] &= ~f;
+    		ram[id] |= n;
+    		return new Object[0];
+    	} else throw new IndexOutOfBoundsException();
     }
     
 }

@@ -84,6 +84,7 @@ public class Display8bit extends ModTileEntity implements IRedstone8bit, ITickab
     public void update() 
     {
         if (worldObj.isRemote) return;
+        ComputerAPI.update(this, node, 0);
         if (update) {
             byte lstate = state;
             state = 0;

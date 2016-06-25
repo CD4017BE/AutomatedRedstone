@@ -329,4 +329,9 @@ public class InvConnector extends ModTileEntity implements ILinkedInventory, IPi
 		return inv == null ? new ChatComponentText("No Connection") : inv.getDisplayName();
 	}
 
+	@Override
+	public boolean isUseableByPlayer(EntityPlayer player) {
+		return false;
+	}
+
 }

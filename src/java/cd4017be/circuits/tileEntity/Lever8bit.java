@@ -78,6 +78,7 @@ public class Lever8bit extends ModTileEntity implements IRedstone8bit, ITickable
     public void update() 
     {
         if (worldObj.isRemote) return;
+        ComputerAPI.update(this, node, 0);
         if (update) {
             for (int i = 0; i < 6; i++) {
                 TileEntity te = Utils.getTileOnSide(this, (byte)i);
