@@ -39,7 +39,7 @@ import net.minecraft.util.ITickable;
 public class Display8bit extends ModTileEntity implements IRedstone8bit, ITickable, Environment //, IPeripheral TODO reimplement
 {
     private static String[] defaultFormat = {"", "##", "###"};
-	private boolean update;
+	private boolean update, textUpdate;
     public byte state;
     public byte dspType;
     public String text0 = "", text1 = "";
@@ -95,9 +95,14 @@ public class Display8bit extends ModTileEntity implements IRedstone8bit, ITickab
                 }
             }
             if (state != lstate) {
-                this.markUpdate();
+                textUpdate = true;
                 this.updateEvent();
             }
+            update = false;
+        }
+        if (textUpdate) {
+        	this.markUpdate();
+        	textUpdate = false;
         }
     }
 
@@ -111,6 +116,7 @@ public class Display8bit extends ModTileEntity implements IRedstone8bit, ITickab
     public void writeToNBT(NBTTagCompound nbt) 
     {
         super.writeToNBT(nbt);
+        if (node != null) ComputerAPI.saveNode(node, nbt);
         nbt.setByte("state", state);
         nbt.setByte("mode", dspType);
         nbt.setString("t0", text0);
@@ -122,6 +128,7 @@ public class Display8bit extends ModTileEntity implements IRedstone8bit, ITickab
     public void readFromNBT(NBTTagCompound nbt) 
     {
         super.readFromNBT(nbt);
+        if (node != null) ComputerAPI.readNode(node, nbt);
         state = nbt.getByte("state");
         dspType = nbt.getByte("mode");
         text0 = nbt.getString("t0");
@@ -247,6 +254,25 @@ public class Display8bit extends ModTileEntity implements IRedstone8bit, ITickab
     @Callback(doc = "" ,direct = true)
     public Object[] getInput(Context cont, Arguments args) {
     	return new Object[]{state};
+    }
+    
+    @Optional.Method(modid = "OpenComputers")
+    @Callback(doc = "" ,direct = true)
+    public Object[] print(Context cont, Arguments args) {
+    	int tar = args.checkInteger(0);
+    	String text = args.checkString(1);
+    	if (tar == 0) {
+    		if (text.length() > 3) throw new IllegalArgumentException("only max. 3 characters allowed for number format!");
+    		format = text;
+    	} else if (tar == 1) {
+    		if (text.length() > 16) throw new IllegalArgumentException("only max. 16 characters allowed for description!");
+    		text0 = text;
+    	} else if (tar == 2) {
+    		if (text.length() > 16) throw new IllegalArgumentException("only max. 16 characters allowed for description!");
+    		text1 = text;
+    	} else throw new IllegalArgumentException("invalid target index");
+    	textUpdate = true;
+    	return new Object[0];
     }
     
 }

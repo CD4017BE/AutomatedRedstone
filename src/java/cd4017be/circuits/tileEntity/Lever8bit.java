@@ -94,6 +94,7 @@ public class Lever8bit extends ModTileEntity implements IRedstone8bit, ITickable
     public void writeToNBT(NBTTagCompound nbt) 
     {
         super.writeToNBT(nbt);
+        if (node != null) ComputerAPI.saveNode(node, nbt);
         nbt.setByte("state", state);
     }
 
@@ -101,6 +102,7 @@ public class Lever8bit extends ModTileEntity implements IRedstone8bit, ITickable
     public void readFromNBT(NBTTagCompound nbt) 
     {
         super.readFromNBT(nbt);
+        if (node != null) ComputerAPI.readNode(node, nbt);
         state = nbt.getByte("state");
         update = true;
     }

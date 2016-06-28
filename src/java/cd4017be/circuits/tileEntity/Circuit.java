@@ -81,6 +81,7 @@ public class Circuit extends AutomatedTile implements IRedstone8bit, IRedstone1b
     {
         super.update();
         if (worldObj.isRemote) return;
+        ComputerAPI.update(this, node, 0);
         if (updateCon) {
         	worldObj.notifyNeighborsOfStateChange(pos, this.getBlockType());
         	updateCon = false;
@@ -225,6 +226,7 @@ public class Circuit extends AutomatedTile implements IRedstone8bit, IRedstone1b
     public void writeToNBT(NBTTagCompound nbt) 
     {
         super.writeToNBT(nbt);
+        if (node != null) ComputerAPI.saveNode(node, nbt);
         nbt.setByteArray("ram", ram);
         nbt.setByteArray("io", io);
         nbt.setByteArray("obj", obj);
@@ -240,6 +242,7 @@ public class Circuit extends AutomatedTile implements IRedstone8bit, IRedstone1b
     public void readFromNBT(NBTTagCompound nbt) 
     {
         super.readFromNBT(nbt);
+        if (node != null) ComputerAPI.readNode(node, nbt);
         byte[] b = nbt.getByteArray("ram");
         System.arraycopy(b, 0, ram, 0, Math.min(ram.length, b.length));
         b = nbt.getByteArray("io");
