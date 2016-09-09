@@ -1,0 +1,6 @@
+#Minecraft run directories
+/client
+/server
+#Build directories
+/build
+/bin
