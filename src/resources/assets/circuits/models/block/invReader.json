@@ -1,8 +1,0 @@
-{
-	"parent": "circuits:block/base0",
-    "textures": {
-        "top": "circuits:blocks/invReader0",
-		"bot": "circuits:blocks/invReader0",
-		"side": "circuits:blocks/invReader1"
-    }
-}

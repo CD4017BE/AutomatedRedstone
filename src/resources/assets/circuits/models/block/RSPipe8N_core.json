@@ -1,6 +1,6 @@
 {
 	"parent": "circuits:block/pipeCore8",
     "textures": {
-        "tex": "circuits:blocks/RSPipe8N"
+        "tex": "circuits:blocks/RSPipe32N"
     }
 }

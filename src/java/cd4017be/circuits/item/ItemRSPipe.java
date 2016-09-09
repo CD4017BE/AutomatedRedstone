@@ -18,20 +18,22 @@ import net.minecraft.item.ItemStack;
  */
 public class ItemRSPipe extends DefaultItemBlock
 {
-    
-    public ItemRSPipe(Block id)
-    {
-        super(id);
-        this.setHasSubtypes(true);
-        BlockItemRegistry.registerItemStack(new ItemStack(this, 1, BlockRSPipe1.ID_Transport), "rsp1bitN");
-        BlockItemRegistry.registerItemStack(new ItemStack(this, 1, BlockRSPipe1.ID_Extraction), "rsp1bitI");
-        BlockItemRegistry.registerItemStack(new ItemStack(this, 1, BlockRSPipe1.ID_Injection), "rsp1bitO");
-    }
 
-    @Override
-    public int getMetadata(int dmg) 
-    {
-        return dmg;
-    }
-    
+	public ItemRSPipe(Block id) {
+		super(id);
+		this.setHasSubtypes(true);
+	}
+
+	@Override
+	protected void init() {
+		BlockItemRegistry.registerItemStack(new ItemStack(this, 1, BlockRSPipe1.ID_Transport), "rsp1bitN");
+		BlockItemRegistry.registerItemStack(new ItemStack(this, 1, BlockRSPipe1.ID_Extraction), "rsp1bitI");
+		BlockItemRegistry.registerItemStack(new ItemStack(this, 1, BlockRSPipe1.ID_Injection), "rsp1bitO");
+	}
+
+	@Override
+	public int getMetadata(int dmg) {
+		return dmg;
+	}
+
 }

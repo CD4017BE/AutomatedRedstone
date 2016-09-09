@@ -9,7 +9,6 @@ package cd4017be.circuits.block;
 import java.util.ArrayList;
 import java.util.List;
 
-import cd4017be.circuits.item.ItemRSPipe;
 import cd4017be.lib.templates.BlockPipe;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -27,27 +26,25 @@ import net.minecraft.item.ItemStack;
 public class BlockRSPipe1 extends BlockPipe
 {
 	public static final PropertyInteger prop = PropertyInteger.create("type", 0, 2);
-	
-    public static final byte ID_Transport = 0;
-    public static final byte ID_Extraction = 2;
-    public static final byte ID_Injection = 1;
-    
-    public BlockRSPipe1(String id, Material m, SoundType sound)
-    {
-        super(id, m, sound, ItemRSPipe.class, 0x30);
-        this.setDefaultState(this.getBlockState().getBaseState().withProperty(prop, 0));
-        this.size = 0.25F;
-    }
-    
-    @Override
-    public void getSubBlocks(Item par1, CreativeTabs par2CreativeTabs, List<ItemStack> list) 
-    {
-        list.add(new ItemStack(this, 1, ID_Transport));
-        list.add(new ItemStack(this, 1, ID_Extraction));
-        list.add(new ItemStack(this, 1, ID_Injection));
-    }
-    
-    @Override
+
+	public static final byte ID_Transport = 0;
+	public static final byte ID_Extraction = 2;
+	public static final byte ID_Injection = 1;
+
+	public BlockRSPipe1(String id, Material m, SoundType sound) {
+		super(id, m, sound, 0x30);
+		this.setDefaultState(this.getBlockState().getBaseState().withProperty(prop, 0));
+		this.size = 0.25F;
+	}
+
+	@Override
+	public void getSubBlocks(Item par1, CreativeTabs par2CreativeTabs, List<ItemStack> list) {
+		list.add(new ItemStack(this, 1, ID_Transport));
+		list.add(new ItemStack(this, 1, ID_Extraction));
+		list.add(new ItemStack(this, 1, ID_Injection));
+	}
+
+	@Override
 	public IBlockState getStateFromMeta(int meta) {
 		return this.getBlockState().getBaseState().withProperty(prop, meta);
 	}
@@ -57,6 +54,7 @@ public class BlockRSPipe1 extends BlockPipe
 		return state.getValue(prop);
 	}
 
+	@SuppressWarnings("rawtypes")
 	@Override
 	protected void addProperties(ArrayList<IProperty> main) {
 		main.add(prop);
@@ -64,9 +62,8 @@ public class BlockRSPipe1 extends BlockPipe
 	}
 
 	@Override
-    public int damageDropped(IBlockState state) 
-    {
-        return this.getMetaFromState(state);
-    }
-    
+	public int damageDropped(IBlockState state) {
+		return this.getMetaFromState(state);
+	}
+
 }

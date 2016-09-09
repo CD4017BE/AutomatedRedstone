@@ -1,104 +1,74 @@
 package cd4017be.circuits.gui;
 
-import java.io.IOException;
-
-import org.lwjgl.opengl.GL11;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import cd4017be.circuits.tileEntity.Display8bit;
 import cd4017be.lib.BlockGuiHandler;
-import cd4017be.lib.TileContainer;
-import cd4017be.lib.templates.GuiMachine;
+import cd4017be.lib.Gui.DataContainer;
+import cd4017be.lib.Gui.GuiMachine;
 
 public class GuiDisplay8bit extends GuiMachine {
 
-	private final Display8bit tileEntity;
-    private int sel = -1;
-    private TextField text;
-    
-    public GuiDisplay8bit(Display8bit tileEntity, EntityPlayer player)
-    {
-        super(new TileContainer(tileEntity, player));
-        this.tileEntity = tileEntity;
-    }
-    
-    @Override
-    public void initGui() 
-    {
-        this.xSize = 64;
-        this.ySize = 53;
-        super.initGui();
-    }
-    
-    @Override
-	protected void drawGuiContainerForegroundLayer(int mx, int my) 
-    {
-		super.drawGuiContainerForegroundLayer(mx, my);
-		this.drawInfo(8, 27, 18, 7, "\\i", "display8bit.format");
-		this.drawInfo(8, 16, 18, 7, "\\i", "display8bit.text");
-		this.drawInfo(8, 38, 18, 7, "\\i", "display8bit.text");
-		this.drawInfo(38, 27, 18, 7, "\\i", "display8bit.mode");
+	private final Display8bit tile;
+
+	public GuiDisplay8bit(Display8bit tileEntity, EntityPlayer player) {
+		super(new DataContainer(tileEntity, player));
+		this.tile = tileEntity;
+		this.MAIN_TEX = new ResourceLocation("circuits", "textures/gui/circuit.png");
+		this.bgTexY = 100;
 	}
-    
-    @Override
-    protected void drawGuiContainerBackgroundLayer(float var1, int var2, int var3) 
-    {
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        this.mc.renderEngine.bindTexture(new ResourceLocation("circuits", "textures/gui/circuit.png"));
-        this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 128, this.xSize, this.ySize);
-        this.drawTexturedModalRect(this.guiLeft + 37, this.guiTop + 26, 64, 128 + tileEntity.dspType * 9, 20, 9);
-        int x, y;
-        x = guiLeft + 8;
-        for (int i = 0; i < 3; i++) {
-        	y = guiTop + 16 + i * 11;
-        	if (i == sel) text.draw(x, y, 0x80ffff, 0xffff8080);
-        	else this.fontRendererObj.drawString(i==0?tileEntity.text0:i==1?tileEntity.format:tileEntity.text1, x, y, 0x80ffff);
-        }
-        this.drawStringCentered(tileEntity.getName(), this.guiLeft + this.xSize / 2, this.guiTop + 4, 0x404040);
-    }
-    
-    @Override
-    protected void keyTyped(char c, int k) throws IOException {
-    	if (sel >= 0) {
-    		byte r = text.keyTyped(c, k);
-    		if (r == 1) this.setTextField(-1);
-    		else if (r >= 0) this.setTextField((sel + r + 5) % 3);
-    	} else super.keyTyped(c, k);
-    }
-    
-    private void setTextField(int k) throws IOException {
-		if (k == sel) return;
-		if (sel >= 0) {
-			PacketBuffer dos = tileEntity.getPacketTargetData();
-			dos.writeByte(sel);
-			dos.writeString(text.text);
-			BlockGuiHandler.sendPacketToServer(dos);
+
+	@Override
+	public void initGui() {
+		this.xSize = 108;
+		this.ySize = 53;
+		super.initGui();
+		guiComps.add(new TextField(0, 8, 27, 11, 7, 2).setTooltip("circuit.ext"));
+		guiComps.add(new TextField(1, 21, 27, 11, 7, 2).setTooltip("circuit.size"));
+		guiComps.add(new Button(2, 34, 26, 18, 9, 0).texture(108, 100).setTooltip("display8bit.mode"));
+		guiComps.add(new TextField(3, 54, 27, 46, 7, 8).setTooltip("display8bit.format"));
+		guiComps.add(new TextField(4, 8, 16, 92, 7, 16).setTooltip("display8bit.text"));
+		guiComps.add(new TextField(5, 8, 38, 92, 7, 16).setTooltip("display8bit.text"));
+	}
+
+	@Override
+	protected void drawGuiContainerBackgroundLayer(float var1, int var2, int var3) {
+		super.drawGuiContainerBackgroundLayer(var1, var2, var3);
+		this.drawStringCentered(tile.getName(), this.guiLeft + this.xSize / 2, this.guiTop + 4, 0x404040);
+	}
+
+	@Override
+	protected Object getDisplVar(int id) {
+		switch(id) {
+		case 0: return Integer.toString(tile.dspType >> 2 & 0x1f);
+		case 1: return Integer.toString((tile.dspType >> 7 & 0x1f) + 1);
+		case 2: return (int)(tile.dspType & 3);
+		case 3: return tile.format;
+		case 4: return tile.text0;
+		case 5: return tile.text1;
+		default: return null;
 		}
-		if (k == 0) text = new TextField(tileEntity.text0, 16);
-		else if (k == 1) text = new TextField(tileEntity.format, 3);
-		else if (k == 2) text = new TextField(tileEntity.text1, 16);
-		else text = null;
-		if (text != null) text.cur = text.text.length();
-		sel = k;
 	}
-    
-    @Override
-    protected void mouseClicked(int x, int y, int b) throws IOException
-    {
-    	int s = -1;
-        if (this.isPointInRegion(38, 27, 18, 7, x, y)) {
-            tileEntity.dspType = (byte)((tileEntity.dspType + 1) % 3);
-            PacketBuffer dos = tileEntity.getPacketTargetData();
-            dos.writeByte(3);
-            dos.writeByte(tileEntity.dspType);
-            BlockGuiHandler.sendPacketToServer(dos);
-        } else if (this.isPointInRegion(8, 16, 48, 7, x, y)) s = 0;
-        else if (this.isPointInRegion(8, 27, 18, 7, x, y)) s = 1;
-        else if (this.isPointInRegion(8, 38, 48, 7, x, y)) s = 2;
-        this.setTextField(s);
-        super.mouseClicked(x, y, b);
-    }
+
+	@Override
+	protected void setDisplVar(int id, Object obj, boolean send) {
+		PacketBuffer dos = tile.getPacketTargetData();
+		switch(id) {
+		case 0: try {
+			int i = Integer.parseInt((String)obj) << 2;
+			dos.writeByte(0).writeShort(tile.dspType = (short)(tile.dspType & 0xff83 | (i & 0x007c))); break;
+		} catch (NumberFormatException e) {return;}
+		case 1: try {
+			int i = (Integer.parseInt((String)obj) - 1) << 7;
+			dos.writeByte(0).writeShort(tile.dspType = (short)(tile.dspType & 0xf07f | (i & 0x0f80))); break;
+		} catch (NumberFormatException e) {return;}
+		case 2: dos.writeByte(0).writeShort(tile.dspType = (short)(tile.dspType & 0xfffc | ((tile.dspType & 0x0003) + 1) % 3)); break;
+		case 3: dos.writeByte(1); dos.writeString(tile.format = (String)obj); break;
+		case 4: dos.writeByte(2); dos.writeString(tile.text0 = (String)obj); break;
+		case 5: dos.writeByte(3); dos.writeString(tile.text1 = (String)obj); break;
+		}
+		if (send) BlockGuiHandler.sendPacketToServer(dos);
+	}
 
 }

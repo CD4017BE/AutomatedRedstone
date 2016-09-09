@@ -1,282 +1,179 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package cd4017be.circuits.gui;
 
 import java.io.IOException;
+import java.util.Arrays;
+
+import org.lwjgl.input.Keyboard;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ChatAllowedCharacters;
 import net.minecraft.util.ResourceLocation;
-
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
-import org.lwjgl.opengl.GL11;
-
+import net.minecraft.util.text.translation.I18n;
 import cd4017be.circuits.tileEntity.Programmer;
 import cd4017be.lib.BlockGuiHandler;
-import cd4017be.lib.TileContainer;
+import cd4017be.lib.TooltipInfo;
+import cd4017be.lib.Gui.GuiMachine;
+import cd4017be.lib.Gui.TileContainer;
 import cd4017be.lib.templates.AutomatedTile;
-import cd4017be.lib.templates.GuiMachine;
 
 /**
  *
  * @author CD4017BE
  */
-public class GuiProgrammer extends GuiMachine
-{
-    private int Scroll = 0;
-    private int curW = 0;
-    private int curX = 0;
-    private int curY = 0;
-    private String numS = "";
-    private final Programmer tileEntity;
-    
-    public GuiProgrammer(Programmer tileEntity, EntityPlayer player)
-    {
-        super(new TileContainer(tileEntity, player));
-        this.tileEntity = tileEntity;
-    }
+public class GuiProgrammer extends GuiMachine {
 
-    @Override
-    public void initGui() 
-    {
-        this.xSize = 176;
-        this.ySize = 189;
-        super.initGui();
-    }
-
-    @Override
-	protected void drawGuiContainerForegroundLayer(int mx, int my) 
-    {
-		super.drawGuiContainerForegroundLayer(mx, my);
-		this.drawInfo(152, 37, 16, 16, "\\i", "program.save");
-		this.drawInfo(152, 73, 16, 16, "\\i", "program.load");
-		this.drawInfo(89, 16, 12, 8, "\\i", "program.cs");
-		this.drawInfo(102, 16, 12, 8, "\\i", "program.cr");
-		this.drawInfo(116, 16, 12, 8, "\\i", "program.o1");
-		this.drawInfo(129, 16, 12, 8, "\\i", "program.o2");
-		this.drawInfo(95, 4, 74, 8, "\\i", "program.name");
-		this.drawInfo(8, 16, 70, 8, "\\i", "program.info");
+	private final Programmer tile;
+	private int selByte = 0;
+	
+	public GuiProgrammer(Programmer tileEntity, EntityPlayer player) {
+		super(new TileContainer(tileEntity, player));
+		this.MAIN_TEX = new ResourceLocation("circuits", "textures/gui/programmer.png");
+		this.tile = tileEntity;
 	}
 
 	@Override
-    protected void drawGuiContainerBackgroundLayer(float f, int i, int j) 
-    {
-        GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-        this.mc.renderEngine.bindTexture(new ResourceLocation("circuits", "textures/gui/programmer.png"));
-        this.drawTexturedModalRect(this.guiLeft, this.guiTop, 0, 0, this.xSize, this.ySize);
-        int n = tileEntity.gates.length <= 8 ? 0 : Scroll * 52 / (tileEntity.gates.length - 8);
-        this.drawTexturedModalRect(this.guiLeft + 8, this.guiTop + 25 + n, 176, 0, 8, 12);
-        this.drawText();
-        this.drawConfig();
-        fontRendererObj.drawString(tileEntity.getName(), this.guiLeft + 8, this.guiTop + 4, 0x404040);
-        fontRendererObj.drawString(curW == 2 && curY == 32 ? numS : tileEntity.name, this.guiLeft + 96, this.guiTop + 4, 0x404040);
-        this.drawStringCentered(tileEntity.message, this.guiLeft + this.xSize / 2, this.guiTop + 91, 0x804040);
-    }
-    
-    private void drawText()
-    {
-        for (int i = Scroll; i < Scroll + 8 && i < tileEntity.gates.length; i++) {
-            this.fontRendererObj.drawString(tileEntity.gates[i], this.guiLeft + 31, this.guiTop + 25 + (i - Scroll)*8, 0xffffff);
-            this.fontRendererObj.drawString("" + i, this.guiLeft + 18, this.guiTop + 25 + (i - Scroll)*8, 0xffff80);
-        }
-        if (curW == 1 && curY >= Scroll && curY < Scroll + 8 && curY < tileEntity.gates.length && curX <= tileEntity.gates[curY].length()) {
-            int i = this.guiTop + (curY - Scroll) * 8 + 25;
-            int j = this.fontRendererObj.getStringWidth(tileEntity.gates[curY].substring(0, curX));
-            this.drawVerticalLine(this.guiLeft + 30 + j, i, i + 7, 0xffff8080);
-        }
-    }
-    
-    private void drawConfig()
-    {
-        for (int i = 0; i < 8; i++) {
-            this.fontRendererObj.drawString(this.getConfig(i), this.guiLeft + 90, this.guiTop + 25 + i * 8, 0xffffff);
-            this.fontRendererObj.drawString(this.getConfig(i + 8), this.guiLeft + 103, this.guiTop + 25 + i * 8, 0xffffff);
-            this.fontRendererObj.drawString(this.getConfig(i + 16), this.guiLeft + 117, this.guiTop + 25 + i * 8, 0xffffff);
-            this.fontRendererObj.drawString(this.getConfig(i + 24), this.guiLeft + 130, this.guiTop + 25 + i * 8, 0xffffff);
-        }
-        if (curW == 2 && curX <= numS.length()) {
-            int i = this.guiTop + (curY == 32 ? 4 :(curY % 8) * 8 + 25);
-            int j = this.guiLeft + this.fontRendererObj.getStringWidth(numS.substring(0, curX)) + (curY == 32 ? 95 : 89 + (curY / 8) * 13 + curY / 16);
-            this.drawVerticalLine(j, i, i + 7, 0xffff8080);
-        }
-    }
-    
-    private String getConfig(int i)
-    {
-        if (curW == 2 && i == curY) return numS;
-        else if (i < 16) return "" + tileEntity.counter[i];
-        else return "" + tileEntity.outputs[i - 16];
-    }
-    
-    @Override
-    public void handleMouseInput() throws IOException 
-    {
-        int d = Mouse.getEventDWheel();
-        if (d != 0) {
-            Scroll -= d > 0 ? 1 : -1;
-            if (Scroll > tileEntity.gates.length - 8) Scroll = tileEntity.gates.length - 8;
-            if (Scroll < 0) Scroll = 0;
-        }
-        super.handleMouseInput();
-    }
-    
-    @Override
-    protected void mouseClicked(int x, int y, int b) throws IOException
-    {
-        super.mouseClicked(x, y, b);
-        if (this.isPointInRegion(89, 25, 52, 64, x, y)) {
-            this.sendCurrentChange();
-            curW = 0;
-            curY = (x - this.guiLeft - 89) / 13 * 8 + (y - this.guiTop - 25) / 8;
-            if (curY < 0 || curY >= 32) return;
-            numS = this.getConfig(curY);
-            curW = 2;
-            curX = numS.length();
-        } else if (this.isPointInRegion(18, 25, 60, 64, x, y)) {
-            this.sendCurrentChange();
-            curW = 1;
-            curY = (y - this.guiTop - 25) / 8 + Scroll;
-            if (curY >= tileEntity.gates.length) curY = tileEntity.gates.length - 1;
-            curX = tileEntity.gates[curY].length();
-        } else if (this.isPointInRegion(88, 4, 80, 8, x, y)){
-            this.sendCurrentChange();
-            curW = 2;
-            curY = 32;
-            numS = tileEntity.name;
-            curX = tileEntity.name.length();
-        } else {
-            this.sendCurrentChange();
-            curW = 0;
-        }
-        if (this.isPointInRegion(152, 37, 16, 16, x, y)) {
-            this.sendCMD((byte)1);
-        } else if (this.isPointInRegion(152, 73, 16, 16, x, y)) {
-            this.sendCMD((byte)0);
-        } else if (this.isPointInRegion(151, 15, 18, 18, x, y)) {
-            //Help Screen
-        }
-    }
+	public void initGui() {
+		this.xSize = 176;
+		this.ySize = 207;
+		super.initGui();
+		for (int i = 0; i < 8; i++) 
+			guiComps.add(new TextField(i, 36, 25 + i * 8, 96, 8, 32).color(0xffc0c0c0, 0xffff0000));
+		for (int i = 0; i < 8; i++)
+			guiComps.add(new TextField(i + 8, 133, 25 + i * 8, 35, 8, 8).color(0xff40ff40, 0xffff0000));
+		guiComps.add(new TextField(16, 89, 4, 80, 8, 24).setTooltip("program.n"));
+		guiComps.add(new Button(17, 152, 91, 16, 16, -1).setTooltip("program.load"));
+		guiComps.add(new Button(18, 116, 91, 16, 16, -1).setTooltip("program.save"));
+		guiComps.add(new Button(19, 8, 91, 16, 8, -1).setTooltip("program.up"));
+		guiComps.add(new Button(20, 8, 99, 16, 8, -1).setTooltip("program.down"));
+		guiComps.add(new GuiComp(21, 8, 16, 28, 8).setTooltip("program.index"));
+		guiComps.add(new GuiComp(22, 36, 16, 96, 8).setTooltip("program.code"));
+		guiComps.add(new GuiComp(23, 132, 16, 36, 8).setTooltip("program.label"));
+	}
 
-    @Override
-    protected void keyTyped(char c, int k) throws IOException 
-    {
-        if (curW == 1) {
-            try {
-            int l = tileEntity.gates.length;
-            if (k == Keyboard.KEY_RIGHT){
-                curX++;
-                if (curX > tileEntity.gates[curY].length() && curY < tileEntity.gates.length - 1){
-                    this.sendCurrentChange();
-                    curY ++;
-                    curX = 0;
-                } else if (curX > tileEntity.gates[curY].length()) curX = tileEntity.gates[curY].length();
-            }
-            else if (k == Keyboard.KEY_LEFT){
-                curX--;
-                if (curX < 0 && curY > 0){
-                    this.sendCurrentChange();
-                    curY --;
-                    curX = tileEntity.gates[curY].length();
-                } else if (curX < 0) curX = 0;
-            }
-            else if (k == Keyboard.KEY_DOWN && curY < l - 1) {
-                this.sendCurrentChange();
-                curY ++;
-                curX = tileEntity.gates[curY].length();
-            } else if (k == Keyboard.KEY_UP && curY > 0) {
-                this.sendCurrentChange();
-                curY --;
-                curX = tileEntity.gates[curY].length();
-            } else if (k == Keyboard.KEY_DELETE && curX < tileEntity.gates[curY].length()) {
-                tileEntity.gates[curY] = tileEntity.gates[curY].substring(0, curX).concat(tileEntity.gates[curY].substring(curX + 1));
-            } else if (k == Keyboard.KEY_BACK) {
-                if (curX <= 0) {
-                    this.sendAddRemove(4, curY);
-                    if (curY > 0) curX = tileEntity.gates[--curY].length();
-                } else {
-                    curX --;
-                    tileEntity.gates[curY] = tileEntity.gates[curY].substring(0, curX).concat(tileEntity.gates[curY].substring(curX + 1));
-                }
-            } else if (k == Keyboard.KEY_RETURN) {
-                this.sendCurrentChange();
-                if (curX <= 0) this.sendAddRemove(3, curY++);
-                else this.sendAddRemove(3, ++curY);
-            } else if (ChatAllowedCharacters.isAllowedCharacter(c)){
-                tileEntity.gates[curY] = tileEntity.gates[curY].substring(0, curX).concat("" +c).concat(tileEntity.gates[curY].substring(curX));
-                curX++;
-            }
-            } catch (IndexOutOfBoundsException e) {
-                if (curY < 0) curY = 0;
-                if (curY >= tileEntity.gates.length) curY = tileEntity.gates.length - 1;
-                if (curX < 0) curX = 0;
-                if (curX > tileEntity.gates[curY].length()) curX = tileEntity.gates[curY].length();
-            }
-            if (curY < Scroll) Scroll = curY;
-            if (curY >= Scroll + 8) Scroll = curY - 7;
-        } else if (curW == 2) {
-            try {
-            if (k == Keyboard.KEY_LEFT && curX > 0) curX--;
-            else if (k == Keyboard.KEY_RIGHT && curX < numS.length()) curX++;
-            else if (k == Keyboard.KEY_DELETE && curX < numS.length()){
-                numS = numS.substring(0, curX).concat(numS.substring(curX + 1));
-            } else if (k == Keyboard.KEY_BACK && curX > 0) {
-                curX --;
-                numS = numS.substring(0, curX).concat(numS.substring(curX + 1));
-            } else if (k == Keyboard.KEY_RETURN) {
-                this.sendCurrentChange();
-                curW = 0;
-            } else if (ChatAllowedCharacters.isAllowedCharacter(c)){
-                numS = numS.substring(0, curX).concat("" +c).concat(numS.substring(curX));
-                curX++;
-            }
-            } catch (IndexOutOfBoundsException e) {
-                if (curX < 0) curX = 0;
-                if (curX > numS.length()) curX = numS.length();
-            }
-        } else super.keyTyped(c, k);
-    }
-    
-    private void sendCurrentChange() throws IOException
-    {
-        try{
-        if (curW == 1) {
-            PacketBuffer dos = tileEntity.getPacketTargetData();
-            dos.writeByte(AutomatedTile.CmdOffset + 2);
-            dos.writeByte(curY);
-            dos.writeString(tileEntity.gates[curY]);
-            BlockGuiHandler.sendPacketToServer(dos);
-        } else if (curW == 2) {
-            PacketBuffer dos = tileEntity.getPacketTargetData();
-            dos.writeByte(AutomatedTile.CmdOffset + (curY < 16 ? 6 : curY < 32 ? 5 : 7));
-            if (curY < 32) {
-                dos.writeByte(curY % 16);
-                dos.writeByte(Short.parseShort(numS));
-            } else dos.writeString(numS);
-            BlockGuiHandler.sendPacketToServer(dos);
-        }
-        } catch(NumberFormatException e) {
-        } catch(ArrayIndexOutOfBoundsException e) {}
-    }
-    
-    private void sendCMD(byte cmd) throws IOException
-    {
-    	PacketBuffer dos = tileEntity.getPacketTargetData();
-    	dos.writeByte(AutomatedTile.CmdOffset + cmd);
-    	BlockGuiHandler.sendPacketToServer(dos);
-    }
-    
-    private void sendAddRemove(int cmd, int l) throws IOException
-    {
-    	PacketBuffer dos = tileEntity.getPacketTargetData();
-    	dos.writeByte(AutomatedTile.CmdOffset + cmd);
-    	dos.writeByte(l);
-    	BlockGuiHandler.sendPacketToServer(dos);
-    }
-    
+	@Override
+	protected void drawGuiContainerForegroundLayer(int mx, int my) {
+		super.drawGuiContainerForegroundLayer(mx, my);
+		if (this.isPointInRegion(9, 26, 14, 62, mx, my)) {
+			int x = (mx - guiLeft - 8) / 2, y = (my - guiTop - 25) / 2, i = y * 8 + x;
+			this.drawHoveringText(Arrays.asList(String.format("%d:%02X ", y, i) + tile.getLabel(i)), mx - guiLeft, my - guiTop);
+		}
+	}
+
+	@Override
+	protected void drawGuiContainerBackgroundLayer(float t, int mx, int my) {
+		super.drawGuiContainerBackgroundLayer(t, mx, my);
+		mc.renderEngine.bindTexture(MAIN_TEX);
+		if (focus >= 0 && focus < 8) this.showIO((TextField)guiComps.get(focus));
+		else this.drawTexturedModalRect(guiLeft + 7, guiTop + 25 + 2 * selByte, 239, 0, 17, 1);
+		for (int i = 0; i < 8; i++)
+			fontRendererObj.drawString(String.format("%02X", i + selByte * 8), guiLeft + 24, guiTop + 25 + i * 8, 0xffffff40);
+		fontRendererObj.drawString(tile.getName(), this.guiLeft + 8, this.guiTop + 4, 0x404040);
+		String[] s = I18n.translateToLocal("gui.cd4017be.program.head").split("\\\\n");
+		if (s.length > 0) fontRendererObj.drawString(s[0], guiLeft + 8, guiTop + 16, 0x404040);
+		if (s.length > 1) fontRendererObj.drawString(s[1], guiLeft + 88 - fontRendererObj.getStringWidth(s[1]) / 2, guiTop + 16, 0x404040);
+		if (s.length > 2) fontRendererObj.drawString(s[2], guiLeft + 168 - fontRendererObj.getStringWidth(s[2]), guiTop + 16, 0x404040);
+		if (tile.errorCode > 0) {
+			this.drawGradientRect(guiLeft + 8, guiTop + 112, guiLeft + 168, guiTop + 120, 0xffc6c6c6, 0xffc6c6c6);
+			this.drawStringCentered(TooltipInfo.format("gui.cd4017be.err" + tile.errorCode, tile.errorArg), this.guiLeft + this.xSize / 2, this.guiTop + 112, 0xff4040);
+		}
+	}
+
+	@Override
+	protected Object getDisplVar(int id) {
+		return id < 8 ? tile.getCode(id + 8 * selByte) : id < 16 ? tile.getLabel(id - 8 + 8 * selByte) : tile.name;
+	}
+
+	@Override
+	protected void setDisplVar(int id, Object obj, boolean send) {
+		PacketBuffer dos = tile.getPacketTargetData();
+		if (id < 8) {dos.writeByte(AutomatedTile.CmdOffset).writeByte(id + selByte * 8); dos.writeString((String)obj);}
+		else if (id < 16) {dos.writeByte(AutomatedTile.CmdOffset + 1).writeByte(id - 8 + selByte * 8); dos.writeString((String)obj);}
+		else if (id == 16) {dos.writeByte(AutomatedTile.CmdOffset + 2); dos.writeString((String)obj);}
+		else if (id == 17) dos.writeByte(AutomatedTile.CmdOffset + 3);
+		else if (id == 18) dos.writeByte(AutomatedTile.CmdOffset + 4);
+		else {
+			this.setFocus(-1);
+			if (id == 19) selByte -= (Integer)obj == 0 ? 1 : 8;
+			else if (id == 20) selByte += (Integer)obj == 0 ? 1 : 8;
+			selByte &= 0x1f;
+			return;
+		}
+		if (send) BlockGuiHandler.sendPacketToServer(dos);
+	}
+
+	@Override
+	protected void mouseClicked(int x, int y, int b) throws IOException {
+		if (this.isPointInRegion(9, 26, 14, 62, x, y)) {
+			int px = (x - guiLeft - 8) / 2, py = (y - guiTop - 25) / 2, i = py * 8 + px;
+			if (focus >= 0 && focus < 8) this.addReqIndex((TextField)guiComps.get(focus), py, i);	
+			else {
+				this.setFocus(-1);
+				selByte = py;
+				this.setFocus(px);
+			}
+		} else super.mouseClicked(x, y, b);
+	}
+
+	@Override
+	protected void keyTyped(char c, int k) throws IOException {
+		TextField t;
+		if (k == Keyboard.KEY_UP && (focus == 0 || focus == 8)) {int f = focus; this.setDisplVar(19, (int)0, false); this.setFocus(f + 7);}
+		else if (k == Keyboard.KEY_DOWN && (focus == 7 || focus == 15)) {int f = focus; this.setDisplVar(20, (int)0, false); this.setFocus(f - 7);}
+		else if (k == Keyboard.KEY_LEFT && focus >= 8 && focus < 16 && (t = (TextField)guiComps.get(focus)).cur == 0) this.setFocus(focus - 8);
+		else if (k == Keyboard.KEY_RIGHT && focus >= 0 && focus < 8 && (t = (TextField)guiComps.get(focus)).cur == t.text.length()) this.setFocus(focus + 8);	
+		else if (k == Keyboard.KEY_PRIOR) this.setDisplVar(19, isShiftKeyDown() ? (int)1 : (int)0, false);
+		else if (k == Keyboard.KEY_NEXT) this.setDisplVar(20, isShiftKeyDown() ? (int)1 : (int)0, false);
+		else if (k == Keyboard.KEY_S && isCtrlKeyDown()) this.setDisplVar(18, null, true);
+		else super.keyTyped(c, k);
+	}
+
+	private void addReqIndex(TextField t, int by, int bi) {
+		if (t.text.isEmpty()) return;
+		int p0 = t.text.lastIndexOf(',', t.cur - 1) + 1, p1 = t.text.indexOf(',', t.cur);
+		if (p0 <= 0) p0 = 1; if (p1 < 0) p1 = t.text.length();
+		switch(t.text.charAt(0)) {
+		case '+': case '-': case '&': case '*': case '/': case '\\': case '$':
+			t.text = t.text.substring(0, p0) + Integer.toHexString(bi) + t.text.substring(p1);
+			break;
+		case '<': case '>': case '=': case '~':
+			t.text = t.text.substring(0, p0) + "#" + Integer.toString(by) + t.text.substring(p1);
+			break;
+		default: return;
+		}
+		if (t.text.length() > t.maxL) t.text = t.text.substring(0, t.maxL);
+		t.cur = p0;
+	}
+
+	private void showIO(TextField t) {
+		this.drawTexturedModalRect(guiLeft + 7 + 2 * t.id, guiTop + 25 + 2 * selByte, 239 + 2 * t.id, 0, 2, 1);
+		if (t.text.isEmpty()) return;
+		String[] s = t.text.substring(1).split(",");
+		switch(t.text.charAt(0)) {
+		case '+': case '-': case '&': case '*': case '/': case '\\':
+			for (String s1 : s)
+				try {
+					int i = Integer.parseInt(s1.trim().toLowerCase(), 16);
+					this.drawTexturedModalRect(guiLeft + 7 + 2 * (i % 8), guiTop + 25 + 2 * (i / 8), 239, 1, 2, 1);
+				} catch(NumberFormatException e) {}
+			break;
+		case '<': case '>': case '=': case '~':
+			for (String s1 : s)
+				if ((s1 = s1.trim()).startsWith("#"))
+					try {
+						int i = Integer.parseInt(s1.substring(1)) & 0x1f;
+						this.drawTexturedModalRect(guiLeft + 7, guiTop + 25 + 2 * i, 239, 1, 17, 1);
+					} catch(NumberFormatException e) {}
+			break;
+		case '$':
+			for (int j = 0; j < s.length && j < 4; j += 2) 
+				try {
+					int i = Integer.parseInt(s[j].trim().toLowerCase(), 16);
+					this.drawTexturedModalRect(guiLeft + 7 + 2 * (i % 8), guiTop + 25 + 2 * (i / 8), 239, 1, 2, 1);
+				} catch(NumberFormatException e) {}
+			for (int j = t.id + 8 * selByte + 1; tile.getCode(j).startsWith("."); j++)
+				this.drawTexturedModalRect(guiLeft + 7 + 2 * (j % 8), guiTop + 25 + 2 * (j / 8), 239, 0, 2, 1);
+		default: return;
+		}
+	}
+
 }

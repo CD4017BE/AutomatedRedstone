@@ -1,234 +1,128 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package cd4017be.circuits.tileEntity;
-
-import java.io.IOException;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
-import cd4017be.circuits.item.ItemCircuit;
-import cd4017be.lib.BlockItemRegistry;
-import cd4017be.lib.TileContainer;
-import cd4017be.lib.TileEntityData;
+import net.minecraftforge.items.ItemHandlerHelper;
+import cd4017be.circuits.Objects;
+import cd4017be.lib.Gui.DataContainer;
+import cd4017be.lib.Gui.DataContainer.IGuiData;
+import cd4017be.lib.Gui.SlotItemType;
+import cd4017be.lib.Gui.TileContainer;
+import cd4017be.lib.Gui.TileContainer.ISlotClickHandler;
 import cd4017be.lib.templates.AutomatedTile;
-import cd4017be.lib.templates.IAutomatedInv;
 import cd4017be.lib.templates.Inventory;
-import cd4017be.lib.templates.Inventory.Component;
-import cd4017be.lib.templates.SlotOutput;
+import cd4017be.lib.templates.Inventory.IAccessHandler;
 
 /**
  *
  * @author CD4017BE
  */
-public class Assembler extends AutomatedTile implements IAutomatedInv
-{
-    
-    public Assembler()
-    {
-        netData = new TileEntityData(1, 3, 0, 0);
-        inventory = new Inventory(this, 8, new Component(0, 1, -1), new Component(2, 3, 1), new Component(3, 6, 0));
-    }
+public class Assembler extends AutomatedTile implements IAccessHandler, IGuiData, ISlotClickHandler {
 
-    @Override
-    protected void customPlayerCommand(byte cmd, PacketBuffer dis, EntityPlayerMP player) throws IOException 
-    {
-        if (cmd == 0 && inventory.items[7] == null && inventory.items[6] != null && inventory.items[6].getItem() instanceof ItemCircuit) {
-            ItemStack item = this.decrStackSize(6, 1);
-            if (item.getTagCompound() == null) item.setTagCompound(new NBTTagCompound());
-            int n = item.getTagCompound().getByte("InOut") & 0xff;
-            int x = this.getInOut(n);
-            item.getTagCompound().setByte("InOut", (byte)(n + x));
-            this.removeInOut(x);
-            n = item.getTagCompound().getByte("Gates") & 0xff;
-            x = this.getGates(n);
-            item.getTagCompound().setByte("Gates", (byte)(n + x));
-            this.removeGates(x);
-            n = item.getTagCompound().getByte("Count") & 0xff;
-            x = this.getCount(n);
-            item.getTagCompound().setByte("Count", (byte)(n + x));
-            this.removeCount(x);
-            this.setInventorySlotContents(7, item);
-        }
-    }
+	private static final Item circuit = Item.getItemFromBlock(Objects.circuit);
+	public static final String[] tagNames = {"IO", "Cap", "Gate", "Calc"};
+	public static final int[] maxCap = {192, 32, 255, 255};
+	public static Item[] compItems = {Item.getItemFromBlock(Blocks.LEVER), Item.getItemFromBlock(Blocks.STONE_PRESSURE_PLATE), Items.REDSTONE, Items.QUARTZ};
 
-    @Override
-    public void update() 
-    {
-        super.update();
-        if (worldObj.isRemote) return;
-        if (inventory.items[1] == null && inventory.items[0] != null && inventory.items[0].getItem() instanceof ItemCircuit) inventory.items[1] = this.decrStackSize(0, 1);
-        ItemStack item = inventory.items[1];
-        if (item != null) {
-            int n0, n1, n2;
-            if (item.getTagCompound() != null) {
-                int n;
-                n0 = item.getTagCompound().getByte("Gates") & 0xff;
-                if (n0 > 0) {
-                    if (inventory.items[3] == null) {
-                        n = Math.min(n0, 64);
-                        inventory.items[3] = new ItemStack(Items.REDSTONE, n);
-                    } else if (inventory.items[3].getItem() == Items.REDSTONE) {
-                        n = Math.min(n0, 64 - inventory.items[3].stackSize);
-                        inventory.items[3].stackSize += n;
-                    } else n = 0;
-                    n0 -= n;
-                    item.getTagCompound().setByte("Gates", (byte)n0);
-                }
-                n1 = item.getTagCompound().getByte("InOut") & 0xff;
-                if (n1 > 0) {
-                    if (inventory.items[4] == null) {
-                        n = Math.min(n1, 64);
-                        inventory.items[4] = new ItemStack(Blocks.LEVER, n);
-                    } else if (inventory.items[4].getItem() == Item.getItemFromBlock(Blocks.LEVER)) {
-                        n = Math.min(n1, 64 - inventory.items[4].stackSize);
-                        inventory.items[4].stackSize += n;
-                    } else n = 0;
-                    n1 -= n;
-                    item.getTagCompound().setByte("InOut", (byte)n1);
-                }
-                n2 = item.getTagCompound().getByte("Count") & 0xff;
-                if (n2 > 0) {
-                    if (inventory.items[5] == null) {
-                        n = Math.min(n2, 32);
-                        inventory.items[5] = new ItemStack(Items.QUARTZ, n * 2);
-                    } else if (inventory.items[5].getItem() == Items.QUARTZ) {
-                        n = Math.min(n2, (64 - inventory.items[4].stackSize) / 2);
-                        inventory.items[4].stackSize += n * 2;
-                    } else n = 0;
-                    n2 -= n;
-                    item.getTagCompound().setByte("Count", (byte)n2);
-                }
-                this.slotChange(inventory.items[6], inventory.items[6], 6);
-            } else n0 = n1 = n2 = 0;
-            if (n0 <= 0 && n1 <= 0 && n2 <= 0) {
-                if (inventory.items[2] == null) {
-                    inventory.items[2] = BlockItemRegistry.stack("tile.circuit", 1);
-                    inventory.items[1] = null;
-                } else if (inventory.items[2].stackSize < 64 && inventory.items[2].getItem() == Item.getItemFromBlock(BlockItemRegistry.blockId("circuit"))) {
-                    inventory.items[2].stackSize++;
-                    inventory.items[1] = null;
-                }
-            }
-        }
-    }
+	public Assembler() {
+		inventory = new Inventory(8, 3, this).group(0, 0, 1, -1).group(1, 2, 3, 1).group(2, 3, 7, 0);
+	}
 
-    @Override
-    public void readFromNBT(NBTTagCompound nbt) 
-    {
-        super.readFromNBT(nbt);
-        this.slotChange(null, inventory.items[6], 6);
-    }
+	@Override
+	public void update() {
+		super.update();
+		if (worldObj.isRemote) return;
+		if (inventory.items[1] == null && inventory.items[0] != null && inventory.items[0].getItem() == circuit) inventory.items[1] = inventory.extractItem(0, 1, false);
+		ItemStack item = inventory.items[1];
+		if (item != null) {
+			NBTTagCompound nbt = item.getTagCompound();
+			boolean empty = true;
+			if (nbt != null) {
+				ItemStack stack;
+				int n;
+				for (int i = 0; i < 4; i++)
+					if ((n = nbt.getByte(tagNames[i]) & 0xff) > 0) {
+						n = (stack = inventory.insertItem(3 + i, new ItemStack(compItems[i], n), false)) == null ? 0 : stack.stackSize;
+						nbt.setByte(tagNames[i], (byte)n);
+						empty &= n == 0;
+					}
+			}
+			if (empty) {
+				if (inventory.items[2] == null) {
+					inventory.items[2] = new ItemStack(circuit);
+					inventory.items[1] = null;
+				} else if (inventory.items[2].stackSize < 64 && inventory.items[2].getItem() == circuit) {
+					inventory.items[2].stackSize++;
+					inventory.items[1] = null;
+				}
+			}
+		}
+	}
 
-    @Override
-    public void initContainer(TileContainer container) 
-    {
-        container.addEntitySlot(new Slot(this, 0, 8, 16));
-        container.addEntitySlot(new SlotOutput(this, 2, 8, 52));
-        container.addEntitySlot(new Slot(this, 3, 44, 16));
-        container.addEntitySlot(new Slot(this, 4, 44, 34));
-        container.addEntitySlot(new Slot(this, 5, 44, 52));
-        container.addEntitySlot(new Slot(this, 6, 152, 16));
-        container.addEntitySlot(new SlotOutput(this, 7, 152, 52));
-        container.addPlayerInventory(8, 86);
-    }
+	@Override
+	protected void customPlayerCommand(byte cmd, PacketBuffer dis, EntityPlayerMP player) {
+		if (cmd >= 4 || inventory.items[7] == null || !(inventory.items[7].getItem() == circuit)) return;
+		NBTTagCompound nbt = inventory.items[7].getTagCompound();
+		if (nbt == null) inventory.items[7].setTagCompound(nbt = new NBTTagCompound());
+		int m = nbt.getByte(tagNames[cmd]) & 0xff;
+		int n = Math.min(maxCap[cmd] - m, dis.readByte() & 0xff);
+		if (n <= 0) return;
+		ItemStack item = inventory.extractItem(3 + cmd, n, false);
+		if (item != null) nbt.setByte(tagNames[cmd], (byte)(m + item.stackSize));
+	}
 
-    @Override
-    public int[] stackTransferTarget(ItemStack item, int s, TileContainer container) 
-    {
-        int[] pi = container.getPlayerInv();
-        if (s < pi[0] || s >= pi[1]) return pi;
-        else if (item.getItem() == Items.REDSTONE) return new int[]{2, 3};
-        else if (item.getItem() == Item.getItemFromBlock(Blocks.LEVER)) return new int[]{3, 4};
-        else if (item.getItem() == Items.QUARTZ) return new int[]{4, 5};
-        else if (item.getItem() instanceof ItemCircuit) return new int[]{5, 6};
-        else return null;
-    }
-    
-    @Override
-    public boolean canInsert(ItemStack item, int cmp, int i) 
-    {
-        if (item == null) return true;
-        else if (i == 3) return item.getItem() == Items.REDSTONE;
-        else if (i == 4) return item.getItem() == Item.getItemFromBlock(Blocks.LEVER);
-        else if (i == 5) return item.getItem() == Items.QUARTZ;
-        else return true;
-    }
+	@Override
+	public void initContainer(DataContainer container) {
+		TileContainer c = (TileContainer)container;
+		c.clickHandler = this;
+		c.refInts = new int[4];
+		c.addItemSlot(new SlotItemType(inventory, 0, 8, 16, new ItemStack(circuit, 64)));
+		c.addItemSlot(new SlotItemType(inventory, 2, 8, 52));
+		c.addItemSlot(new SlotItemType(inventory, 3, 62, 16, new ItemStack(compItems[0], 64)));
+		c.addItemSlot(new SlotItemType(inventory, 4, 44, 16, new ItemStack(compItems[1], 64)));
+		c.addItemSlot(new SlotItemType(inventory, 5, 44, 52, new ItemStack(compItems[2], 64)));
+		c.addItemSlot(new SlotItemType(inventory, 6, 62, 52, new ItemStack(compItems[3], 64)));
+		c.addItemSlot(new SlotItemType(inventory, 7, 152, 34, new ItemStack(circuit, 1)));
+		c.addPlayerInventory(8, 86);
+	}
 
-    @Override
-    public boolean canExtract(ItemStack item, int cmp, int i) 
-    {
-        return true;
-    }
+	@Override
+	public int[] getSyncVariables() {
+		if (inventory.items[7] == null || !inventory.items[7].hasTagCompound()) return new int[]{0, 0, 0, 0};
+		NBTTagCompound nbt = inventory.items[7].getTagCompound();
+		int[] ret = new int[4];
+		for (int i = 0; i < ret.length; i++)
+			ret[i] = nbt.getByte(tagNames[i]) & 0xff;
+		return ret;
+	}
 
-    @Override
-    public boolean isValid(ItemStack item, int cmp, int i) 
-    {
-        return true;
-    }
+	@Override
+	public boolean transferStack(ItemStack item, int s, TileContainer container) {
+		if (s < 7) return false;
+		container.mergeItemStack(item, 2, 6, false);
+		return true;
+	}
 
-    @Override
-    public void slotChange(ItemStack oldItem, ItemStack newItem, int i) 
-    {
-        if (i >= 3 && i <= 6) {
-            if (inventory.items[6] != null && inventory.items[6].getItem() instanceof ItemCircuit && inventory.items[6].getTagCompound() != null) {
-                netData.ints[0] = inventory.items[6].getTagCompound().getByte("InOut") & 0xff;
-                netData.ints[1] = inventory.items[6].getTagCompound().getByte("Gates") & 0xff;
-                netData.ints[2] = inventory.items[6].getTagCompound().getByte("Count") & 0xff;
-            } else {
-                netData.ints[0] = 0;//InOut
-                netData.ints[1] = 0;//Gates
-                netData.ints[2] = 0;//Count
-            }
-            netData.ints[0] += this.getInOut(netData.ints[0]);
-            netData.ints[1] += this.getGates(netData.ints[1]);
-            netData.ints[2] += this.getCount(netData.ints[2]);
-        }
-    }
-    
-    private int getInOut(int x)
-    {
-        int n = inventory.items[4] != null && inventory.items[4].getItem() == Item.getItemFromBlock(Blocks.LEVER) ? inventory.items[4].stackSize : 0;
-        if (n + x > 16) n = 16 - x;
-        return n;
-    }
-    
-    private void removeInOut(int n)
-    {
-        this.decrStackSize(4, n);
-    }
-    
-    private int getGates(int x)
-    {
-        int n = inventory.items[3] != null && inventory.items[3].getItem() == Items.REDSTONE ? inventory.items[3].stackSize : 0;
-        if (n + x > 128) n = 128 - x;
-        return n;
-    }
-    
-    private void removeGates(int n)
-    {
-        this.decrStackSize(3, n);
-    }
-    
-    private int getCount(int x)
-    {
-        int n = inventory.items[5] != null && inventory.items[5].getItem() == Items.QUARTZ ? inventory.items[5].stackSize / 2 : 0;
-        if (n + x > 8) n = 8 - x;
-        return n;
-    }
-    
-    private void removeCount(int n)
-    {
-        this.decrStackSize(5, n * 2);
-    }
-    
+	@Override
+	public int insertAm(int g, int s, ItemStack item, ItemStack insert) {
+		if (s >= 2 && s < 6 && insert.getItem() != compItems[s - 2]) return 0;
+		int m = Math.min(insert.getMaxStackSize(), insert.stackSize); 
+		return item == null ? m : item.stackSize < m && ItemHandlerHelper.canItemStacksStack(item, insert) ? m - item.stackSize : 0;
+	}
+
+	@Override
+	public int extractAm(int g, int s, ItemStack item, int extract) {
+		return item == null ? 0 : item.stackSize < extract ? item.stackSize : extract;
+	}
+
+	@Override
+	public void setSlot(int g, int s, ItemStack item) {
+		inventory.items[s] = item;
+	}
+
 }
