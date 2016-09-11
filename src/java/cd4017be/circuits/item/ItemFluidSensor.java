@@ -50,7 +50,7 @@ public class ItemFluidSensor extends DefaultItem implements ISensor, IGuiItem {
 	public void addInformation(ItemStack item, EntityPlayer player, List<String> list, boolean b) {
 		if (item.hasTagCompound()) {
 			String[] states = I18n.translateToLocal("gui.cd4017be.fluidSensor.tip").split(",");
-			boolean inv = item.stackTagCompound.getBoolean("inv");
+			boolean inv = item.getTagCompound().getBoolean("inv");
 			Fluid fluid = this.getFluid(item);
 			if (states.length >= 3) {
 				String s;
@@ -64,11 +64,11 @@ public class ItemFluidSensor extends DefaultItem implements ISensor, IGuiItem {
 
 	@Override
 	public float measure(ItemStack sensor, World world, BlockPos pos, EnumFacing side) {
-		if (!world.isBlockLoaded(pos) || sensor.stackTagCompound == null) return 0F;
+		if (!world.isBlockLoaded(pos) || !sensor.hasTagCompound()) return 0F;
 		IFluidHandler acc = FluidUtil.getFluidHandler(world, pos, side);
 		if (acc == null) return 0F;
 		Fluid filter = this.getFluid(sensor);
-		boolean inv = sensor.stackTagCompound.getBoolean("inv");
+		boolean inv = sensor.getTagCompound().getBoolean("inv");
 		int n = 0;
 		for (IFluidTankProperties prop : acc.getTankProperties()) {
 			FluidStack fluid = prop.getContents();
@@ -79,7 +79,7 @@ public class ItemFluidSensor extends DefaultItem implements ISensor, IGuiItem {
 	}
 
 	private Fluid getFluid(ItemStack inv) {
-		return inv.stackTagCompound != null ? FluidRegistry.getFluid(inv.stackTagCompound.getString("type")) : null;
+		return inv.hasTagCompound() ? FluidRegistry.getFluid(inv.getTagCompound().getString("type")) : null;
 	}
 
 	@Override
@@ -94,10 +94,10 @@ public class ItemFluidSensor extends DefaultItem implements ISensor, IGuiItem {
 
 	@Override
 	public void onPlayerCommand(ItemStack item, EntityPlayer player, PacketBuffer data) {
-		if (item.stackTagCompound == null) item.stackTagCompound = new NBTTagCompound();
+		if (!item.hasTagCompound()) item.setTagCompound(new NBTTagCompound());
 		byte cmd = data.readByte();
-		if (cmd == 0) item.stackTagCompound.setBoolean("inv", !item.stackTagCompound.getBoolean("inv"));
-		else if (cmd == 1) item.stackTagCompound.setString("type", data.readStringFromBuffer(32));
+		if (cmd == 0) item.getTagCompound().setBoolean("inv", !item.getTagCompound().getBoolean("inv"));
+		else if (cmd == 1) item.getTagCompound().setString("type", data.readStringFromBuffer(32));
 	}
 
 	class GuiData extends ItemGuiData implements ITankContainer {

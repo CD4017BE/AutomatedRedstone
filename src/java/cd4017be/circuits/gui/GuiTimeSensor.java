@@ -45,7 +45,7 @@ public class GuiTimeSensor extends GuiMachine {
 	}
 
 	private NBTTagCompound getTag() {
-		NBTTagCompound nbt = inv.mainInventory[inv.currentItem] != null ? inv.mainInventory[inv.currentItem].stackTagCompound : null;
+		NBTTagCompound nbt = inv.mainInventory[inv.currentItem] != null ? inv.mainInventory[inv.currentItem].getTagCompound() : null;
 		return nbt != null ? nbt : new NBTTagCompound();
 	}
 
@@ -108,7 +108,7 @@ public class GuiTimeSensor extends GuiMachine {
 	@Override
 	protected void setDisplVar(int id, Object obj, boolean send) {
 		NBTTagCompound nbt = this.getTag();
-		PacketBuffer dos = BlockGuiHandler.getPacketTargetData(((DataContainer)inventorySlots).data.getPos());
+		PacketBuffer dos = BlockGuiHandler.getPacketTargetData(((DataContainer)inventorySlots).data.pos());
 		switch(id) {
 		case 0: dos.writeByte(1).writeByte((nbt.getByte("mode") + ((Integer)obj == 0 ? 1 : 3)) % 4); break;
 		case 1: dos.writeByte(0).writeByte((nbt.getByte("src") + ((Integer)obj == 0 ? 1 : 2)) % 3); break;

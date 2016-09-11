@@ -4,3 +4,4 @@
 #Build directories
 /build
 /bin
+/.gradle

@@ -21,7 +21,7 @@ import static cd4017be.circuits.Objects.*;
  *
  * @author CD4017BE
  */
-@Mod(modid="Circuits", dependencies= "required-after:CD4017BE_lib", useMetadata = true)
+@Mod(modid="Circuits", useMetadata = true)
 public class RedstoneCircuits {
 
 	@Instance("Circuits")

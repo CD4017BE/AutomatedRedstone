@@ -40,7 +40,7 @@ public class GuiFluidSensor extends GuiMachine {
 	@Override
 	protected void mouseClicked(int x, int y, int b) throws IOException {
 		if (this.isPointInRegion(62, 16, 16, 16, x, y)) {
-			PacketBuffer dos = BlockGuiHandler.getPacketTargetData(((TileContainer)inventorySlots).data.getPos());
+			PacketBuffer dos = BlockGuiHandler.getPacketTargetData(((TileContainer)inventorySlots).data.pos());
 			FluidStack fluid = FluidUtil.getFluidContained(inv.getItemStack());
 			dos.writeByte(1);
 			dos.writeString(fluid != null ? fluid.getFluid().getName() : "");
@@ -51,12 +51,12 @@ public class GuiFluidSensor extends GuiMachine {
 	@Override
 	protected Object getDisplVar(int id) {
 		ItemStack item = inv.mainInventory[inv.currentItem];
-		return item != null && item.stackTagCompound != null && item.stackTagCompound.getBoolean("inv") ? 1 : 0;
+		return item != null && item.hasTagCompound() && item.getTagCompound().getBoolean("inv") ? 1 : 0;
 	}
 
 	@Override
 	protected void setDisplVar(int id, Object obj, boolean send) {
-		PacketBuffer dos = BlockGuiHandler.getPacketTargetData(((TileContainer)inventorySlots).data.getPos());
+		PacketBuffer dos = BlockGuiHandler.getPacketTargetData(((TileContainer)inventorySlots).data.pos());
 		dos.writeByte(0);
 		BlockGuiHandler.sendPacketToServer(dos);
 	}

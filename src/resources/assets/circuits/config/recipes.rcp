@@ -1,3 +1,4 @@
+#V:00010
 @PRE_INIT
 add("item", 1, "emptySensor");
 

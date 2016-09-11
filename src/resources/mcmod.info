@@ -3,16 +3,18 @@
   "modid": "Circuits",
   "name": "Automated Redstone",
   "description": "Better redstone cables and programmable circuits",
-  "version": "4.1.0",
-  "acceptableRemoteVersions": "[4.1.0,4.2.0)",
-  "acceptableSaveVersions": "[3.0.0,4.2.0)",
-  "acceptedMinecraftVersions": "1.9.4",
+  "version": "4.2.0",
+  "acceptableRemoteVersions": "[4.2.0,4.3.0)",
+  "acceptableSaveVersions": "[4.2.0,4.3.0)",
+  "acceptedMinecraftVersions": "[1.9.4,1.11)",
   "url": "https://github.com/CD4017BE/AutomatedRedstone",
   "updateUrl": "https://github.com/CD4017BE/AutomatedRedstone/releases",
   "authorList": ["CD4017BE"],
   "credits": "Chinese translation by Glease",
   "logoFile": "",
   "screenshots": [],
-  "dependencies": []
+  "useDependencyInformation": true,
+  "requiredMods": ["CD4017BE_lib@[4.3.0,4.4.0)"],
+  "dependencies": ["CD4017BE_lib@[4.3.0,4.4.0)"]
 }
 ]
