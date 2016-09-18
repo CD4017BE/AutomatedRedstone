@@ -22,6 +22,8 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import cd4017be.api.circuits.ISensor;
 import cd4017be.circuits.gui.GuiFluidSensor;
 import cd4017be.lib.BlockGuiHandler;
@@ -88,6 +90,7 @@ public class ItemFluidSensor extends DefaultItem implements ISensor, IGuiItem {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public GuiContainer getGui(World world, EntityPlayer player, int x, int y, int z) {
 		return new GuiFluidSensor(new TileContainer(new GuiData(), player));
 	}

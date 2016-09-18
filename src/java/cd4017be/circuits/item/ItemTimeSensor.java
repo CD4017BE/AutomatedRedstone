@@ -12,6 +12,8 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import cd4017be.api.circuits.ISensor;
 import cd4017be.circuits.gui.GuiTimeSensor;
 import cd4017be.lib.BlockGuiHandler;
@@ -63,6 +65,7 @@ public class ItemTimeSensor extends DefaultItem implements ISensor, IGuiItem {
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public GuiContainer getGui(World world, EntityPlayer player, int x, int y, int z) {
 		return new GuiTimeSensor(new DataContainer(new ItemGuiData(this), player));
 	}

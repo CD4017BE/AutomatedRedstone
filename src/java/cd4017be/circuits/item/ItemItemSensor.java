@@ -19,6 +19,8 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import cd4017be.api.circuits.ISensor;
@@ -108,6 +110,7 @@ public class ItemItemSensor extends DefaultItem implements ISensor, IGuiItem, II
 	}
 
 	@Override
+	@SideOnly(Side.CLIENT)
 	public GuiContainer getGui(World world, EntityPlayer player, int x, int y, int z) {
 		return new GuiItemSensor(new TileContainer(new GuiData(), player));
 	}
