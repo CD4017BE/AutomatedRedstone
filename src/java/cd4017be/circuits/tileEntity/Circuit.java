@@ -2,8 +2,14 @@ package cd4017be.circuits.tileEntity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
+import li.cil.oc.api.network.Environment;
+import li.cil.oc.api.network.Message;
+import li.cil.oc.api.network.Node;
 import cd4017be.api.circuits.IDirectionalRedstone;
+import cd4017be.api.computers.ComputerAPI;
 import cd4017be.lib.ModTileEntity;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
@@ -17,12 +23,14 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraftforge.fml.common.Optional;
 
 /**
  *
  * @author CD4017BE
  */
-public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGuiData, ITickable {
+@Optional.Interface(modid = "OpenComputers", iface = "li.cil.oc.api.network.Environment")
+public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGuiData, ITickable, Environment {
 
 	public static final byte 
 		C_NULL = 0x00,	//empty gates
@@ -62,6 +70,7 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 	@Override
 	public void update() {
 		if (worldObj.isRemote) return;
+		if (node != null) ComputerAPI.update(this, node, 0);
 		if ((cfgI & 1L<<60) != 0) timer++;
 		if (timer >= tickInt && ram.length > 0) {
 			timer = 0;
@@ -228,6 +237,7 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 		nbt.setLong("cfgE", cfgE);
 		nbt.setShort("timer", timer);
 		nbt.setIntArray("out", output);
+		if (node != null) ComputerAPI.saveNode(node, nbt);
 		return super.writeToNBT(nbt);
 	}
 
@@ -247,6 +257,7 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 		cfgI = nbt.getLong("cfgI");
 		cfgE = nbt.getLong("cfgE");
 		update = true;
+		if (node != null) ComputerAPI.readNode(node, nbt);
 	}
 
 	@Override
@@ -351,6 +362,86 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 	@Override
 	public byte getRSDirection(EnumFacing s) {
 		return (byte)getDir(s.ordinal());
+	}
+
+	//---------------- OpenComputers integration ----------------//
+
+	Object node = ComputerAPI.newOCnode(this, "circuit", false);
+
+	@Override
+	public void invalidate() {
+		super.invalidate();
+		ComputerAPI.removeOCnode(node);
+	}
+
+	@Override
+	public void onChunkUnload() {
+		super.onChunkUnload();
+		ComputerAPI.removeOCnode(node);
+	}
+
+	@Override
+	public Node node() {
+		return (Node)node;
+	}
+
+	@Override
+	public void onConnect(Node node) {}
+
+	@Override
+	public void onDisconnect(Node node) {}
+
+	@Override
+	public void onMessage(Message message) {}
+
+	@Optional.Method(modid = "OpenComputers")
+	@Callback(doc = "" , direct = true)
+	public Object[] getBytes(Context cont, Arguments args) throws Exception {
+		return new Object[]{ram};
+	}
+
+	@Optional.Method(modid = "OpenComputers")
+	@Callback(doc = "" , direct = true)
+	public Object[] setBytes(Context cont, Arguments args) throws Exception {
+		byte[] data = args.checkByteArray(0);
+		int ofs = args.optInteger(2, 0);
+		int size = Math.min(data.length, ram.length - ofs);
+		if (size > 0) System.arraycopy(data, 0, ram, ofs, size);
+		return null;
+	}
+
+	@Optional.Method(modid = "OpenComputers")
+	@Callback(doc = "" , direct = true)
+	public Object[] getBit(Context cont, Arguments args) throws Exception {
+		int p = args.checkInteger(0);
+		return new Object[]{p >= 0 && p < ram.length * 8 && (ram[p >> 3] >> (p & 7) & 1) != 0};
+	}
+
+	@Optional.Method(modid = "OpenComputers")
+	@Callback(doc = "" , direct = true)
+	public Object[] setBit(Context cont, Arguments args) throws Exception {
+		int p = args.checkInteger(0);
+		if (p >= 0 && p < ram.length * 8) {
+			if (args.checkBoolean(1)) ram[p >> 3] |= 1 << (p & 7);
+			else ram[p >> 3] &= ~(1 << (p & 7));
+		}
+		return null;
+	}
+
+	@Optional.Method(modid = "OpenComputers")
+	@Callback(doc = "" , direct = true)
+	public Object[] getInt(Context cont, Arguments args) throws Exception {
+		int pos = args.optInteger(0, 0), size = args.optInteger(1, 32);
+		return new Object[]{this.readInt(pos, size)};
+	}
+
+	@Optional.Method(modid = "OpenComputers")
+	@Callback(doc = "" , direct = true)
+	public Object[] setInt(Context cont, Arguments args) throws Exception {
+		int val = args.checkInteger(0);
+		int pos = args.optInteger(1, 0), size = args.optInteger(2, 32);
+		this.writeInt(pos, size, val);
+		return null;
 	}
 
 }

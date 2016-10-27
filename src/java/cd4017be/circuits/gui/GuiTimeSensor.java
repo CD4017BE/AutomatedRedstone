@@ -6,7 +6,6 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.translation.I18n;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.GuiMachine;
@@ -37,7 +36,6 @@ public class GuiTimeSensor extends GuiMachine {
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
 		super.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY);
-		this.drawStringCentered(I18n.translateToLocal("gui.cd4017be.timeSensor.name"), guiLeft + xSize / 2, guiTop + 4, 0xff404040);
 		NBTTagCompound nbt = this.getTag();
 		this.drawLocString(guiLeft + 26, guiTop + 16, 8, 0xff000080, "timeSensor.src" + nbt.getByte("src"));
 		this.drawLocString(guiLeft + 8, guiTop + 34, 8, 0xff404040, "timeSensor.ref");

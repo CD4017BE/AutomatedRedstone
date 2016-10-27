@@ -26,6 +26,7 @@ import net.minecraft.util.ITickable;
 public class RSPipe1 extends ModTileEntity implements IDirectionalRedstone, IPipe, ITickable {
 	private byte state;
 	private boolean update = false;
+	/** bits[0-13 (6+1)*2]: (side + total) * dir{0:none, 1:in, 2:out, 3:lock} */
 	private short flow;
 	private boolean updateCon = true;
 	private Cover cover = null;

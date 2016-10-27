@@ -36,6 +36,7 @@ public class GuiProgrammer extends GuiMachine {
 		this.xSize = 176;
 		this.ySize = 207;
 		super.initGui();
+		this.titleX = xSize / 4;
 		for (int i = 0; i < 8; i++) 
 			guiComps.add(new TextField(i, 36, 25 + i * 8, 96, 8, 32).color(0xffc0c0c0, 0xffff0000));
 		for (int i = 0; i < 8; i++)
@@ -67,7 +68,6 @@ public class GuiProgrammer extends GuiMachine {
 		else this.drawTexturedModalRect(guiLeft + 7, guiTop + 25 + 2 * selByte, 239, 0, 17, 1);
 		for (int i = 0; i < 8; i++)
 			fontRendererObj.drawString(String.format("%02X", i + selByte * 8), guiLeft + 24, guiTop + 25 + i * 8, 0xffffff40);
-		fontRendererObj.drawString(tile.getName(), this.guiLeft + 8, this.guiTop + 4, 0x404040);
 		String[] s = I18n.translateToLocal("gui.cd4017be.program.head").split("\\\\n");
 		if (s.length > 0) fontRendererObj.drawString(s[0], guiLeft + 8, guiTop + 16, 0x404040);
 		if (s.length > 1) fontRendererObj.drawString(s[1], guiLeft + 88 - fontRendererObj.getStringWidth(s[1]) / 2, guiTop + 16, 0x404040);

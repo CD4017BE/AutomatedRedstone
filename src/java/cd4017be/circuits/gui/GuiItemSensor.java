@@ -4,7 +4,6 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.translation.I18n;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.Gui.GuiMachine;
 import cd4017be.lib.Gui.TileContainer;
@@ -28,12 +27,6 @@ public class GuiItemSensor extends GuiMachine {
 		guiComps.add(new Button(1, 97, 15, 18, 9, 0).texture(194, 0).setTooltip("itemSensor.meta"));
 		guiComps.add(new Button(2, 97, 24, 18, 9, 0).texture(194, 18).setTooltip("itemSensor.nbt"));
 		guiComps.add(new Button(3, 115, 15, 18, 18, 0).texture(212, 0).setTooltip("itemSensor.ore"));
-	}
-
-	@Override
-	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-		super.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY);
-		this.drawStringCentered(I18n.translateToLocal("gui.cd4017be.itemSensor.name"), guiLeft + xSize / 2, guiTop + 4, 0xff404040);
 	}
 
 	@Override

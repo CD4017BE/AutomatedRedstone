@@ -65,7 +65,6 @@ public class GuiCircuit extends GuiMachine {
 			}
 			this.drawSideCube(guiLeft - 64, guiTop + 7, s, (byte)dir);
 		}
-		this.drawStringCentered(tile.getName(), this.guiLeft + this.xSize / 2, this.guiTop + 4, 0x404040);
 		this.drawStringCentered(String.format("%.2f", (float)tile.tickInt / 20F).concat("s"), this.guiLeft + 83, this.guiTop + 20, 0x404040);
 		this.drawStringCentered(TooltipInfo.format("gui.cd4017be.circuit.io", tile.usedIO(), tile.var & 0xff), guiLeft + xSize / 2, guiTop + ySize + 4, 0xff4040);
 	}

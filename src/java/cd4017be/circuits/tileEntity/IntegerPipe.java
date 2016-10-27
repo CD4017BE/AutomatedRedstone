@@ -68,12 +68,10 @@ public class IntegerPipe extends MutiblockTile<IntegerComp, SharedInteger> imple
 			if (player.isSneaking()) {
 				boolean con = !comp.canConnect(s);
 				comp.setConnect(s, con);
-				this.updateCon = true;
 				ICapabilityProvider te = this.getTileOnSide(dir);
 				if (te != null && te instanceof IntegerPipe) {
 					IntegerPipe pipe = (IntegerPipe)te;
 					pipe.comp.setConnect((byte)(s^1), con);
-					pipe.updateCon = true;
 					pipe.markUpdate();
 				}
 			} else {

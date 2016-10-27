@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package cd4017be.circuits.gui;
 
 import net.minecraft.entity.player.EntityPlayer;
@@ -51,7 +45,6 @@ public class GuiAssembler extends GuiMachine {
 		this.drawStringCentered(TooltipInfo.format("gui.cd4017be.assembler.comp1", cont.refInts[1]), this.guiLeft + 124, this.guiTop + 33, 0x408040);
 		this.drawStringCentered(TooltipInfo.format("gui.cd4017be.assembler.comp2", cont.refInts[2]), this.guiLeft + 124, this.guiTop + 43, 0x408040);
 		this.drawStringCentered(TooltipInfo.format("gui.cd4017be.assembler.comp3", cont.refInts[3]), this.guiLeft + 124, this.guiTop + 51, 0x408040);
-		this.drawStringCentered(tileEntity.getName(), this.guiLeft + this.xSize / 2, this.guiTop + 4, 0x404040);
 	}
 
 	@Override

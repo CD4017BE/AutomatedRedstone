@@ -47,7 +47,7 @@ public class ItemItemSensor extends DefaultItem implements ISensor, IGuiItem, II
 		if (item.hasTagCompound()) {
 			String[] states = I18n.translateToLocal("gui.cd4017be.itemSensor.tip").split(",");
 			byte mode = item.getTagCompound().getByte("mode");
-			ItemStack stack = this.getStack(item, 0);
+			ItemStack stack = this.loadInventory(item, player)[0];
 			if (states.length >= 6) {
 				String s;
 				if (stack == null) s = states[mode & 1];
@@ -76,7 +76,7 @@ public class ItemItemSensor extends DefaultItem implements ISensor, IGuiItem, II
 		if (!sensor.hasTagCompound() || !world.isBlockLoaded(pos)) return 0F;
 		TileEntity te =  world.getTileEntity(pos);
 		IItemHandler acc = te != null ? te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, side) : null;
-		ItemStack filter = this.getStack(sensor, 0);
+		ItemStack filter = this.loadInventory(sensor, null)[0];
 		int mode = sensor.getTagCompound().getByte("mode");
 		boolean inv = (mode & 1) != 0;
 		ItemStack item;
@@ -121,23 +121,6 @@ public class ItemItemSensor extends DefaultItem implements ISensor, IGuiItem, II
 		item.getTagCompound().setByte("mode", data.readByte());
 	}
 
-	@Override
-	public int getSlots(ItemStack inv) {
-		return 1;
-	}
-
-	@Override
-	public ItemStack getStack(ItemStack inv, int slot) {
-		return inv.hasTagCompound() && inv.getTagCompound().hasKey("type", 10) ? ItemStack.loadItemStackFromNBT(inv.getTagCompound().getCompoundTag("type")) : null;
-	}
-
-	@Override
-	public void setStack(ItemStack inv, int slot, ItemStack stack) {
-		if (!inv.hasTagCompound()) inv.setTagCompound(new NBTTagCompound());
-		if (stack == null) inv.getTagCompound().removeTag("type");
-		else inv.getTagCompound().setTag("type", stack.writeToNBT(new NBTTagCompound()));
-	}
-
 	class GuiData extends ItemGuiData {
 
 		public GuiData() {super(ItemItemSensor.this);}
@@ -150,6 +133,20 @@ public class ItemItemSensor extends DefaultItem implements ISensor, IGuiItem, II
 			cont.addPlayerInventory(8, 50, false, true);
 		}
 
+	}
+
+	@Override
+	public ItemStack[] loadInventory(ItemStack inv, EntityPlayer player) {
+		ItemStack[] items = new ItemStack[1];
+		if (inv.hasTagCompound() && inv.getTagCompound().hasKey("type", 10)) items[0] = ItemStack.loadItemStackFromNBT(inv.getTagCompound().getCompoundTag("type"));
+		return items;
+	}
+
+	@Override
+	public void saveInventory(ItemStack inv, EntityPlayer player, ItemStack[] items) {
+		if (!inv.hasTagCompound()) inv.setTagCompound(new NBTTagCompound());
+		if (items[0] == null) inv.getTagCompound().removeTag("type");
+		else inv.getTagCompound().setTag("type", items[0].writeToNBT(new NBTTagCompound()));
 	}
 
 }

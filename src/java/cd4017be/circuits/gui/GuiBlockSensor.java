@@ -47,7 +47,6 @@ public class GuiBlockSensor extends GuiMachine {
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
 		super.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY);
-		this.drawStringCentered(tile.getName(), this.guiLeft + this.xSize / 2, this.guiTop + 4, 0x404040);
 		this.drawStringCentered(String.format("%.2f", (float)tile.tickInt / 20F).concat("s"), this.guiLeft + 25, this.guiTop + 110, 0x404040);
 		this.drawLocString(guiLeft + 7, guiTop + 88, 8, 0x404040, "sensor.timer");
 	}

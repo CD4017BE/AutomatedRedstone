@@ -33,12 +33,6 @@ public class GuiDisplay8bit extends GuiMachine {
 	}
 
 	@Override
-	protected void drawGuiContainerBackgroundLayer(float var1, int var2, int var3) {
-		super.drawGuiContainerBackgroundLayer(var1, var2, var3);
-		this.drawStringCentered(tile.getName(), this.guiLeft + this.xSize / 2, this.guiTop + 4, 0x404040);
-	}
-
-	@Override
 	protected Object getDisplVar(int id) {
 		switch(id) {
 		case 0: return Integer.toString(tile.dspType >> 2 & 0x1f);

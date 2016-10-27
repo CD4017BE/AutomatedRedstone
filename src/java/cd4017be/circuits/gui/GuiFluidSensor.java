@@ -6,7 +6,6 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
 import cd4017be.lib.BlockGuiHandler;
@@ -29,12 +28,6 @@ public class GuiFluidSensor extends GuiMachine {
 		this.ySize = 132;
 		super.initGui();
 		guiComps.add(new Button(1, 97, 15, 18, 18, 0).texture(176, 0).setTooltip("itemSensor.neg"));
-	}
-
-	@Override
-	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-		super.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY);
-		this.drawStringCentered(I18n.translateToLocal("gui.cd4017be.fluidSensor.name"), guiLeft + xSize / 2, guiTop + 4, 0xff404040);
 	}
 
 	@Override
