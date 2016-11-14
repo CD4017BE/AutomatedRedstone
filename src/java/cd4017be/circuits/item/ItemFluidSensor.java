@@ -24,10 +24,9 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidTankProperties;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import cd4017be.api.circuits.ISensor;
+import cd4017be.api.circuits.ItemBlockSensor;
 import cd4017be.circuits.gui.GuiFluidSensor;
 import cd4017be.lib.BlockGuiHandler;
-import cd4017be.lib.DefaultItem;
 import cd4017be.lib.IGuiItem;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.ItemGuiData;
@@ -35,10 +34,10 @@ import cd4017be.lib.Gui.TileContainer;
 import cd4017be.lib.Gui.TileContainer.TankSlot;
 import cd4017be.lib.templates.ITankContainer;
 
-public class ItemFluidSensor extends DefaultItem implements ISensor, IGuiItem {
+public class ItemFluidSensor extends ItemBlockSensor implements IGuiItem {
 
 	public ItemFluidSensor(String id) {
-		super(id);
+		super(id, 20F);
 	}
 
 	@Override
@@ -62,22 +61,6 @@ public class ItemFluidSensor extends DefaultItem implements ISensor, IGuiItem {
 			}
 		}
 		super.addInformation(item, player, list, b);
-	}
-
-	@Override
-	public float measure(ItemStack sensor, World world, BlockPos pos, EnumFacing side) {
-		if (!world.isBlockLoaded(pos) || !sensor.hasTagCompound()) return 0F;
-		IFluidHandler acc = FluidUtil.getFluidHandler(world, pos, side);
-		if (acc == null) return 0F;
-		Fluid filter = this.getFluid(sensor);
-		boolean inv = sensor.getTagCompound().getBoolean("inv");
-		int n = 0;
-		for (IFluidTankProperties prop : acc.getTankProperties()) {
-			FluidStack fluid = prop.getContents();
-			if (!inv && filter == null) n += prop.getCapacity() - (fluid != null ? fluid.amount : 0);
-			else if (fluid != null && (inv ^ fluid.getFluid() == filter)) n += fluid.amount;
-		}
-		return n;
 	}
 
 	private Fluid getFluid(ItemStack inv) {
@@ -133,4 +116,20 @@ public class ItemFluidSensor extends DefaultItem implements ISensor, IGuiItem {
 		public void setTank(int i, FluidStack fluid) {}
 
 	}
+
+	@Override
+	protected float measure(ItemStack sensor, NBTTagCompound nbt, World world, BlockPos pos, EnumFacing side) {
+		IFluidHandler acc = FluidUtil.getFluidHandler(world, pos, side);
+		if (acc == null) return 0F;
+		Fluid filter = this.getFluid(sensor);
+		boolean inv = nbt.getBoolean("inv");
+		int n = 0;
+		for (IFluidTankProperties prop : acc.getTankProperties()) {
+			FluidStack fluid = prop.getContents();
+			if (!inv && filter == null) n += prop.getCapacity() - (fluid != null ? fluid.amount : 0);
+			else if (fluid != null && (inv ^ fluid.getFluid() == filter)) n += fluid.amount;
+		}
+		return n;
+	}
+
 }

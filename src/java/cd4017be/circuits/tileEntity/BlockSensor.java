@@ -21,7 +21,6 @@ import cd4017be.lib.templates.Inventory;
 public class BlockSensor extends AutomatedTile implements IDirectionalRedstone, IGuiData {
 
 	private static final float[] DefTransf = {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0};
-	public int input, access;
 	public int tickInt = 20;
 	private short timer = 0;
 	public final float[] transf = Arrays.copyOf(DefTransf, 12);
@@ -39,8 +38,7 @@ public class BlockSensor extends AutomatedTile implements IDirectionalRedstone, 
 			ItemStack item;
 			int nstate;
 			if ((item = inventory.items[i]) != null && item.getItem() instanceof ISensor) 
-				nstate = (int)Math.floor(((ISensor)item.getItem()).measure(item, worldObj, pos.offset(getSide(input, i)), getSide(access, i))
-						* transf[i * 2] + transf[i * 2 + 1]);
+				nstate = (int)Math.floor(((ISensor)item.getItem()).measure(item, worldObj, pos) * transf[i * 2] + transf[i * 2 + 1]);
 			else nstate = 0;
 			if (output[i] != nstate) {
 				output[i] = nstate;
@@ -57,9 +55,7 @@ public class BlockSensor extends AutomatedTile implements IDirectionalRedstone, 
 		timer = nbt.getShort("timer");
 		int[] arr = nbt.getIntArray("cfg");
 		for (int i = 0; i < 12; i++) transf[i] = arr.length > i ? Float.intBitsToFloat(arr[i]) : DefTransf[i];
-		input = arr.length > 12 ? arr[12] : 0;
-		access = arr.length > 13 ? arr[13] : 0;
-		tickInt = arr.length > 14 ? arr[14] : 1;
+		tickInt = arr.length > 12 ? arr[12] : 1;
 	}
 
 	@Override
@@ -73,8 +69,6 @@ public class BlockSensor extends AutomatedTile implements IDirectionalRedstone, 
 	@Override
 	protected void customPlayerCommand(byte cmd, PacketBuffer dis, EntityPlayerMP player) throws IOException {
 		if (cmd < 12) transf[cmd] = dis.readFloat();
-		else if (cmd == 12) input = dis.readInt();
-		else if (cmd == 13) access = dis.readInt();
 		else if (cmd == 14) {
 			tickInt = dis.readInt();
 			if (tickInt < 1) tickInt = 1;
@@ -94,29 +88,24 @@ public class BlockSensor extends AutomatedTile implements IDirectionalRedstone, 
 
 	@Override
 	public void initContainer(DataContainer container) {
-		container.refInts = new int[15];
 		TileContainer cont = (TileContainer)container;
 		for (int i = 0; i < 6; i++)
-			cont.addItemSlot(new SlotItemHandler(inventory, i, 62, 16 + 18 * i));
+			cont.addItemSlot(new SlotItemHandler(inventory, i, 44, 16 + 18 * i));
 		cont.addPlayerInventory(8, 140);
 	}
 
 	@Override
 	public int[] getSyncVariables() {
-		int[] arr = new int[15];
+		int[] arr = new int[13];
 		for (int i = 0; i < 12; i++) arr[i] = Float.floatToIntBits(transf[i]);
-		arr[12] = input;
-		arr[13] = access;
-		arr[14] = tickInt;
+		arr[12] = tickInt;
 		return arr;
 	}
 
 	@Override
 	public void setSyncVariable(int i, int v) {
 		if (i < 12) transf[i] = Float.intBitsToFloat(v);
-		else if (i == 12) input = v;
-		else if (i == 13) access = v;
-		else if (i == 14) tickInt = v;
+		else if (i == 12) tickInt = v;
 	}
 
 }

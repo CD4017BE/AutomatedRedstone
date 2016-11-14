@@ -1,7 +1,6 @@
 package cd4017be.circuits.item;
 
 import java.util.List;
-
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.entity.item.EntityItem;
@@ -23,10 +22,9 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
-import cd4017be.api.circuits.ISensor;
+import cd4017be.api.circuits.ItemBlockSensor;
 import cd4017be.circuits.gui.GuiItemSensor;
 import cd4017be.lib.BlockGuiHandler;
-import cd4017be.lib.DefaultItem;
 import cd4017be.lib.IGuiItem;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.ItemGuiData;
@@ -36,10 +34,10 @@ import cd4017be.lib.templates.InventoryItem;
 import cd4017be.lib.templates.InventoryItem.IItemInventory;
 import cd4017be.lib.util.Utils.ItemType;
 
-public class ItemItemSensor extends DefaultItem implements ISensor, IGuiItem, IItemInventory {
+public class ItemItemSensor extends ItemBlockSensor implements IGuiItem, IItemInventory {
 
 	public ItemItemSensor(String id) {
-		super(id);
+		super(id, 20F);
 	}
 
 	@Override
@@ -69,39 +67,6 @@ public class ItemItemSensor extends DefaultItem implements ISensor, IGuiItem, II
 		if (hand != EnumHand.MAIN_HAND) return new ActionResult<ItemStack>(EnumActionResult.PASS, item);
 		BlockGuiHandler.openItemGui(player, world, 0, -1, 0);
 		return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, item);
-	}
-
-	@Override
-	public float measure(ItemStack sensor, World world, BlockPos pos, EnumFacing side) {
-		if (!sensor.hasTagCompound() || !world.isBlockLoaded(pos)) return 0F;
-		TileEntity te =  world.getTileEntity(pos);
-		IItemHandler acc = te != null ? te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, side) : null;
-		ItemStack filter = this.loadInventory(sensor, null)[0];
-		int mode = sensor.getTagCompound().getByte("mode");
-		boolean inv = (mode & 1) != 0;
-		ItemStack item;
-		int n = 0;
-		if (acc == null) {
-			if (filter == null && !inv) return 0F;
-			ItemType type = filter == null ? null : new ItemType((mode & 2) != 0, (mode & 4) != 0, (mode & 8) != 0, filter);
-			for (EntityItem e : world.getEntitiesWithinAABB(EntityItem.class, new AxisAlignedBB(pos))) {
-				item = e.getEntityItem();
-				if (type == null || (inv ^ type.matches(item))) n += item.stackSize;
-			}
-			IBlockState state = world.getBlockState(pos);
-			for (ItemStack it : state.getBlock().getDrops(world, pos, state, 0))
-				if (type == null || (inv ^ type.matches(it))) n += it.stackSize;
-		} else if (filter == null) {
-			for (int i = 0; i < acc.getSlots(); i++)
-				if ((item = acc.getStackInSlot(i)) == null ^ inv)
-					n += inv ? item.stackSize : 1;
-		} else {
-			ItemType type = new ItemType((mode & 2) != 0, (mode & 4) != 0, (mode & 8) != 0, filter);
-			for (int i = 0; i < acc.getSlots(); i++) 
-				if ((item = acc.getStackInSlot(i)) != null && (type.matches(item) ^ inv))
-					n += item.stackSize;
-		}
-		return n;
 	}
 
 	@Override
@@ -147,6 +112,38 @@ public class ItemItemSensor extends DefaultItem implements ISensor, IGuiItem, II
 		if (!inv.hasTagCompound()) inv.setTagCompound(new NBTTagCompound());
 		if (items[0] == null) inv.getTagCompound().removeTag("type");
 		else inv.getTagCompound().setTag("type", items[0].writeToNBT(new NBTTagCompound()));
+	}
+
+	@Override
+	protected float measure(ItemStack sensor, NBTTagCompound nbt, World world, BlockPos pos, EnumFacing side) {
+		int mode = nbt.getByte("mode");
+		TileEntity te =  world.getTileEntity(pos);
+		IItemHandler acc = te != null ? te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, side) : null;
+		ItemStack filter = loadInventory(sensor, null)[0];
+		boolean inv = (mode & 1) != 0;
+		ItemStack item;
+		int n = 0;
+		if (acc == null) {
+			if (filter == null && !inv) return 0F;
+			ItemType type = filter == null ? null : new ItemType((mode & 2) != 0, (mode & 4) != 0, (mode & 8) != 0, filter);
+			for (EntityItem e : world.getEntitiesWithinAABB(EntityItem.class, new AxisAlignedBB(pos))) {
+				item = e.getEntityItem();
+				if (type == null || (inv ^ type.matches(item))) n += item.stackSize;
+			}
+			IBlockState state = world.getBlockState(pos);
+			for (ItemStack it : state.getBlock().getDrops(world, pos, state, 0))
+				if (type == null || (inv ^ type.matches(it))) n += it.stackSize;
+		} else if (filter == null) {
+			for (int i = 0; i < acc.getSlots(); i++)
+				if ((item = acc.getStackInSlot(i)) == null ^ inv)
+					n += inv ? item.stackSize : 1;
+		} else {
+			ItemType type = new ItemType((mode & 2) != 0, (mode & 4) != 0, (mode & 8) != 0, filter);
+			for (int i = 0; i < acc.getSlots(); i++) 
+				if ((item = acc.getStackInSlot(i)) != null && (type.matches(item) ^ inv))
+					n += item.stackSize;
+		}
+		return n;
 	}
 
 }

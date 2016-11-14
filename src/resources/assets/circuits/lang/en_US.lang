@@ -9,7 +9,7 @@ tile.cd4017be.rsp1bit:1.name=Redstone Receiver Wire
 tile.cd4017be.rsp1bit:2.name=Redstone Emitter Wire
 tile.cd4017be.lever8bit.name=8-bit Lever
 tile.cd4017be.display8bit.name=Signal LED-Display
-tile.cd4017be.blockSensor.name=Universal Block Sensor
+tile.cd4017be.blockSensor.name=Sensor Module Container
 tile.cd4017be.invConnector.name=Remote Block Connector
 // tooltips
 tile.cd4017be.programmer.tip=Used to programm the actual\ncircuitry in Redstone Circuits.
@@ -21,7 +21,7 @@ tile.cd4017be.rsp1bit:1.tip=Emits a redstone signal.\nSupports 8-bit RS-strength
 tile.cd4017be.rsp1bit:2.tip=Receives a redstone signal.\nSupports 8-bit RS-strength (0-255).
 tile.cd4017be.lever8bit.tip=8 levers in one block.\nEmits lever states as 8-bit-strength (0-255).
 tile.cd4017be.display8bit.tip=A fancy way to display redstone signals.\nSupports 32-bit RS-strength (+/- 2.147.483.648).
-tile.cd4017be.blockSensor.tip=Can measure various properties of its\nneighbor blocks using Sensor Modules.\nEach side emits one value as 32-bit RS-strength.
+tile.cd4017be.blockSensor.tip=Outputs the measurement of up to 6 Sensor Modules.\nEach side emits one value as 32-bit RS-strength.
 tile.cd4017be.invConnector.tip=Provides remote access to capabilities\n(Item, Fluid, ...) of a connected Block.\nConnection shows green if linked and red if not.\nClick with empty hand to change orientation.\nClick with solid block to cover.
 
 // Items
@@ -29,18 +29,19 @@ tile.cd4017be.invConnector.tip=Provides remote access to capabilities\n(Item, Fl
 
 item.cd4017be.m:emptySensor.name=Blank Sensor Module
 item.cd4017be.circuitPlan.name=Circuit Programm
-item.cd4017be.itemSensor.name=Item Sensor Module
-item.cd4017be.fluidSensor.name=Fluid Sensor Module
-item.cd4017be.energySensor.name=Energy Sensor Module
+item.cd4017be.itemSensor.name=Item Sensor §e(%.0f)
+item.cd4017be.fluidSensor.name=Fluid Sensor §e(%.0fmB)
+item.cd4017be.energySensor.name=Energy Sensor §e(%.0fkJ)
 item.cd4017be.timeSensor.name=Time Sensor Module
 // tooltips
 item.cd4017be.circuitPlan.tip=Stores programm sourcecode for later use.\nPut paper into your Circuit Programmer to save.
-item.cd4017be.itemSensor.tip=Sensor module for counting items.\nUses block drops and items laying around\nif target block is not an inventory.\nRight-Click to configure filter.
-item.cd4017be.fluidSensor.tip=Sensor module for counting fluids [mB].\nUses tank contents or fluids placed in world.\nRight-Click to configure filter.
-item.cd4017be.energySensor.tip=Sensor module for counting energy [kJ].\nSupports: §3kJ§7[x1], §3RF§7[x0.1]
-item.cd4017be.timeSensor.tip=Sensor module for time measurement [s].\nCan use §3server-tick§7, §3ingame§7 or §3real-world§7 time.\nRight-Click to configure settings.
+item.cd4017be.itemSensor.tip=Sensor module for counting items.\nUses block drops and items laying around\nif target block is not an inventory.\nRight-Click to configure filter.\nSneak-Click block to link (max 20m range).
+item.cd4017be.fluidSensor.tip=Sensor module for counting fluids.\nUses tank contents or fluids placed in world.\nRight-Click to configure filter.\nSneak-Click block to link (max 20m range).
+item.cd4017be.energySensor.tip=Sensor module for counting energy.\nSupports: §3kJ§7[x1], §3Tesla/RF§7[x0.1], §3EU§7[x0.4]\nSneak-Click block to link (max 20m range).
+item.cd4017be.timeSensor.tip=Sensor module for time measurement [s].\nCan use §3server-tick§7, §3ingame§7 or §3real-world§7 time.\nRight-Click to configure settings.\nSneak-Click block to link as signal source.
 
 //GUI
+gui.cd4017be.tickInt=%.2fs
 //Inventory names
 gui.cd4017be.programmer.name=Programm:
 gui.cd4017be.assembler.name=Assembler
@@ -48,7 +49,7 @@ gui.cd4017be.circuit.name=Circuit
 gui.cd4017be.invReader.name=Inventory Sensor
 gui.cd4017be.itemTranslocator.name=Item Translocator
 gui.cd4017be.display8bit.name=Display
-gui.cd4017be.blockSensor.name=Universal Block Sensor
+gui.cd4017be.blockSensor.name=Sensor Module Container
 gui.cd4017be.itemSensor.name=Item Filter
 gui.cd4017be.fluidSensor.name=Fluid Filter
 gui.cd4017be.timeSensor.name=Time Measurement
@@ -69,7 +70,7 @@ gui.cd4017be.timeSensor.srcT1=The ingame time, where day/night\ncycle and moon p
 gui.cd4017be.timeSensor.srcT2=Real-world system time of the\nserver that is running minecraft.
 gui.cd4017be.timeSensor.mode0=Emit time passed since starting date.
 gui.cd4017be.timeSensor.mode1=Restart when time interval passed.
-gui.cd4017be.timeSensor.mode2=Restart when target Block emits redstone.
+gui.cd4017be.timeSensor.mode2=Restart when linked Block emits redstone.
 gui.cd4017be.timeSensor.mode3=Emit time between last two redstone signals.
 gui.cd4017be.assembler.add0=Add IO-bits to allow the circuit\ncommunicate with other blocks.\nLC adds 1, RC adds 8
 gui.cd4017be.assembler.add1=Increase byte capacity to\nfill in more circuitry\nLC adds 1, RC adds 8

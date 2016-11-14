@@ -1,5 +1,7 @@
 package cd4017be.circuits.item;
 
+import java.util.List;
+
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
@@ -19,13 +21,22 @@ import cd4017be.circuits.gui.GuiTimeSensor;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.DefaultItem;
 import cd4017be.lib.IGuiItem;
+import cd4017be.lib.TooltipInfo;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.ItemGuiData;
 
 public class ItemTimeSensor extends DefaultItem implements ISensor, IGuiItem {
 
+	private static double RangeSQ = 400D;
+
 	public ItemTimeSensor(String id) {
 		super(id);
+	}
+
+	@Override
+	public void addInformation(ItemStack item, EntityPlayer player, List<String> list, boolean b) {
+		if (item.hasTagCompound()) list.add(TooltipInfo.formatLink(BlockPos.fromLong(item.getTagCompound().getLong("link")), EnumFacing.getFront(item.getTagCompound().getByte("side"))));
+		super.addInformation(item, player, list, b);
 	}
 
 	@Override
@@ -36,16 +47,28 @@ public class ItemTimeSensor extends DefaultItem implements ISensor, IGuiItem {
 	}
 
 	@Override
-	public float measure(ItemStack sensor, World world, BlockPos pos, EnumFacing side) {
+	public EnumActionResult onItemUse(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) {
+		if (!player.isSneaking()) return EnumActionResult.PASS;
+		NBTTagCompound nbt = stack.getTagCompound();
+		if (nbt == null) stack.setTagCompound(nbt = new NBTTagCompound());
+		nbt.setLong("link", pos.toLong());
+		nbt.setByte("side", (byte)side.ordinal());
+		return EnumActionResult.SUCCESS;
+	}
+
+	@Override
+	public float measure(ItemStack sensor, World world, BlockPos det) {
 		if (!sensor.hasTagCompound()) return 0F;
 		NBTTagCompound nbt = sensor.getTagCompound();
+		BlockPos pos = BlockPos.fromLong(nbt.getLong("link"));
+		EnumFacing side = EnumFacing.getFront(nbt.getByte("side"));
 		long ref = nbt.getLong("ref");
 		long interv = nbt.getLong("int");
 		byte src = nbt.getByte("src");
 		byte mode = nbt.getByte("mode");
 		long time = this.getTime(src, world);
 		if (mode == 1 && time >= ref + interv) nbt.setLong("ref", ref += interv);
-		else if (mode > 1 && world.getRedstonePower(pos, side.getOpposite()) > 0) {
+		else if (mode > 1 && pos.distanceSq(det) < RangeSQ && world.getRedstonePower(pos, side.getOpposite()) > 0) {
 			if (mode == 2) nbt.setLong("ref", ref = time);
 			else {
 				nbt.setLong("ref", ref += interv);

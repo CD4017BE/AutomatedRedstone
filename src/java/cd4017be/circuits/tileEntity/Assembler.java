@@ -79,8 +79,7 @@ public class Assembler extends AutomatedTile implements IAccessHandler, IGuiData
 	@Override
 	public void initContainer(DataContainer container) {
 		TileContainer c = (TileContainer)container;
-		c.clickHandler = this;
-		c.refInts = new int[4];
+		c.clickHandler = this;
 		c.addItemSlot(new SlotItemType(inventory, 0, 8, 16, new ItemStack(circuit, 64)));
 		c.addItemSlot(new SlotItemType(inventory, 2, 8, 52));
 		c.addItemSlot(new SlotItemType(inventory, 3, 62, 16, new ItemStack(compItems[0], 64)));
