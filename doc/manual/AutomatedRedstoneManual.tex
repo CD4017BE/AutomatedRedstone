@@ -62,7 +62,7 @@
 
 \title{Automated Redstone Manual}
 \author{by CD4017BE}
-\date{mod version: 4.2.0}
+\date{mod version: 4.2.2}
 
 \begin{document}
  \maketitle
@@ -78,12 +78,21 @@ The information provided here refers to the mod version displayed above.
 \section{Redstone Signals}
 Minecraft represents the redstone output state (aka. redstone strength) of blocks by using 32-bit-integer numbers which theoretically allow redstone signal values up to $2.147.483.647$ as well as negative numbers. The components provided by Automated Redstone take advantage of this and can operate with pretty high numbers. Also \bf Redstone Cards \bf from the \bf OpenComputers \rm mod support full range so these mods can work together very well.
 
-But all redstone components provided by minecraft itself and also most mods can only handle and emit values in range $0-15$. So expect that anything above or below is interpreted as only 15 or 0.\\
+But most redstone components provided by minecraft itself and also most mods can only handle and emit values in range $0-15$. So expect that anything above or below is interpreted as only 15 or 0. The \bf Redstone Comparator \rm is the only component in vanilla minecraft that also works with values above 15.\\
 
 To transmit these bigger numbers, the mod provides two new types or redstone wires that also have a few other advantages over "vanilla redstone":
 
 Signals can be transported over (theoretically) unlimited distance and won't change their value (loose strength). Also these wires can be placed anywhere and don't need a solid surface.
 To allow very compact wiring, wires laying next to each other can be disconnected by sneak-right-click. And for decoration you can cover them with solid blocks via right-click with the block in hand.
+
+\subsection{Signals as binary numbers}
+Signals in this mod are generally just an array of states (a.k.a. bits) that each can be either inactive or active. Signals with multiple bits can also be used to represet other types of data than just binary states, for example numbers:
+
+Integer numbers are represented as $X = bit_0*2^0 + bit_1*2^1 + \dots + bit_N*2^N$ with $bit=0$ for inactive and $1$ for active states. This works almost the same way we represent our decimal numbers with the digits 0-9 ($X=digit_0*10^0 + digit_1*10^1 + \dots + digit_N*10^N$). So for example the number 42 represented as $4*10 + 2 * 1$ in decimal, is represented as $1*32 + 0*16 + 1*8 + 0*4 + 1*2 + 0*1$ (101010) in binary. Therefore in the same way you need at least two digits to represent the numbers 0-99 you need 4 bits to represent the numbers 0-15 in binary. Generally with $N$ bits you can represent numbers in range $0$ up to $2^N - 1$. \it This was probably not new to you if you already have experience with programming.\rm 
+
+Some devices in this mod have settings called "external bit offset"($o$) and "signal size"($s$) which simply define the range of bits a redstone signal should be received or emitted on. When setting $o = 0, s = 32$ (default) the signal ($X$) will be always equal the the redstone strength ($R$). With an offset $o > 0$ the signal will start at a higher bit index and with a size $s < 32$ the signal is capped off after s bits. When using numbers this means $X= \frac{R}{2^o} \mod 2^s$ for received signals and $R = (X \mod 2^s) * 2^o$ for emitted signals.
+
+When using the circuit you will probably often work with single bit states (only active or inactive). In this case use a signal size of 1 and if want to emit an active state as full redstone strength use an offset of 4 which will result in a strength of 16. When receiving signals of strength 15 (default for vanilla emitters) it doesn't matter whether you use 0,1,2 or 3 as offset but if it's a different strength and you don't want to worry about which bit has to be used, just move the signal through a Redstone Repeater (turns everything not 0 into 15).
 
 \subsection{Solid Redstone Wire}
 \bf Solid Redstone Wires \rm support signal values in range 0-255. They will receive redstone signals from their input connections (blue) and transmit them further to their output connections (green) with one tick delay. If one has multiple inputs it will choose the highest signal value for output. To control the signal transfer direction, these cables come in three variants:\\
@@ -108,12 +117,42 @@ Signal bit offset and signal size define which bits of the input signal should b
 The two text fields on top and bottom are for description texts that will be shown above and below the number.
 \includegraphics[width=\textwidth]{8_bit_io}\\
 
-\section{Inventory control}
-\subsection{Inventory connectors}
-\subsection{Inventory reader}
-\subsection{Item translocator}
-\it Documentation coming soon!\rm
+\newpage
+\section{Sensors}
+\bf Sensor Modules \rm are used to detect certain properties usually from the block they are linked to. To use them for redstone control mechanisms they can be put into a \bf Sensor Module Container \rm. When opening its GUI there are 6 slots (one for each block face) that can hold Sensor Modules:\\
+\includegraphics[width = \textwidth]{sensor_gui}\\
+The two numbers next to each slot define how the value ($X$) measured by the Sensor Module should be converted into the redstone signal ($R$) that is emited on its block face.\\
+$R(X) = X*multiplier+offset$ While $X$, $multiplier$ and $offset$ are all floating point numbers, $R$ will be rounded down to the next full integer. So using the right multiplier and offset you can perform any linear transformation on the measurement value.
 
+When giving the output to a Repeater, Redstone Torch or anything else that doesn't care about the actual strength, it's also possible to just use the transformation as comparator:\\
+for $X\geq C$ use $multiplier=1$ and $offset=1-C$.\\
+for $X\leq C$ use $multiplier=-1$ and $offset=1+C$.\\
+
+\subsection{Item Sensor}
+The \bf Item Sensor \rm counts the amount of matching items in the inventory of the blockface, it's linked to (some blocks have side dependent inventories). If the block has no inventory, it will instead use the items that would be dropped when harvested or items laying around in that spot.
+
+The \bf Item Sensor \rm has a filter and will only count those items matching to it (or the amount of empty slots in the inventory if the filter is set to allow nothing). The filter can be edited via GUI on right-click in air.
+
+\subsection{Fluid Sensor}
+The \bf Fluid Sensor \rm counts the amount (mB) of matching fluids in tanks provided at the linked blockface. The linked block can also be a fluid block in the world, in this case the amount is usually the bucket volume of 1000mB.
+
+The \bf  Fluid Sensor \rm has a filter and will only count those fluids matching to it (or the remaining tank capacity if the filter is set to allow nothing). The filter can be edited via GUI on right-click in air.
+
+\subsection{Energy Sensor}
+The \bf Energy Sensor \rm counts the amount of energy stored in its linked block in units of kJ (InductiveAutomation's energy unit). It also supports Blocks using the folowing energy types from other mods: RedstoneFlux (1RF = 0.1kJ), Tesla (like RF), IndustrialCraft (1EU = 0.4kJ). Keep in mind that these other energy types will be translated in to their equivalent kJ amount, so for example 250RF will be represented as 25kJ.
+
+\subsection{Time Sensor}
+The \bf Time Sensor \rm has 4 operating modes:\\
+\includegraphics[align=c]{time_total} outputs the time difference in seconds between the current time (\& date) and the set starting date.\\
+\includegraphics[align=c]{time_int} is like above but resets the starting date every time, the set interval is passed.\\
+\includegraphics[align=c]{time_reset} outputs the time in seconds passed  since the last time, the linked blockface emitted redstone.\\
+\includegraphics[align=c]{time_diff} outputs the time in seconds between the last two times, the linked blockface emitted redstone.\\
+And you can choose one of the following timer types to be used for the measurement:\\
+\bf Server Ticks \rm is based on the total amount of calculation cycles (ticks) the world has been simulated so far, where each tick represents $0.05s$. In case the server becomes unable to maintain its normal tickrate of 20 calculation cycles per second, the timer will slow down and stay synced with all other game processes.\\
+\bf Ingame Time \rm behaves similar but is based on the ingame time and therefore in sync with daytime and moon phases (1 ingame day = 20min). So this timer will do jumps when players go sleeping or somebody uses time editing commands.\\
+\bf System Time \rm is based on the internal clock of your computer or server and will always be in sync with real time, no matter how much the server was lagging or has been offline.\\
+
+\newpage
 \section{Integerated redstone circuits}
 \imgtex
 \includegraphics[align = t]{circuit} & The \bf Redstone Circuit \rm block allows you to put complicated redstone logic circuits into one single block, making them very compact and a bit cheaper in redstone cost. To define what the block should do you need to program it using the \bf Circuit Programmer \rm (explained later).\\
@@ -121,54 +160,55 @@ The two text fields on top and bottom are for description texts that will be sho
 
 \subsection{Creating \& using a circuit}
 \imgtex
-\includegraphics[align = t]{assembler} & Also your circuit needs some logic gates, IO-ports, and counter to perform the program. These are installed using the \bf Circuit Assembler\rm .
-The exact amount of these parts depend on your program and is displayed in the Circuit Programmer when trying to put the program on the circuit.\\
+\includegraphics[align = t]{assembler} & Before the circuit can do anything or even be written with a program, you have to install components to it in the \bf Circuit Assembler\rm . There are four different types of components (IO-bits, storage bytes, logic gates and calculators), each required for certain functionality:\\
 \end{tabularx}
 
-For creating circuits in the assembler put the citcuit item into the top right slot. Adding logic gates requires 1 redstone dust each, adding counters requires 2 netherquartz each and adding available signal outputs requires 1 lever each. Put the ingredients into the 3 left slots and click on the big button int the middle to insert them. Circuits can also be disassembled again on the left side of the assembler's GUI giving you the parts back. The circuit's internal logic can contain up to 128 gates and/or up to 8 8-bit counter and up to 16 outputs.\\
+\bf IO-bits \rm are required for communication with neighboring blocks, so you always need them. The amount depends on how many and how complex signals the circuit should receive or emit (explained with circuit GUI). Maximum amount is 192 (allowing full 32-bit signals on all 6 sides).
+
+\bf Storage bytes \rm each provide a chunk of 8 bits which are required to store the result of logic gates and operators or externally received signals. Maximum is 32 byte (256 bit). 
+
+\bf Logic Gates \rm and \bf Calculators \rm are required to install programs. You will be told how much of each is needed in \bf Circuit Programmer \rm when trying to store a program on a circuit.\\
 \includegraphics[width = \textwidth]{assembler_gui}\\
-\it About the colored tab on the very left read section 2.1 "Machine Configuration" in the Inductive Automation Manual. \rm\\
+The circuit goes into the slot on the right and components are added by putting the required items in the 4 blue slots and pressing the '+' buttons. Circuits put into the red slot will get disassembled by outputting all contained component items back into the blue slots.\\
 
-When placed, the circuit block has 16 1-bit channels for each input and output, so to use all of them with only 6 available block faces, you would need to use 8-bit wire or place multiple circuits next to each other. Therefore they are bundled into four 8-bit chunks (2 in + 2 out).
+When the circuit is placed it has to be turned on and you have to define which block faces should be connected with which of the storage bits in its GUI:\\
+\imgtex
+\includegraphics[align=t]{circuit_gui} & 
+For each side there is a row of settings. The button defines whether the side is input, output or inactive and the numbers define where the signal should be put in or read from the storage, its size and its external strength-bit offset \it(for details see section 2.1)\rm . The dot grid on the left shows the current state of all storage bits, dark red are in inactive state, bright red active and the gray ones are unused (install more storage byte components to use them). When hovering over a side config row, all storage bits connected with that block face will show in yellow. Also you can set the time interval for processing cycles (+/- buttons), start or pause processing (ON/OFF) and set all storage bits back to inactive (RESET).
+\end{tabularx}\\
+Every time the tick interval you've set is passed, the circuit will perform the following processing cycle:
 
-In the circuits's GUI you can set for each block face, which 8-bit chunk to use and a HEX-AND-gate filter that should be applied (like in \bf logic signal converter\rm ). So applying a normal redstone signal will set all bits contained in the filter to on and for output a redstone signal will be emitted if at least one of the bits contained in the filter is on.
+First all redstone signals received on the input sides are transfered into the storage bits they are connected to.
 
-The circuit's internal logic does the following:
-The state of all gates is updated each operation tick, based on the individually defined input states and the type of logic operation they represent. This is done in the order they appear in the programm using the input states present at that time, so referring to previous gates will use their just updated state and referring to later gates (or themself) will use the state they had after last update tick.
+Next all the logic gates and operators from the stored program are recalculated and put their results on the storage bits they were defined on. This is done one by one in the same order as they were defined in the program. Note that if there is no program written on the circuit it will still run and just skip this part, meaning that the circuit won't be able to do much more than just move signals from one side to another.
 
-After that the counters will count up by one if the gate defined as SET-input is on, otherwise if the gate defined as RESET-input is on they will go back to 0. They also go back to 0 if they reach above 255. Their current 8-bit counting states are stored in gate slots $64\dots127$ using 8 for each counter, so when using counters these slots are occupied and can't be used for logic gates.
-
-Finally the circuit's outputs will be set to the state of the individual gates they are bound to.
-
-The operation tick interval can be set in the circuit's GUI. It also contains a ON/OFF button to run or pause updating and a RESET button to set all gates to off.
-
+Finally the output sides will read their new signal from the storage bits they are connected to and emit them to neighbor blocks (causing block updates if the signal changed).
 \subsection{Programming}
-To actually tell the circuit what it should do, you need to apply a program to it in the \bf Circuit Programmer\rm :\\
-\includegraphics[width = \textwidth]{programmer_gui}\\
-\it This shows it's GUI with a RS-Latch setup as example. The colored arrows and texts are edited to illustrate the signal flow. \rm\\
-Gates are defined on the left part of the GUI with the following syntax. Each line defines one gate and has to start with one character representing it's type and is directly (no whitespace) followed by its parameters. 
+Programming circuits works a bit different than usual computer programming languages. 
+\imgtex \includegraphics[align = t, scale = 2]{program_diagram} & The program basically defines a bunch of logic gates and operators and how they are wired together. This is an example schematic of a toggle latch with its source code on the right to demonstrate how the programming works. (node 0 is input and 4,5 are output)\end{tabularx} \\
+Each line in the program represents one of the circuit's storage bits and defines how to calculate its (next) state. It usually starts with one character representing it's type and is directly (no whitespace) followed by its parameters which are separated by colons ',' (also no whitespace).
 
-For logic gates the parameters are the gate numbers that should be used as input, separated by colons ',' (also no whitespace). For redstone input it's the number of the circuit's input channel that this gate should be set to. And for the 8-bit comparator it's the number of the 8-bit chunk of gates (= number of it's first contained gate divided by 8), whose numerical representation should be compared, followed by the comparator character, followed by a decimal number in range 0-255 to compare with. All currently available gate types are listed in this table:\\
-\begin{tabular}{|c|c|l|l|} \hline
+There are three types of parameters: \bf Bits \rm are written as the hexadecimal index number of the storage bit to use as input (its line number). For \bf Bytes \rm it's the '\#' character followed by the decimal index number of the storage byte that should be used to form the input number in binary out if its 8 bits. And \bf Constants \rm are just written as decimal number in range 0-255.
+
+All currently available operation types are listed in this table: \\
+\begin{tabularx}{\textwidth}{|c|c|l|X|} \hline
 \bf Type & \bf Ch & \bf Parameters & \bf Function \\\hline
-RS input & $\%$ & input channel & Active if channel receives redstone signal \\\hline
-OR gate & $+$ & 0-15 inputs & Active if any input active, otherwise inactive \\\hline
-NOR gate & $-$ & 0-15 inputs & Inactive if any input active, otherwise active \\\hline
-AND gate & $\&$ & 0-15 inputs & Inactive if any input inactive, otherwise active \\\hline
-NAND gate & $*$ & 0-15 inputs & Active if any input inactive, otherwise inactive \\\hline
-XOR gate & $/$ & 0-15 inputs & Active if uneven number of inputs active \\\hline
-XNOR gate & $\backslash$ & 0-15 inputs & Active if even number of inputs active \\\hline
-8-bit Comp. & $\#$ & input$=$number & Active if 8-bit input equal to number \\\hline
-8-bit Comp. & $\#$ & input$<$number & Active if 8-bit input smaller than number \\\hline
-8-bit Comp. & $\#$ & input$>$number & Active if 8-bit input greater than number \\\hline
-\end{tabular}\\
-
-The up to 8 counters of the circuit are defined in the columns on the right marked with 'CS' and 'CR'. The 'CS' (Counter SET) column gets the gate number that need to be active for the individual counter to count up by one. And the 'CR' (Counter RESET) column gets the gate number that needs to be active to set the counter back to zero. If reset gate is set to '$-1$' the counter will only go back to zero if it reaches an 8-bit integer overflow ($>255$). Set both values to '$-1$' for counters you don't use (every counter costs 2 netherquartz).
-
-As already mentioned before each counter occupies 8 gates to store its value, where counter 1 uses gates $64-71$, counter 2 uses $72-79$ and so on ($64 + counterId * 8$). These gates can be referenced in the program like any other gate, but the most common way is to use the 8-bit compare gate to check if the counter value is below, above or equal to a certain number. In this case the 8-bit chunk number for the comparator gate is simply the counter  number plus 8.\\
-
-And the last two columns marked with 'O1' and 'O2' define which gate should be used for which output channel, where 'O1' defines channels $0-7$ and 'O2' defines channels $8-15$. Set outputs to '-1' if you're not using them (every output costs a lever).\\
-
+OR gate & $+$ & 0-15 bits & Active if any input active, otherwise inactive. \\\hline
+NOR gate & $-$ & 0-15 bits & Inactive if any input active, otherwise active. \\\hline
+AND gate & $\&$ & 0-15 bits & Inactive if any input inactive, otherwise active. \\\hline
+NAND gate & $*$ & 0-15 bits & Active if any input inactive, otherwise inactive. \\\hline
+XOR gate & $/$ & 0-15 bits & Active if uneven number of inputs active. \\\hline
+XNOR gate & $\backslash$ & 0-15 bits & Active if even number of inputs active. \\\hline
+$A < B$ & $<$ & byte/const A,B & Active if input number A smaller than B. \\\hline
+$A \geq B$ & $>$ & byte/const A,B & Active if input number A not smaller than B. \\\hline
+$A = B$ & $=$ & byte/const A,B & Active if input numbers A and B equal. \\\hline
+$A \neq B$ & $\widetilde{}$ & byte/const A,B & Active if input numbers A and B not equal. \\\hline
+Counter & $\$$ & S, A, R, B & Increases its count by constant A if bit S active and resets it to constant B if bit R active. \\\hline
+Extension & $.$ & none & Used in lines following a counter to provide additional bits to store its binary count number. \\\hline
+\end{tabularx}\\
+\it There is also a short version of this as hovering tooltip in the Programmer GUI. \rm\\
+\includegraphics[width = \textwidth]{programmer_gui}\\
+% TODO describe GUI navigation and code auto completion here
 To put your settings onto a circuit, just give it a name in the line on top, put the circuit into the only available slot and click the save button. If everything is fine you should get a "Compiling successful" message and the tooltip of the circuit should show the program name you have set. If your gate definitions contain errors you get a message that tells "Compile error" with the line that was wrong. Otherwise if your circuit is missing gates, counter or outputs required to execute your settings you get a message that tells you what is missing.
 
 To store your settings for later use you can also save it on a piece of paper and later load it into the programmer again by clicking the load button. If you don't need a circuit program anymore just put the item into the crafting grid to get the paper back.
@@ -176,34 +216,41 @@ To store your settings for later use you can also save it on a piece of paper an
 \subsection{Example programms}
 A \bf timer \rm that emits a 1 tick redstone signal every 150 ticks and resets if receiving a signal:
 \begin{lstlisting}
-Gates:
-0: %0		get input signal
-1: #8=149	check if counter reached 149
+Program:
+0:		input signal
+1: =#1,149	check if counter reached 149
 2: +0,1		reset counter if it reached 149 or input active
 3: -0		increase counter if input not active
-Counter 0: CS=3 CR=2
-Outputs: 1	emit signal if counter reached 149
-Total cost: 4 redstone dust, 2 netherquartz, 1 lever
+8: $3,1,2,0	counter increases by 1 and resets to 0
+9-F: .		8-bit counter
+IO settings:
+0, In, 1, 0	input signal
+2, Out, 1, 4	output signal
 \end{lstlisting}
-A \bf clock \rm that displays time in minutes and seconds on two 8-bit Displays. Input signal on channel 0 lets the clock run and signal on channel 1 resets it. (Circuit tick interval must be set to 0.05s):
+A \bf clock \rm that displays time in minutes and seconds on two 8-bit Displays. It has a 'run' and a 'reset' input for control. (Circuit tick interval must be set to 0.05s):
 \begin{lstlisting}
-Gates:
-0: %0		get run signal
-1: %1		get reset signal
-2: #8=19	check if 19 ticks have passed
-3: #9=59	check if 59 seconds have passed
+Program:
+0:		run signal
+1:		reset signal
+2: =#1,19	check if 19 ticks have passed
+3: =#2,59	check if 59 seconds have passed
 4: &2,3		reset second counter after 59.95s
 5: +1,4		or if receiving reset signal
 6: +1,2		reset tick counter after 19 ticks or reset signal
-Counter 0: CS=0 CR=6	counting ticks
-Counter 1: CS=2 CR=5	counting seconds
-Counter 2: CS=4 CR=1	counting minutes
-Outputs: 
-72 - 77		to display seconds (6-bit)
-80 - 87		to display minutes (8-bit)
-Total cost: 7 redstone dust, 6 netherquartz, 14 lever
+8: $0,1,6,0	counting ticks
+9-C: .		5-bit counter
+10: $2,1,5,0	counting seconds
+11-15: .	6-bit counter
+18: $4,1,1,0	counting minutes
+19-1F: .	8-bit counter
+IO settings:
+0, In, 1, 0	run
+1, In, 1, 0	reset
+10, Out, 6, 0	display seconds (6-bit)
+18, Out, 8, 0	display minutes (8-bit)
 \end{lstlisting}
 
 \it there will be probably added more in the future \rm
+%TODO add more programs here
 
 \end{document}
