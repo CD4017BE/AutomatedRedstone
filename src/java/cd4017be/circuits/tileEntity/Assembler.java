@@ -109,7 +109,7 @@ public class Assembler extends AutomatedTile implements IAccessHandler, IGuiData
 
 	@Override
 	public int insertAm(int g, int s, ItemStack item, ItemStack insert) {
-		if (s >= 2 && s < 6 && insert.getItem() != compItems[s - 2]) return 0;
+		if (s >= 3 && s < 7 && insert.getItem() != compItems[s - 3]) return 0;
 		int m = Math.min(insert.getMaxStackSize(), insert.stackSize); 
 		return item == null ? m : item.stackSize < m && ItemHandlerHelper.canItemStacksStack(item, insert) ? m - item.stackSize : 0;
 	}
