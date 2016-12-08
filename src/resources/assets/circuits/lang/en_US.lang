@@ -94,10 +94,12 @@ gui.cd4017be.program.load=Load program
 gui.cd4017be.program.up=view previous byte\n[PRIOR]
 gui.cd4017be.program.down=view next byte\n[NEXT]
 gui.cd4017be.program.n=program name
-gui.cd4017be.program.index=Indices:   (byte-index : bit-index)\nRed = output of selected gate/calculation\nYellow = input parameters of sel. gate/calc.\nClick on dots to fill in as parameter.
-gui.cd4017be.program.code=Defines the output of each bit index,\nfirst char. is the type of operation:\n'+': OR-gate(I...)    '-': NOR-gate(I...)\n'&': AND-gate(I...)   '*': NAND-gate(I...)\n'/': XOR-gate(I...)   '\': XNOR-gate(I...)\n'<': (BK1 < BK2)    '>': (BK1 >= BK2)\n'=': (BK1 = BK2)    '~': (BK1 ~= BK2)\n'$': count(I set, K incr, I rs, K rsVal)\n'.': additional output bit for last '$'\nParameters follow separated by ',':\nI: bit-index   K: constant number\nB: '#' + byte-index   BK: B or K
-gui.cd4017be.program.label=Just for better overview.\n(max 8 Char.)
+gui.cd4017be.program.index=Indices:   (byteIndex : bitIndex)\n§einput of selected operation\n§4output of selected operation\nClick on dots to add as input\nparameter for sel. operation.
+gui.cd4017be.program.code=Syntax definitions: §e"..."§7 = code, §2L.§7 = {§e<bitIndex>§7} bit parameter, §3N.§7 = {§e<constant>§7, §1T§e<byteIndex>§7} numeric parameter, §1T§7 = number type prefix {§1B§7, §1S§7, §1M§7, §1I§7}:signed or {§1b§7, §1s§7, §1m§7, §1i§7}:unsigned with 8, 16, 24, 32 bits\nThese define the binary state in their bit index:\n§7LogicGates §e"§4X§2L1§7,§2L2§7,§2...§e"§7 with §4X§7 = {§4+§7: OR, §4-§7: NOR, §4&§7: AND, §4*§7: NAND, §4/§7: XOR, §4\§7: XNOR} and §20-15 parameters§7\n§7Comparator §e"§4X§3N1§7,§3N2§e"§7 with §4X§7 = {§4<§7: §3N1§7<§3N2§7, §4>§7: §3N1§7>=§3N2§7, §4=§7: §3N1§7==§3N2§7, §4~§7: §3N1§7!=§3N2§7}\nThese define the number stored in their 1-4 byte indices:\n§7Arithmetic §e"§1T§4X§3N1§7,§3N2§e"§7 with §4X§7 = {§4+§7: §3N1§7+§3N2§7, §4-§7: §3N1§7-§3N2§7, §4*§7: §3N1§7*§3N2§7, §4/§7: §3N1§7/§3N2§7, §4%§7: §3N1§7mod§3N2§7}\n§7Switch §e"§1T§7?§3N1§7,§3N2§7,§2L3§e"§7 returns §3N1§7 if §2L3§7 active, else §3N2§7\n§7Counter §e"§1T§7$§3N1§7,§3N2§7,§2L3§7,§2L4§e"§7 resets to §3N2§7 if §2L4§7 active else increments by §3N1§7 if §2L3§7 active\nAlso read section 5.2 of the PDF-Manual available on GitHub
+gui.cd4017be.program.label=Just for better overview\nAlso shows up in Index
 gui.cd4017be.program.head=Index\nCode\nLabel
+gui.cd4017be.program.view0=Bit index view\n(for logic operators)
+gui.cd4017be.program.view1=Byte index view\n(for numeric operators)
 gui.cd4017be.err1=Programm loaded
 gui.cd4017be.err2=Programm saved
 gui.cd4017be.err3=Compiling Successfull
@@ -106,10 +108,11 @@ gui.cd4017be.err5=Required capacity: %d
 gui.cd4017be.err6=Required logic gates: %d
 gui.cd4017be.err7=Required calculators: %d
 gui.cd4017be.err8=Programm too big! max 512 bytes
-gui.cd4017be.err9=Invalid number @ %02X
+gui.cd4017be.err9=Invalid index/number @ %02X
 gui.cd4017be.err10=Invalid arguments @ %02X
-gui.cd4017be.err11=Invalid command @ %02X
+gui.cd4017be.err11=Invalid operation @ %02X
 gui.cd4017be.err12=Compile error @ %02X
+gui.cd4017be.err13=Overlapping operations @ %02X
 gui.cd4017be.display8bit.text=Text rendered on display
 gui.cd4017be.display8bit.mode=Number type for converting\nsignal into digits.
 gui.cd4017be.display8bit.format=Display format:\n'0123456789ABCDEF.:-%' displayed as they are\n'#' displays next digit of signal\n'$' skips one digit without displaying\nN+'S' skips N digits (N = '1'...'9')\nAnything else displays empty space.

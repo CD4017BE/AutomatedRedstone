@@ -33,22 +33,23 @@ import net.minecraftforge.fml.common.Optional;
 public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGuiData, ITickable, Environment {
 
 	public static final byte 
-		C_NULL = 0x00,	//empty gates
-		C_CNT = 0x10,	//counter
-		C_OR = 0x20,	//OR
-		C_NOR = 0x30,	//NOR
-		C_AND = 0x40,	//AND
-		C_NAND = 0x50,	//NAND
-		C_XOR = 0x60,	//XOR
-		C_XNOR = 0x70,	//XNOR
-		C_LS = (byte)0x80,	//lesser
-		C_NLS = (byte)0x90,	//not lesser
-		C_EQ = (byte)0xA0,	//equal
-		C_NEQ = (byte)0xB0,	//not equal
-		C_12 = (byte)0xC0,	//unused
-		C_13 = (byte)0xD0,	//unused
-		C_14 = (byte)0xE0,	//unused
-		C_15 = (byte)0xF0;	//unused
+		C_NULL = 0x00,	//empty gates[0xf]
+		C_1 = 0x10,		//unused
+		C_OR = 0x20,	//OR (bit^[0xf]) -> bit
+		C_NOR = 0x30,	//NOR (bit^[0xf]) -> bit
+		C_AND = 0x40,	//AND (bit^[0xf]) -> bit
+		C_NAND = 0x50,	//NAND (bit^[0xf]) -> bit
+		C_XOR = 0x60,	//XOR (bit^[0xf]) -> bit
+		C_XNOR = 0x70,	//XNOR (bit^[0xf]) -> bit
+		C_COMP = (byte)0x80,//compare[0xc] (N/C[1], N/C[2]) -> bit
+		C_COMP_1 = (byte)0x81, C_COMP_2 = (byte)0x82, C_COMP_3 = (byte)0x83,
+		C_CNT = (byte)0x90,	//counter (N/C[1], N/C[2], bit, bit) -> N[0xc]
+		C_MUX = (byte)0xA0,	//multiplex (N/C[1], N/C[2], bit) -> N[0xc]
+		C_ADD = (byte)0xB0,	//add (N/C[1], N/C[2]) -> N[0xc]
+		C_SUB = (byte)0xC0,	//subtract (N/C[1], N/C[2]) -> N[0xc]
+		C_MUL = (byte)0xD0,	//multiply (N/C[1], N/C[2]) -> N[0xc]
+		C_DIV = (byte)0xE0,	//divide (N/C[1], N/C[2]) -> N[0xc]
+		C_MOD = (byte)0xF0;	//modulo (N/C[1], N/C[2]) -> N[0xc]
 
 	@Override
 	public String getName() {
@@ -85,7 +86,11 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 					}
 				update = false;
 			}
-			cpuTick();
+			try {cpuTick();} catch (Exception e) {
+				e.printStackTrace();
+				code = new byte[0];
+				name = "§cERROR: invalid code!§8";
+			}
 			for (int i = 0; i < 6; i++) 
 				if (getDir(i) == 2) {
 					rs = this.readInt(getRamIdx(i), getSize(i)) << getExtIdx(i);
@@ -115,67 +120,107 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 	}
 
 	private void cpuTick() {
-		boolean x;
-		int cmd, con;
 		int n = 0;
 		for (int i = 0, j = 0; i < code.length && n >> 3 < ram.length; j = ++i) {
-			cmd = code[i] & 0xf0;
-			con = code[i] & 0x0f;
+			int mask = 1 << (n & 7);
+			int cmd = code[i];
+			int con = cmd & 0x0f;
+			cmd &= 0xf0;
+			int x, a, b;
+			if (cmd >= 0x80) {
+				if ((con & 4) != 0) {
+					a = consT(++i);
+					i += 3;
+				} else a = param(code[++i] & 0xff);
+				if ((con & 8) != 0) {
+					b = consT(++i);
+					i += 3;
+				} else b = param(code[++i] & 0xff);
+			} else {a = 0; b = 0;}
 			switch ((byte)cmd) {
 			case C_NULL:
 				n += con == 0 ? 16 : con;
-			continue;
-			case C_CNT:{
-				int mask = (0xff >> con) << (n & 7) & 0xff, p = n >> 3;
-				if (getBit(i + 3)) ram[p] = (byte)((ram[p] & ~mask) | (code[i + 4] & mask));
-				else if (getBit(i + 1)) ram[p] = (byte)((ram[p] & ~mask) | (ram[p] + code[i + 2] & mask));
-				i += 4;	n += 8 - con;
-			} continue;
+				continue;
 			case C_OR:
-				for (x = false; !x && i < j + con;) x |= getBit(++i);
+				for (x = 0; i < j + con;)
+					if (getBit(++i)) {x = mask; break;}
 				i = j + con;
-			break;
+				break;
 			case C_NOR:
-				for (x = false; !x && i < j + con;) x |= getBit(++i);
-				x = !x; i = j + con;
-			break;
+				for (x = mask; i < j + con;)
+					if (getBit(++i)) {x = 0; break;}
+				i = j + con;
+				break;
 			case C_AND:
-				for (x = true; x && i < j + con;) x &= getBit(++i);
+				for (x = mask; i < j + con;)
+					if (!getBit(++i)) {x = 0; break;}
 				i = j + con;
-			break;
+				break;
 			case C_NAND:
-				for (x = true; x && i < j + con;) x &= getBit(++i);
-				x = !x; i = j + con;
-			break;
+				for (x = 0; i < j + con;)
+					if (!getBit(++i)) {x = mask; break;}
+				i = j + con;
+				break;
 			case C_XOR:
-				for (x = false; i < j + con;) x ^= getBit(++i);
+				for (x = 0; i < j + con;)
+					if (getBit(++i)) x ^= mask;
 				i = j + con;
-			break;
+				break;
 			case C_XNOR:
-				for (x = true; i < j + con;) x ^= getBit(++i);
+				for (x = mask; i < j + con;)
+					if (getBit(++i)) x ^= mask;
 				i = j + con;
-			break;
-			case C_LS:
-				x = (((con & 1) != 0 ? getByte(++i) : code[++i]) & 0xff) <
-					(((con & 2) != 0 ? getByte(++i) : code[++i]) & 0xff);
-			break;
-			case C_NLS:
-				x = (((con & 1) != 0 ? getByte(++i) : code[++i]) & 0xff) >=
-					(((con & 2) != 0 ? getByte(++i) : code[++i]) & 0xff);
-			break;
-			case C_EQ:
-				x = ((con & 1) != 0 ? getByte(++i) : code[++i]) ==
-					((con & 2) != 0 ? getByte(++i) : code[++i]);
-			break;
-			case C_NEQ:
-				x = ((con & 1) != 0 ? getByte(++i) : code[++i]) !=
-					((con & 2) != 0 ? getByte(++i) : code[++i]);
-			break;
+				break;
+			case C_COMP:
+				switch(con & 3) {
+				case 0: x = a < b ? mask : 0; break;
+				case 1: x = a < b ? 0 : mask; break;
+				case 2: x = a == b ? mask : 0; break;
+				default: x = a == b ? 0 : mask;
+				}
+				break;
+			case C_CNT:
+				boolean set = getBit(++i), rst = getBit(++i);
+				if (rst) {
+					x = b;
+					break;
+				} else if (set) {
+					x = param(n >> 3 | (con & 3) << 5) + a;
+					break;
+				} else {
+					n += (con & 3) * 8 + 8;
+					continue;
+				}
+			case C_MUX:
+				x = getBit(++i) ? b : a;
+				break;
+			case C_ADD:
+				x = a + b;
+				break;
+			case C_SUB:
+				x = a - b;
+				break;
+			case C_MUL:
+				x = a * b;
+				break;
+			case C_DIV:
+				x = b == 0 ? -1 : a / b;
+				break;
+			case C_MOD:
+				x = b == 0 ? -1 : a % b;
+				break;
 			default: continue;
 			}
-			if (x) ram[n >> 3] |= 1 << (n & 7);
-			else ram[n >> 3] &= ~(1 << (n & 7));
-			n++;
+			int p = n >> 3;
+			if (cmd <= 0x80) {
+				if (x == 0) ram[p] &= ~mask;
+				else ram[p] |= mask;
+				n++;
+			} else {
+				con &= 3;
+				n += con * 8 + 8;
+				for (;con >= 0; con--, x >>>= 8) ram[p++] = (byte)x;
+			}
 		}
 	}
 
@@ -183,8 +228,24 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 		int p = code[i] & 0xff;
 		return (ram[(p >> 3) % ram.length] >> (p & 7) & 1) != 0;
 	}
-	private byte getByte(int i) {
-		return ram[(code[i] & 0xff) % ram.length];
+
+	/**
+	 * @param p bit[0-4]: index, bit[5,6]: size, bit[7]: signed
+	 * @return number
+	 */
+	private int param(int p) {
+		int t0 = p & 0x1f, t = t0 + (p >> 5 & 3), x;
+		if ((p & 0x80) != 0) x = (int)ram[t-- % ram.length];
+		else x = 0;
+		for (;t >= t0; t--) {
+			x <<= 8;
+			x |= ram[t % ram.length] & 0xff;
+		}
+		return x;
+	}
+
+	private int consT(int i) {
+		return (code[i++] & 0xff) | (code[i++] & 0xff) << 8 | (code[i++] & 0xff) << 16 | (code[i] & 0xff) << 24;
 	}
 
 	public int getDir(int s) {return (int)(cfgI >>> (48 + s * 2)) & 3;}

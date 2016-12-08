@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package cd4017be.circuits.tileEntity;
 
 import java.io.IOException;
@@ -42,7 +36,8 @@ public class Programmer extends AutomatedTile implements IGuiData {
 		E_num = 9,
 		E_arg = 10,
 		E_cmd = 11,
-		E_err = 12;
+		E_err = 12,
+		E_struc = 13;
 	public String[] code = new String[]{""};
 	public String[] label = new String[]{""};
 	public String name = "";
@@ -146,7 +141,7 @@ public class Programmer extends AutomatedTile implements IGuiData {
 				for (int i = code.length - 1; i >= n; i--)
 					if (!code[i].isEmpty()) {
 						errorCode = E_cap;
-						errorArg = (i + 7) / 8;
+						errorArg = i / 8 + 1;
 						return;
 					}
 				byte[] data = this.compile(nbt.getByte("Gate") & 0xff, nbt.getByte("Calc") & 0xff);
@@ -201,32 +196,43 @@ public class Programmer extends AutomatedTile implements IGuiData {
 					continue;
 				}
 				String s0 = code[l].substring(1);
+				byte cmd = 0;
 				switch (code[l].charAt(0)) {
-				case '$':{
-					int k = l + 1, e = Math.min(code.length, (l >> 3 << 3) + 8);
-					while(k < e && code[k].equals(".")) k++;
-					data[p++] = (byte)(C_CNT | 8 - (k -= l)); l += k;
-					String[] s1 = s0.split(",");
-					if (s1.length != 4) throw new IllegalArgumentException();
-					data[p++] = (byte)Integer.parseInt(s1[0].trim(), 16);
-					data[p++] = (byte)Integer.parseInt(s1[1].trim());
-					data[p++] = (byte)Integer.parseInt(s1[2].trim(), 16);
-					data[p++] = (byte)Integer.parseInt(s1[3].trim());
-					g1 += k; c1++;
-				} continue;
-				case '+': p = addParameters(data, p, C_OR, s0); g1++; break;
-				case '-': p = addParameters(data, p, C_NOR, s0); g1++; break;
-				case '&': p = addParameters(data, p, C_AND, s0); g1++; break;
-				case '*': p = addParameters(data, p, C_NAND, s0); g1++; break;
-				case '/': p = addParameters(data, p, C_XOR, s0); g1++; break;
-				case '\\': p = addParameters(data, p, C_XNOR, s0); g1++; break;
-				case '<': p = compare(data, p, C_LS, s0); g1++; c1++; break;
-				case '>': p = compare(data, p, C_NLS, s0); g1++; c1++; break;
-				case '=': p = compare(data, p, C_EQ, s0); g1++; c1++; break;
-				case '~': p = compare(data, p, C_NEQ, s0); g1++; c1++; break;
+				case '+': p = addBitParams(data, p, C_OR, s0); g1++; l++; break;
+				case '-': p = addBitParams(data, p, C_NOR, s0); g1++; l++; break;
+				case '&': p = addBitParams(data, p, C_AND, s0); g1++; l++; break;
+				case '*': p = addBitParams(data, p, C_NAND, s0); g1++; l++; break;
+				case '/': p = addBitParams(data, p, C_XOR, s0); g1++; l++; break;
+				case '\\': p = addBitParams(data, p, C_XNOR, s0); g1++; l++; break;
+				case '<': p = addParameters(data, p, C_COMP, 0, s0); g1++; l++; break;
+				case '>': p = addParameters(data, p, C_COMP_1, 0, s0); g1++; l++; break;
+				case '=': p = addParameters(data, p, C_COMP_2, 0, s0); g1++; l++; break;
+				case '~': p = addParameters(data, p, C_COMP_3, 0, s0); g1++; l++; break;
+				case 'i':
+				case 'I': c1 += 2; cmd++;
+				case 'm':
+				case 'M': c1 += 2; cmd++;
+				case 's':
+				case 'S': c1 += 2; cmd++;
+				case 'b':
+				case 'B': c1 += 2;
+					s0 = s0.substring(1);
+					switch(code[l].charAt(1)) {
+					case '$': p = addParameters(data, p, (byte)(C_CNT | cmd), 2, s0); c1+=1; break;
+					case '?': p = addParameters(data, p, (byte)(C_MUX | cmd), 1, s0); break;
+					case '+': p = addParameters(data, p, (byte)(C_ADD | cmd), 0, s0); c1+=1; break;
+					case '-': p = addParameters(data, p, (byte)(C_SUB | cmd), 0, s0); c1+=1; break;
+					case '*': p = addParameters(data, p, (byte)(C_MUL | cmd), 0, s0); c1+=2; break;
+					case '/': p = addParameters(data, p, (byte)(C_DIV | cmd), 0, s0); c1+=2; break;
+					case '%': p = addParameters(data, p, (byte)(C_MOD | cmd), 0, s0); c1+=2; break;
+					default: errorCode = E_cmd; errorArg = l; return null;
+					}
+					l &= 0xf8; l++;
+					for (int j = Math.min(code.length, l + (int)cmd * 8 + 7); l < j; l++)
+						if (!code[l].isEmpty()) {errorCode = E_struc; errorArg = l; return null;}
+					break;
 				default: errorCode = E_cmd; errorArg = l; return null;
 				}
-				l++;
 			}
 			if (g < g1) {errorCode = E_gate; errorArg = g1;}
 			else if (c < c1) {errorCode = E_calc; errorArg = c1;}
@@ -245,7 +251,7 @@ public class Programmer extends AutomatedTile implements IGuiData {
 		return null;
 	}
 
-	private int addParameters(byte[] data, int p, byte cmd, String s) {
+	private int addBitParams(byte[] data, int p, byte cmd, String s) {
 		if (s.isEmpty()) {
 			data[p++] = cmd;
 			return p;
@@ -253,20 +259,51 @@ public class Programmer extends AutomatedTile implements IGuiData {
 		String[] s1 = s.split(",");
 		if (s1.length > 15) throw new IllegalArgumentException();
 		data[p++] = (byte)(cmd | s1.length);
-		for (String s2 : s1)
-			data[p++] = (byte)Integer.parseInt(s2.trim(), 16);
+		for (String s2 : s1) {
+			if ((s2 = s2.trim()).length() > 2) throw new NumberFormatException();
+			data[p++] = (byte)Integer.parseInt(s2, 16);
+		}
 		return p;
 	}
 
-	private int compare(byte[] data, int p, byte cmd, String s) {
+	private int addParameters(byte[] data, int p, byte cmd, int n, String s) {
 		String[] s1 = s.split(",");
-		if (s1.length != 2) throw new IllegalArgumentException();
-		if (s1[0].startsWith("#")) {cmd |= 1; s1[0] = s1[0].substring(1);}
-		if (s1[1].startsWith("#")) {cmd |= 1; s1[0] = s1[0].substring(1);}
-		data[p++] = cmd;
-		data[p++] = (byte)Integer.parseInt(s1[0]);
-		data[p++] = (byte)Integer.parseInt(s1[1]);
-		return p;
+		if (s1.length != n + 2) throw new IllegalArgumentException();
+		int i = p + 1;
+		for (int j = 0; j < 2; j++)
+			try {
+				int x = Integer.parseInt(s1[j]);
+				cmd |= 4 << j;
+				data[i++] = (byte)x;
+				data[i++] = (byte)(x >> 8);
+				data[i++] = (byte)(x >> 16);
+				data[i++] = (byte)(x >> 24);
+			} catch (NumberFormatException e) {
+				data[i++] = decodeVar(s1[j]);
+			}
+		data[p] = cmd;
+		for (int j = 2; j < s1.length; j++) {
+			String s2 = s1[j].trim();
+			if (s2.length() > 2) throw new NumberFormatException();
+			data[i++] = (byte)Integer.parseInt(s2, 16);
+		}
+		return i;
+	}
+	
+	private byte decodeVar(String s) {
+		byte x = Byte.parseByte(s.substring(1));
+		x &= 0x1f;
+		switch(s.charAt(0)) {
+		case 'B': return x |= 0x00;
+		case 'S': return x |= 0x20;
+		case 'M': return x |= 0x40;
+		case 'I': return x |= 0x60;
+		case 'b': return x |= 0x80;
+		case 's': return x |= 0xa0;
+		case 'm': return x |= 0xc0;
+		case 'i': return x |= 0xe0;
+		default: throw new NumberFormatException();
+		}
 	}
 
 	@Override
