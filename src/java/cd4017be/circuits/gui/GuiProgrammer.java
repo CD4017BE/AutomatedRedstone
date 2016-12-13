@@ -141,7 +141,7 @@ public class GuiProgrammer extends GuiMachine {
 		else super.keyTyped(c, k);
 	}
 
-	private void addReqIndex(TextField t, int by, int bi) {
+	private void addReqIndex(TextField t, int by, int bi) {//TODO some wrong auto complete
 		if (t.text.isEmpty()) return;
 		int p0 = t.text.lastIndexOf(',', t.cur - 1) + 1, p1 = t.text.indexOf(',', t.cur);
 		if (p0 <= 0) p0 = 1; if (p1 < 0) p1 = t.text.length();
@@ -170,7 +170,7 @@ public class GuiProgrammer extends GuiMachine {
 		}
 		String ins;
 		if (num) {
-			char c = t.text.charAt(p0);
+			char c = t.text.length() > p0 ? t.text.charAt(p0) : ' ';
 			if (!Character.isAlphabetic(c)) {
 				c = t.text.charAt(0);
 				if (!Character.isAlphabetic(c)) c = 'B';

@@ -58,8 +58,8 @@ public class GuiBlockSensor extends GuiMachine {
 			dos.writeByte(AutomatedTile.CmdOffset + id);
 			dos.writeFloat(Float.parseFloat((String)obj));
 		} catch(NumberFormatException e){return;}
-		else if (id == 12 || id == 14) dos.writeByte(AutomatedTile.CmdOffset + 14).writeInt(tile.tickInt = Math.min(1200, tile.tickInt + (id == 24 ? 20 : 1)));
-		else if (id == 13 || id == 15) dos.writeByte(AutomatedTile.CmdOffset + 14).writeInt(tile.tickInt = Math.max(1, tile.tickInt - (id == 25 ? 20 : 1)));
+		else if (id == 12 || id == 14) dos.writeByte(AutomatedTile.CmdOffset + 14).writeInt(tile.tickInt = Math.min(1200, tile.tickInt + (id == 12 ? 20 : 1)));
+		else if (id == 13 || id == 15) dos.writeByte(AutomatedTile.CmdOffset + 14).writeInt(tile.tickInt = Math.max(1, tile.tickInt - (id == 13 ? 20 : 1)));
 		else return;
 		if (send) BlockGuiHandler.sendPacketToServer(dos);
 	}

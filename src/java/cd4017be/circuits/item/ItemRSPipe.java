@@ -27,8 +27,8 @@ public class ItemRSPipe extends DefaultItemBlock
 	@Override
 	protected void init() {
 		BlockItemRegistry.registerItemStack(new ItemStack(this, 1, BlockRSPipe1.ID_Transport), "rsp1bitN");
-		BlockItemRegistry.registerItemStack(new ItemStack(this, 1, BlockRSPipe1.ID_Extraction), "rsp1bitI");
-		BlockItemRegistry.registerItemStack(new ItemStack(this, 1, BlockRSPipe1.ID_Injection), "rsp1bitO");
+		BlockItemRegistry.registerItemStack(new ItemStack(this, 1, BlockRSPipe1.ID_Extraction), "rsp1bitO");
+		BlockItemRegistry.registerItemStack(new ItemStack(this, 1, BlockRSPipe1.ID_Injection), "rsp1bitI");
 	}
 
 	@Override
