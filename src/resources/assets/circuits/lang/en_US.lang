@@ -2,7 +2,7 @@
 // names
 tile.cd4017be.programmer.name=Circuit Programmer
 tile.cd4017be.assembler.name=Circuit Assembler
-tile.cd4017be.circuit.name=Redstone Circuit
+tile.cd4017be.circuit.name=Circuit Casing
 tile.cd4017be.rsp8bit.name=32-bit-Signal Wire
 tile.cd4017be.rsp1bit:0.name=Solid Redstone Wire
 tile.cd4017be.rsp1bit:1.name=Redstone Receiver Wire
@@ -24,10 +24,18 @@ tile.cd4017be.display8bit.tip=A fancy way to display redstone signals.\nSupports
 tile.cd4017be.blockSensor.tip=Outputs the measurement of up to 6 Sensor Modules.\nEach side emits one value as 32-bit RS-strength.
 tile.cd4017be.invConnector.tip=Provides remote access to capabilities\n(Item, Fluid, ...) of a connected Block.\nConnection shows green if linked and red if not.\nClick with empty hand to change orientation.\nClick with solid block to cover.
 
+tile.cd4017be.lever8bit.click0=Output as bits 0-7 [1-128]
+tile.cd4017be.lever8bit.click1=Output as bits 8-15 [256-32768]
+tile.cd4017be.lever8bit.click2=Output as bits 16-23 [65536-8388608]
+tile.cd4017be.lever8bit.click3=Output as bits 24-31 [16777216-2147483648]
+
 // Items
 // names
-
 item.cd4017be.m:emptySensor.name=Blank Sensor Module
+item.cd4017be.m:IORelay.name=IO bus Relay
+item.cd4017be.m:RAMPlate.name=8-bit Memory Board
+item.cd4017be.m:LogicPrc.name=Logic Processor
+item.cd4017be.m:CalcPrc.name=Arithmetic Processor
 item.cd4017be.circuitPlan.name=Circuit Programm
 item.cd4017be.itemSensor.name=Item Sensor §e(%.0f)
 item.cd4017be.fluidSensor.name=Fluid Sensor §e(%.0fmB)

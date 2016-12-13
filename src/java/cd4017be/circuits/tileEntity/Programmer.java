@@ -209,13 +209,13 @@ public class Programmer extends AutomatedTile implements IGuiData {
 				case '=': p = addParameters(data, p, C_COMP_2, 0, s0); g1++; l++; break;
 				case '~': p = addParameters(data, p, C_COMP_3, 0, s0); g1++; l++; break;
 				case 'i':
-				case 'I': c1 += 2; cmd++;
+				case 'I': c1 += 1; cmd++;
 				case 'm':
-				case 'M': c1 += 2; cmd++;
+				case 'M': c1 += 1; cmd++;
 				case 's':
-				case 'S': c1 += 2; cmd++;
+				case 'S': c1 += 1; cmd++;
 				case 'b':
-				case 'B': c1 += 2;
+				case 'B': c1 += 1;
 					s0 = s0.substring(1);
 					switch(code[l].charAt(1)) {
 					case '$': p = addParameters(data, p, (byte)(C_CNT | cmd), 2, s0); c1+=1; break;
