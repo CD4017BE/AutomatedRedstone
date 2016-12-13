@@ -28,9 +28,9 @@ public class Display8bit extends ModTileEntity implements IDirectionalRedstone, 
 	@Override
 	public void onNeighborBlockChange(Block b) {
 		if (worldObj.isRemote) return;
-		int nState = 0, rs;
+		int nState = 0;
 		for (EnumFacing s : EnumFacing.VALUES)
-			if ((rs = worldObj.getRedstonePower(pos.offset(s), s)) > nState) nState = rs;
+			nState |= worldObj.getRedstonePower(pos.offset(s), s);
 		if (nState != state) {
 			state = nState;
 			this.formatState();
@@ -54,11 +54,14 @@ public class Display8bit extends ModTileEntity implements IDirectionalRedstone, 
 
 	private void formatState() {
 		int m = dspType & 3;
-		int s = state >> (dspType >> 2 & 0x1f) & 0xffffffff >>> (31 - (dspType >> 7 & 0x1f));
+		long s = (long)state >> (dspType >> 2 & 0x1f) & 0xffffffffL >>> (31 - (dspType >> 7 & 0x1f));
 		if (m == 0 || m == 3) {
-			display = s;
+			display = (int)s;
 			return;
 		}
+		long sgnMask = 1L << (dspType >> 7 & 0x1f);
+		boolean sign = (s & sgnMask) != 0;
+		if (sign && format.indexOf('+') >= 0) s = sgnMask - (s & ~sgnMask);
 		display = 0;
 		int n = 0;
 		for (int i = format.length() - 1; i >= 0 && n < 3; i--) {
@@ -66,26 +69,28 @@ public class Display8bit extends ModTileEntity implements IDirectionalRedstone, 
 			char c = format.charAt(i);
 			switch (c) {
 			case '#': 
-				if (m == 1) {d = (s & 0xf) + 8; s >>= 4;}
-				else {d = s % 10 + 8; s /= 10;}
+				if (m == 1) {d = ((int)s & 0xf) + 8; s >>>= 4;}
+				else {d = (int)(s % 10L) + 8; s /= 10L;}
 				break;
 			case '$': 
-				if (m == 1) s >>= 4;
-				else s /= 10;
+				if (m == 1) s >>>= 4;
+				else s /= 10L;
 				continue;
 			case 's': case 'S':
 				if (i <= 0 || (c = format.charAt(--i)) <= '0' || c > '9') continue;
-				else if (m == 1) s >>= (c - '0') * 4;
-				else for (int j = c - '0'; j >= 0; j--) s /= 10;
+				else if (m == 1) s >>>= (c - '0') * 4;
+				else for (int j = c - '0'; j > 0; j--) s /= 10L;
 				continue;
 			case ':': d = 24; break;
 			case '.': d = 25; break;
 			case '-': d = 26; break;
 			case '%': d = 27; break;
+			case '_': d = 28; break;
+			case '+': d = sign ? 26 : 28; break;
 			default: if (c >= '0' && c <= '9') d = c - '0' + 8;
 				else if (c >= 'a' && c <= 'f') d = c - 'a' + 18;
 				else if (c >= 'A' && c <= 'F') d = c - 'A' + 18;
-				else d = 28;
+				else d = 29;
 			}
 			display |= (d & 0xff) << (8 * n++);
 		}
