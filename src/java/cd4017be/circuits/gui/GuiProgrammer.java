@@ -68,7 +68,7 @@ public class GuiProgrammer extends GuiMachine {
 		else this.drawTexturedModalRect(guiLeft + 7, guiTop + 25 + 2 * selByte, 239, 0, 17, view8 ? 16 : 2);
 		for (int i = 0; i < 8; i++)
 			fontRendererObj.drawString(String.format("%02X", lineIndex(i)), guiLeft + 24, guiTop + 25 + i * 8, 0xffffff40);
-		String[] s = I18n.translateToLocal("gui.cd4017be.program.head").split("\\\\n");
+		String[] s = I18n.translateToLocal("gui.cd4017be.program.head").split("\\n");
 		if (s.length > 0) fontRendererObj.drawString(s[0], guiLeft + 8, guiTop + 16, 0x404040);
 		if (s.length > 1) fontRendererObj.drawString(s[1], guiLeft + 88 - fontRendererObj.getStringWidth(s[1]) / 2, guiTop + 16, 0x404040);
 		if (s.length > 2) fontRendererObj.drawString(s[2], guiLeft + 168 - fontRendererObj.getStringWidth(s[2]), guiTop + 16, 0x404040);

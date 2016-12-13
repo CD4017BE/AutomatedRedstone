@@ -108,4 +108,9 @@ public class BlockSensor extends AutomatedTile implements IDirectionalRedstone, 
 		else if (i == 12) tickInt = v;
 	}
 
+	@Override
+	public void breakBlock() {
+		inventory.dropItems(this, 0, 6);
+	}
+
 }

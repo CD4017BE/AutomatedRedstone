@@ -395,4 +395,9 @@ public class Programmer extends AutomatedTile implements IGuiData {
 		int errCode, errArg, size = 1;
 	}
 
+	@Override
+	public void breakBlock() {
+		inventory.dropItems(this, 0, 1);
+	}
+
 }
