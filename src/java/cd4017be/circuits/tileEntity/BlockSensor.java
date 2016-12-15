@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
@@ -17,12 +16,12 @@ import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.Gui.TileContainer;
 import cd4017be.lib.templates.AutomatedTile;
 import cd4017be.lib.templates.Inventory;
+import cd4017be.lib.util.Utils;
 
 public class BlockSensor extends AutomatedTile implements IDirectionalRedstone, IGuiData {
 
 	private static final float[] DefTransf = {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0};
 	public int tickInt = 20;
-	private short timer = 0;
 	public final float[] transf = Arrays.copyOf(DefTransf, 12);
 	private final int[] output = new int[6];
 
@@ -32,8 +31,7 @@ public class BlockSensor extends AutomatedTile implements IDirectionalRedstone, 
 
 	@Override
 	public void update() {
-		if (worldObj.isRemote || ++timer < tickInt) return;
-		timer = 0;
+		if (worldObj.isRemote || worldObj.getTotalWorldTime() % tickInt != 0) return;
 		for (int i = 0; i < 6; i++) {
 			ItemStack item;
 			int nstate;
@@ -42,17 +40,14 @@ public class BlockSensor extends AutomatedTile implements IDirectionalRedstone, 
 			else nstate = 0;
 			if (output[i] != nstate) {
 				output[i] = nstate;
-				worldObj.notifyBlockOfStateChange(pos.offset(EnumFacing.VALUES[i]), Blocks.REDSTONE_TORCH);
+				Utils.updateRedstoneOnSide(this, nstate, EnumFacing.VALUES[i]);
 			}
 		}
 	}
 
-	public EnumFacing getSide(int var, int id) {return EnumFacing.VALUES[(var >> (id * 4) & 0xf) % 6];}
-
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
-		timer = nbt.getShort("timer");
 		int[] arr = nbt.getIntArray("cfg");
 		for (int i = 0; i < 12; i++) transf[i] = arr.length > i ? Float.intBitsToFloat(arr[i]) : DefTransf[i];
 		tickInt = arr.length > 12 ? arr[12] : 1;
@@ -60,7 +55,6 @@ public class BlockSensor extends AutomatedTile implements IDirectionalRedstone, 
 
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
-		nbt.setShort("timer", timer);
 		nbt.setIntArray("cfg", getSyncVariables());
 		nbt.setIntArray("out", output);
 		return super.writeToNBT(nbt);

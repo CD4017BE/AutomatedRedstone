@@ -2,6 +2,7 @@ package cd4017be.circuits.tileEntity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
@@ -9,6 +10,7 @@ import li.cil.oc.api.network.Environment;
 import li.cil.oc.api.network.Message;
 import li.cil.oc.api.network.Node;
 import cd4017be.api.circuits.IDirectionalRedstone;
+import cd4017be.api.circuits.IQuickRedstoneHandler;
 import cd4017be.api.computers.ComputerAPI;
 import cd4017be.lib.ModTileEntity;
 import cd4017be.lib.Gui.DataContainer;
@@ -17,12 +19,13 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fml.common.Optional;
 
 /**
@@ -30,7 +33,7 @@ import net.minecraftforge.fml.common.Optional;
  * @author CD4017BE
  */
 @Optional.Interface(modid = "OpenComputers", iface = "li.cil.oc.api.network.Environment")
-public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGuiData, ITickable, Environment {
+public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGuiData, ITickable, Environment, IQuickRedstoneHandler {
 
 	public static final byte 
 		C_NULL = 0x00,	//empty gates[0xf]
@@ -56,7 +59,7 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 		return name.length() > 0 ? "\"" + name + "\"" : super.getName();
 	}
 
-	public final int[] output = new int[6];
+	public final int[] ioCache = new int[6];
 	public byte[] ram = new byte[0];
 	public byte[] code = new byte[0];
 	public String name = "";
@@ -65,43 +68,55 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 	/** cfgI[0-47 6*8]: side*ramAddr, cfgI[48-59 6*2]: side*dir, cfgI[60]: on/off, cfgE[0-59 6*(5+5)]: side*(offset+size) */
 	public long cfgI, cfgE;
 	public int tickInt = 1;
-	private short timer = 0;
-	private boolean update;
+	private long nextUpdate = 0;
+	private byte update = 0;
 
 	@Override
 	public void update() {
 		if (worldObj.isRemote) return;
 		if (node != null) ComputerAPI.update(this, node, 0);
-		if ((cfgI & 1L<<60) != 0) timer++;
-		if (timer >= tickInt && ram.length > 0) {
-			timer = 0;
+		long t = worldObj.getTotalWorldTime();
+		if (t % tickInt == 0 && ram.length > 0 && (cfgI & 1L<<60) != 0) {
+			nextUpdate = t + (long)tickInt;
 			int rs;
-			if (update) {
-				for (int i = 0; i < 6; i++) 
+			if ((update & 64) != 0) {
+				for (int i = 0; i < 6; i++)
 					if (getDir(i) == 1) {
-						EnumFacing dir = EnumFacing.VALUES[i];
-						rs = worldObj.getRedstonePower(pos.offset(dir), dir);
+						rs = ioCache[i];
 						rs >>>= getExtIdx(i);
-						this.writeInt(getRamIdx(i), getSize(i), rs);
+						writeInt(getRamIdx(i), getSize(i), rs);
 					}
-				update = false;
+				update &= 63;
 			}
 			try {cpuTick();} catch (Exception e) {
 				e.printStackTrace();
 				code = new byte[0];
 				name = "§cERROR: invalid code!§8";
 			}
-			for (int i = 0; i < 6; i++) 
-				if (getDir(i) == 2) {
-					rs = this.readInt(getRamIdx(i), getSize(i)) << getExtIdx(i);
-					if (rs != output[i]) {
-						output[i] = rs;
-						worldObj.notifyBlockOfStateChange(pos.offset(EnumFacing.VALUES[i]), Blocks.REDSTONE_TORCH);
-					}
-				} else if (output[i] != 0) {
-					output[i] = 0;
-					worldObj.notifyBlockOfStateChange(pos.offset(EnumFacing.VALUES[i]), Blocks.REDSTONE_TORCH);
+			for (int i = 0; i < 6; i++) {
+				switch(getDir(i)) {
+				case 1:
+					if ((update >> i & 1) != 0) {
+						EnumFacing side = EnumFacing.VALUES[i];
+						rs = worldObj.getRedstonePower(pos.offset(side), side);
+						if (rs != ioCache[i]) {
+							ioCache[i] = rs;
+							update |= 64;
+						}
+					} continue;
+				case 2: rs = this.readInt(getRamIdx(i), getSize(i)) << getExtIdx(i); break;
+				default: rs = 0;
 				}
+				if (rs != ioCache[i]) {
+					ioCache[i] = rs;
+					EnumFacing side = EnumFacing.VALUES[i];
+					ICapabilityProvider te = getTileOnSide(side);
+					if (te != null && te instanceof IQuickRedstoneHandler)
+						((IQuickRedstoneHandler)te).onRedstoneStateChange(side.getOpposite(), rs, this);
+					else worldObj.notifyBlockOfStateChange(pos.offset(side), blockType);
+				}
+			}
+			update &= 64;
 		}
 	}
 
@@ -248,10 +263,12 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 		return (code[i++] & 0xff) | (code[i++] & 0xff) << 8 | (code[i++] & 0xff) << 16 | (code[i] & 0xff) << 24;
 	}
 
+	/** @return 0: none, 1: input, 2: output */
 	public int getDir(int s) {return (int)(cfgI >>> (48 + s * 2)) & 3;}
 	public int getRamIdx(int s) {return (int)(cfgI >>> (s * 8)) & 0xff;}
 	public int getExtIdx(int s) {return (int)(cfgE >>> (s * 10)) & 0x1f;}
 	public int getSize(int s) {return ((int)(cfgE >>> (s * 10 + 5)) & 0x1f) + 1;}
+	/** @param v 0: none, 1: input, 2: output */
 	public void setDir(int s, int v) {int p = 48 + s * 2; cfgI &= ~(3L << p); cfgI |= (long)(v & 3) << p;}
 	public void setRamIdx(int s, int v) {int p = s * 8; cfgI &= ~(0xffL << p); cfgI |= (long)(v & 0xff) << p;}
 	public void setExtIdx(int s, int v) {int p = s * 10; cfgE &= ~(0x1fL << p); cfgE |= (long)(v & 0x1f) << p;}
@@ -271,7 +288,7 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 			cfgI = data.readLong();
 			cfgE = data.readLong();
 			if (this.usedIO() > (var & 0xff)) cfgI &= 0xf000ffffffffffffL;
-			update = true;
+			update = 127;
 		} else if (cmd == 1) {
 			cfgI ^= 1L<<60;
 		} else if (cmd == 2) {
@@ -280,7 +297,7 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 			else if (tickInt > 1200) tickInt = 1200;
 		} else if (cmd == 3) {
 			Arrays.fill(ram, (byte)0);
-			update = true;
+			update = 127;
 		} else if (cmd == 4) {
 			byte i = data.readByte();
 			ram[i >> 3 & 0x1f] ^= 1 << (i & 7);
@@ -296,8 +313,7 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 		nbt.setInteger("tick", tickInt);
 		nbt.setLong("cfgI", cfgI);
 		nbt.setLong("cfgE", cfgE);
-		nbt.setShort("timer", timer);
-		nbt.setIntArray("out", output);
+		nbt.setIntArray("out", ioCache);
 		if (node != null) ComputerAPI.saveNode(node, nbt);
 		return super.writeToNBT(nbt);
 	}
@@ -310,14 +326,13 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 		byte[] b = nbt.getByteArray("ram");
 		System.arraycopy(b, 0, ram, 0, Math.min(ram.length, b.length));
 		int[] i = nbt.getIntArray("out");
-		System.arraycopy(i, 0, output, 0, Math.min(output.length, i.length));
+		System.arraycopy(i, 0, ioCache, 0, Math.min(ioCache.length, i.length));
 		code = nbt.getByteArray("code");
 		name = nbt.getString("name");
-		timer = nbt.getShort("timer");
 		tickInt = nbt.getInteger("tick");
 		cfgI = nbt.getLong("cfgI");
 		cfgE = nbt.getLong("cfgE");
-		update = true;
+		update = 127;
 		if (node != null) ComputerAPI.readNode(node, nbt);
 	}
 
@@ -357,12 +372,26 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 
 	@Override
 	public int redstoneLevel(int s, boolean str) {
-		return str ? 0 : output[s];
+		return str || getDir(s) != 2 ? 0 : ioCache[s];
+	}
+
+	@Override
+	public void onRedstoneStateChange(EnumFacing side, int value, TileEntity src) {
+		if (worldObj.getTotalWorldTime() < nextUpdate && getDir(side.ordinal()) == 1) {
+			ioCache[side.ordinal()] = value;
+			update |= 64;
+		} else 
+			update |= 1 << side.ordinal();
 	}
 
 	@Override
 	public void onNeighborBlockChange(Block b) {
-		update = true;//TODO time synchronization
+		for (EnumFacing s : EnumFacing.VALUES) {
+			if (getDir(s.ordinal()) != 1) continue;
+			int rs = worldObj.getRedstonePower(pos.offset(s), s);
+			if (rs != ioCache[s.ordinal()])
+				onRedstoneStateChange(s, rs, null);
+		}
 	}
 
 	@Override

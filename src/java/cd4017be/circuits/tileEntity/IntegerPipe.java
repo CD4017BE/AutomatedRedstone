@@ -1,17 +1,18 @@
 package cd4017be.circuits.tileEntity;
 
 import cd4017be.api.circuits.IDirectionalRedstone;
+import cd4017be.api.circuits.IQuickRedstoneHandler;
 import cd4017be.api.circuits.IntegerComp;
 import cd4017be.api.circuits.SharedInteger;
 import cd4017be.lib.templates.IPipe;
 import cd4017be.lib.templates.MutiblockTile;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -20,7 +21,7 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
  *
  * @author CD4017BE
  */
-public class IntegerPipe extends MutiblockTile<IntegerComp, SharedInteger> implements IPipe {
+public class IntegerPipe extends MutiblockTile<IntegerComp, SharedInteger> implements IPipe, IQuickRedstoneHandler {
 
 	private Cover cover = null;
 
@@ -30,18 +31,21 @@ public class IntegerPipe extends MutiblockTile<IntegerComp, SharedInteger> imple
 	}
 
 	@Override
+	public void onRedstoneStateChange(EnumFacing side, int value, TileEntity src) {
+		comp.updateInput();
+	}
+
+	@Override
 	public void onNeighborBlockChange(Block b) {
-		if (b != Blocks.REDSTONE_TORCH) {
-			ICapabilityProvider te;
-			byte d;
-			short io = comp.rsIO;
-			for (EnumFacing s : EnumFacing.VALUES)
-				if ((te = this.getTileOnSide(s)) != null && te instanceof IDirectionalRedstone && (d = ((IDirectionalRedstone)te).getRSDirection(s.getOpposite())) != 0)
-					io |= ((d & 1) << 1 | (d & 2) >> 1) << (s.ordinal() * 2);
-			if (io != comp.rsIO) {
-				comp.network.setIO(comp, io);
-				this.markUpdate();
-			}
+		ICapabilityProvider te;
+		byte d;
+		short io = comp.rsIO;
+		for (EnumFacing s : EnumFacing.VALUES)
+			if ((te = this.getTileOnSide(s)) != null && te instanceof IDirectionalRedstone && (d = ((IDirectionalRedstone)te).getRSDirection(s.getOpposite())) != 0)
+				io |= ((d & 1) << 1 | (d & 2) >> 1) << (s.ordinal() * 2);
+		if (io != comp.rsIO) {
+			comp.network.setIO(comp, io);
+			this.markUpdate();
 		}
 		comp.updateInput();
 	}
