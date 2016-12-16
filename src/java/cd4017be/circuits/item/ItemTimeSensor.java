@@ -57,8 +57,8 @@ public class ItemTimeSensor extends DefaultItem implements ISensor, IGuiItem {
 	}
 
 	@Override
-	public float measure(ItemStack sensor, World world, BlockPos det) {
-		if (!sensor.hasTagCompound()) return 0F;
+	public double measure(ItemStack sensor, World world, BlockPos det) {
+		if (!sensor.hasTagCompound()) return 0D;
 		NBTTagCompound nbt = sensor.getTagCompound();
 		BlockPos pos = BlockPos.fromLong(nbt.getLong("link"));
 		EnumFacing side = EnumFacing.getFront(nbt.getByte("side"));
@@ -75,7 +75,7 @@ public class ItemTimeSensor extends DefaultItem implements ISensor, IGuiItem {
 				nbt.setLong("int", time - ref);
 			}
 		}
-		return (float)(mode == 3 ? interv : time - ref) / 1000F;
+		return (double)(mode == 3 ? interv : time - ref) / 1000D;
 	}
 
 	private long getTime(byte src, World world) {
