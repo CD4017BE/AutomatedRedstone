@@ -3,6 +3,7 @@ package cd4017be.circuits.render;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.entity.RenderManager;
@@ -15,6 +16,7 @@ import org.lwjgl.opengl.GL11;
 import cd4017be.circuits.tileEntity.Display8bit;
 import cd4017be.circuits.tileEntity.MultiLever;
 import cd4017be.lib.ModTileEntity;
+import cd4017be.lib.render.Util;
 
 /**
  *
@@ -65,13 +67,17 @@ public class RSInterfaceRenderer extends TileEntitySpecialRenderer<ModTileEntity
 
 	@Override
 	public void renderTileEntityAt(ModTileEntity te, double x, double y, double z, float partialTicks, int destroyStage) {
-		GL11.glPushMatrix();
-		GL11.glTranslated(x + 0.5D, y + 0.5D, z + 0.5D);
 		GlStateManager.color(1, 1, 1, 1);
 		GlStateManager.disableLighting();
+		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240.0F, 240.0F);
+		GL11.glPushMatrix();
+		Util.moveAndOrientToBlock(x, y, z, te.getOrientation());
+		/*
+		GL11.glTranslated(x + 0.5D, y + 0.5D, z + 0.5D);
 		int s = te.getBlockMetadata();
 		float a = s == 4 ? 0F : s == 5 ? 180F : s == 6 ? 90F : -90F;
 		GL11.glRotatef(a, 0, 1, 0);
+		*/
 		GL11.glScalef(-0.0625F, -0.0625F, 0.0625F);
 		GL11.glTranslatef(-8F, -8F, -8F);
 		if (te instanceof MultiLever) {

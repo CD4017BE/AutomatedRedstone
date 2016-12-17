@@ -1,4 +1,4 @@
-#V:00100
+#V:00102
 @PRE_INIT
 add("item", 1, "emptySensor");
 add("item", 200, "IORelay");
@@ -20,7 +20,8 @@ add("shaped", it("rsp1bitN", 12), "000/111/000", it("minecraft:iron_bars"), "dus
 if(hasit("RstMetall")) {add("shaped", it("rsp1bitN", 8), "000", it("RstMetall"));}
 add("shaped", it("rsp1bitI", 2), "001", it("rsp1bitN"), "dustRedstone");
 add("shaped", it("rsp1bitO", 2), "001", it("rsp1bitN"), it("minecraft:redstone_torch"));
-add("shaped", it("tile.blockSensor", 1), " 3 /010/ 2 ", slab, "gemQuartz", it("tile.rsp8bit"), it("minecraft:chest"));
+add("shaped", it("tile.blockSensor"), " 3 /010/ 2 ", slab, "gemQuartz", it("tile.rsp8bit"), it("minecraft:chest"));
+add("shaped", it("tile.oszillograph"), "222/010", it("m.CalcPrc"), it("tile.display8bit"), it("minecraft:glass_pane"));
 add("shaped", it("tile.invConnector", 12), "000/121/000", "gemQuartz", "blockGlass", it("minecraft:ender_eye"));
 add("shaped", it("m.emptySensor", 4), " 0 /010/232", "nuggetGold", it("minecraft:paper"), "ingotIron", it("minecraft:comparator"));
 add("shapeless", it("item.itemSensor"), it("m.emptySensor"), it("minecraft:chest"));

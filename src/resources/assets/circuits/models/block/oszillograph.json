@@ -1,0 +1,10 @@
+{
+	"parent": "circuits:block/base1",
+    "textures": {
+        "top": "circuits:blocks/display8bit0",
+		"bot": "circuits:blocks/display8bit1",
+		"front": "circuits:blocks/oszi2",
+		"back": "circuits:blocks/display8bit3",
+		"side": "circuits:blocks/display8bit3"
+    }
+}

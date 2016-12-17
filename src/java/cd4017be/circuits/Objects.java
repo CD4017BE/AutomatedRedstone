@@ -15,6 +15,7 @@ public class Objects {
 	public static TileBlock lever8bit;
 	public static TileBlock display8bit;
 	public static TileBlock blockSensor;
+	public static TileBlock oszillograph;
 	public static BlockInvConnector invConnector;
 	
 	public static ItemProgramm circuitPlan;

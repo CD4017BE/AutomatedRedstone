@@ -1,0 +1,8 @@
+{
+    "variants": {
+        "orient=n": { "model": "circuits:oszillograph" },
+		"orient=e": { "model": "circuits:oszillograph" , "y": 90 },
+		"orient=s": { "model": "circuits:oszillograph" , "y": 180 },
+		"orient=w": { "model": "circuits:oszillograph" , "y": 270 }
+    }
+}
