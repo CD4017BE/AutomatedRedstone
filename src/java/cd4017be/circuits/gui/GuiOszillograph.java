@@ -10,6 +10,7 @@ import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.Gui.GuiMachine;
 import cd4017be.lib.Gui.TileContainer;
 import cd4017be.lib.templates.AutomatedTile;
+import cd4017be.lib.util.Utils;
 
 public class GuiOszillograph extends GuiMachine {
 
@@ -29,36 +30,42 @@ public class GuiOszillograph extends GuiMachine {
 		super.initGui();
 		for (int i = 0; i < 8; i++) {
 			boolean t = (i & 1) != 0;
-			guiComps.add(new TextField(i, 51, (t?15:16) + i * 9, 63, 8, 11).color(0xff40c0c0, 0xffff4040).setTooltip(t ? "oszi.add" : "oszi.div"));
+			guiComps.add(new TextField(i, 105, (t?15:16) + i * 9, 63, 8, 11).color(0xff40c0c0, 0xffff4040).setTooltip(t ? "oszi.add" : "oszi.div"));
 		}
-		for (int i = 0; i < 4; i++) guiComps.add(new Button(i + 8, 8, 15 + i * 18, 16, 9, 1).texture(176, 0).setTooltip("oszi.rsIn"));
+		for (int i = 0; i < 4; i++) guiComps.add(new Button(i + 8, 27, 24 + i * 18, 16, 9, 1).texture(176, 0).setTooltip("oszi.rsIn"));
 		for (int i = 0; i < 4; i++) guiComps.add(new Button(i + 12, 8, 24 + i * 18, 16, 9, 0).texture(192, i * 18).setTooltip("oszi.on"));
-		for (int i = 0; i < 4; i++) guiComps.add(new TextField(i + 16, 116, 16 + i * 18, 52, 7, 12).color(OszillographRenderer.textColors[i], 0xffffffff).setTooltip("oszi.info"));
-		guiComps.add(new Button(20, 7, 87, 18, 5, -1));//+1s
-		guiComps.add(new Button(21, 7, 100, 18, 5, -1));//-1s
-		guiComps.add(new Button(22, 25, 87, 18, 5, -1));//+1t
-		guiComps.add(new Button(23, 25, 100, 18, 5, -1));//-1t
-		guiComps.add(new Text(24, 7, 92, 36, 8, "oszi.int").center().setTooltip("oszi.time"));
-		guiComps.add(new Button(25, 44, 87, 16, 9, 0).texture(208, 0).setTooltip("oszi.trigger#"));
-		guiComps.add(new Button(26, 62, 87, 16, 9, 1).texture(176, 0).setTooltip("oszi.src"));
-		guiComps.add(new Button(27, 80, 87, 16, 9, 0).texture(192, 72).setTooltip("oszi.comp#"));
-		guiComps.add(new TextField(28, 44, 97, 52, 7, 8).color(0xff40c0c0, 0xffff4040).setTooltip("oszi.level"));
+		for (int i = 0; i < 4; i++) guiComps.add(new TextField(i + 16, 8, 16 + i * 18, 70, 7, 16).color(OszillographRenderer.textColors[i], 0xffffffff).setTooltip("oszi.info"));
+		for (int i = 0; i < 4; i++) guiComps.add(new TextField(i + 20, 45, 25 + i * 18, 11, 7, 2).setTooltip("circuit.ext"));
+		for (int i = 0; i < 4; i++) guiComps.add(new TextField(i + 24, 58, 25 + i * 18, 11, 7, 2).setTooltip("circuit.size"));
+		for (int i = 0; i < 4; i++) guiComps.add(new Button(i + 28, 71, 24 + i * 18, 7, 9, 0).texture(208, 36).setTooltip("oszi.signed#"));
+		guiComps.add(new Button(32, 7, 87, 18, 5, -1));//+1s
+		guiComps.add(new Button(33, 7, 100, 18, 5, -1));//-1s
+		guiComps.add(new Button(34, 25, 87, 18, 5, -1));//+1t
+		guiComps.add(new Button(35, 25, 100, 18, 5, -1));//-1t
+		guiComps.add(new Text(36, 7, 92, 36, 8, "oszi.int").center().setTooltip("oszi.time"));
+		guiComps.add(new Button(37, 44, 91, 16, 9, 0).texture(208, 0).setTooltip("oszi.trigger#"));
+		guiComps.add(new Button(38, 62, 91, 16, 9, 1).texture(176, 0).setTooltip("oszi.src"));
+		guiComps.add(new Button(39, 80, 91, 16, 9, 0).texture(192, 72).setTooltip("oszi.comp#"));
+		guiComps.add(new TextField(40, 98, 92, 63, 7, 11).color(0xff40c0c0, 0xffff4040).setTooltip("oszi.level"));
 	}
 
 	@Override
 	protected Object getDisplVar(int id) {
 		if (id < 8) return Float.toString(tile.transf[id]);
-		else if (id < 12) return EnumFacing.VALUES[(tile.mode >> (id - 8) * 4 & 7) % 6];
-		else if (id < 16) return tile.mode >> ((id - 12) * 4 + 3) & 1;
+		else if (id < 12) return EnumFacing.VALUES[(int)(tile.cfg >> (id - 8) * 16 + 1 & 7) % 6];
+		else if (id < 16) return (int)(tile.cfg >> (id - 12) * 16) & 1;
 		else if (id < 20) return tile.info[id - 16];
+		else if (id < 24) return "" + (int)(tile.cfg >> (id - 20) * 16 + 4 & 31);
+		else if (id < 28) return "" + ((int)(tile.cfg >> (id - 24) * 16 + 9 & 31) + 1);
+		else if (id < 32) return (int)(tile.cfg >> (id - 28) * 16 + 14) & 1;
 		else switch(id) {
-		case 24: return (float)tile.tickInt / 2F;
-		case 25: return tile.mode >> 16 & 3;
-		case 26: {
-			int m = tile.mode >> 16 & 3;
-			return m == 1 ? EnumFacing.VALUES[tile.mode >> 18 & 7] : m == 2 ? (tile.mode >> 18 & 7) + 6 : 10;
-		} case 27: return tile.mode >> 21 & 1;
-		case 28: return Float.toString(tile.triggerLevel);
+		case 36: return (float)tile.tickInt / 2F;
+		case 37: return tile.mode & 3;
+		case 38: {
+			int m = tile.mode & 3;
+			return m == 1 ? EnumFacing.VALUES[tile.mode >> 2 & 7] : m == 2 ? (tile.mode >> 2 & 7) + 6 : 10;
+		} case 39: return tile.mode >> 5 & 1;
+		case 40: return Float.toString(tile.triggerLevel);
 		default: return null;
 		}
 	}
@@ -70,34 +77,29 @@ public class GuiOszillograph extends GuiMachine {
 			dos.writeByte(AutomatedTile.CmdOffset + id);
 			dos.writeFloat(Float.parseFloat((String)obj));
 		} catch(NumberFormatException e){return;}
-		else if (id < 12) {
-			int i = (id - 8) * 4;
-			dos.writeByte(AutomatedTile.CmdOffset + 9).writeInt(tile.mode = tile.mode & ~(7 << i) | ((tile.mode >> i & 7) + ((Integer)obj == 0 ? 1 : 5)) % 6 << i);
-		} else if (id < 16)
-			dos.writeByte(AutomatedTile.CmdOffset + 9).writeInt(tile.mode ^= 8 << (id - 12) * 4);
-		else if (id < 20) {
-			dos.writeByte(AutomatedTile.CmdOffset + id - 6);
-			dos.writeString((String)obj);
-		} else switch(id) {
-		case 20: case 22:
-			dos.writeByte(AutomatedTile.CmdOffset + 8).writeInt(tile.tickInt = Math.min(1200, tile.tickInt + (id == 20 ? 20 : 1)));
-			break;
-		case 21: case 23:
-			dos.writeByte(AutomatedTile.CmdOffset + 8).writeInt(tile.tickInt = Math.max(1, tile.tickInt - (id == 21 ? 20 : 1)));
-			break;
-		case 25:
-			dos.writeByte(AutomatedTile.CmdOffset + 9).writeInt(tile.mode = tile.mode & 0xfcffff | ((tile.mode >> 16 & 3) + ((Integer)obj == 0 ? 1 : 3)) % 4 << 16);
-			break;
-		case 26: 
-			int m = tile.mode >> 16 & 3;
+		else if (id < 12) dos.writeByte(AutomatedTile.CmdOffset + 15).writeLong(tile.cfg = Utils.cycleState(tile.cfg, (id - 8) * 16 + 1, 7, 6, (Integer)obj == 0));
+		else if (id < 16) dos.writeByte(AutomatedTile.CmdOffset + 15).writeLong(tile.cfg ^= 1L << (id - 12) * 16);
+		else if (id < 20) {dos.writeByte(AutomatedTile.CmdOffset + id - 6); dos.writeString((String)obj);}
+		else if (id < 24) try {
+			dos.writeByte(AutomatedTile.CmdOffset + 15).writeLong(tile.cfg = Utils.setState(tile.cfg, (id - 20) * 16 + 4, 31, Integer.parseInt((String)obj)));
+		} catch(NumberFormatException e){return;}
+		else if (id < 28) try {
+			dos.writeByte(AutomatedTile.CmdOffset + 15).writeLong(tile.cfg = Utils.setState(tile.cfg, (id - 24) * 16 + 9, 31, Integer.parseInt((String)obj) - 1));
+		} catch(NumberFormatException e){return;}
+		else if (id < 32) 
+			dos.writeByte(AutomatedTile.CmdOffset + 15).writeLong(tile.cfg ^= 0x4000L << (id - 28) * 16);
+		else switch(id) {
+		case 32: case 34: dos.writeByte(AutomatedTile.CmdOffset + 8).writeInt(tile.tickInt = Math.min(1200, tile.tickInt + (id == 32 ? 20 : 1))); break;
+		case 33: case 35: dos.writeByte(AutomatedTile.CmdOffset + 8).writeInt(tile.tickInt = Math.max(1, tile.tickInt - (id == 33 ? 20 : 1))); break;
+		case 37: dos.writeByte(AutomatedTile.CmdOffset + 9).writeInt(tile.mode = Utils.cycleState(tile.mode, 0, 3, 4, (Integer)obj == 0)); break;
+		case 38: 
+			int m = tile.mode & 3;
 			m = m == 1 ? 6 : m == 2 ? 4 : 0;
 			if (m == 0) return;
-			dos.writeByte(AutomatedTile.CmdOffset + 9).writeInt(tile.mode = tile.mode & 0xe3ffff | ((tile.mode >> 18 & 3) + ((Integer)obj == 0 ? 1 : m - 1)) % m << 18);
+			dos.writeByte(AutomatedTile.CmdOffset + 9).writeInt(tile.mode = Utils.cycleState(tile.mode, 2, 7, m, (Integer)obj == 0));
 			break;
-		case 27:
-			dos.writeByte(AutomatedTile.CmdOffset + 9).writeInt(tile.mode ^= 0x200000);
-			break;
-		case 28: try {
+		case 39: dos.writeByte(AutomatedTile.CmdOffset + 9).writeInt(tile.mode ^= 0x20); break;
+		case 40: try {
 			dos.writeByte(AutomatedTile.CmdOffset + 14);
 			dos.writeFloat(Float.parseFloat((String)obj));
 			break;

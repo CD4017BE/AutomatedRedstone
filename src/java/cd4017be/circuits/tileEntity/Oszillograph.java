@@ -24,6 +24,7 @@ import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.Gui.TileContainer;
 import cd4017be.lib.templates.AutomatedTile;
 import cd4017be.lib.templates.Inventory;
+import cd4017be.lib.util.Utils;
 
 public class Oszillograph extends AutomatedTile implements IGuiData, IDirectionalRedstone {
 
@@ -31,6 +32,8 @@ public class Oszillograph extends AutomatedTile implements IGuiData, IDirectiona
 	public static final int Size = 60;
 	public final int[][] points = new int[4][];
 	public final float[] transf = Arrays.copyOf(DefTransf, 8);
+	/** bits[0-63 4*(1+3+5+5+1+1)]: channel*(on + dir + bitOfs + bitSize + signed + emptyBit) */
+	public long cfg = 0x3e003e003e003e00L;
 	public int idx = 59, tickInt = 1, mode = 0;
 	public final String[] info = new String[]{"", "", "", ""};
 	public float triggerLevel = 0;
@@ -48,15 +51,11 @@ public class Oszillograph extends AutomatedTile implements IGuiData, IDirectiona
 		idx %= 60;
 		for (int i = 0; i < points.length; i++) {
 			if (points[i] == null) continue;
-			int c = mode >> i * 4 & 0x7;
 			ItemStack item;
 			double nstate;
 			if ((item = inventory.items[i]) != null && item.getItem() instanceof ISensor) {
 				nstate = ((ISensor)item.getItem()).measure(item, worldObj, pos);
-			} else if (c < 6) {
-				EnumFacing side = EnumFacing.VALUES[c];
-				nstate = worldObj.getRedstonePower(pos.offset(side), side);
-			} else nstate = 0;
+			} else nstate = getRedstone((int)(cfg >> i * 16 + 1) & 0x3fff);
 			nstate /= transf[i * 2];
 			nstate += transf[i * 2 + 1];
 			points[i][idx] = Float.floatToIntBits(Math.min(0.5F, Math.max(-0.5F, (float)nstate / 6F)));
@@ -64,12 +63,24 @@ public class Oszillograph extends AutomatedTile implements IGuiData, IDirectiona
 		markUpdate();
 	}
 
+	private double getRedstone(int cfg) {
+		EnumFacing side = EnumFacing.VALUES[(cfg & 7) % 6];
+		long r = worldObj.getRedstonePower(pos.offset(side), side);
+		int shift = cfg >> 3 & 0x1f, size = cfg >> 8 & 0x1f;
+		r = r >> shift & 0xffffffffL >>> (31 - size);
+		if ((cfg & 0x2000) != 0) {
+			long sgnMask = 1L << size;
+			if ((r & sgnMask) != 0) return (r & ~sgnMask) - sgnMask;
+		}
+		return r;
+	}
+
 	private boolean checkTrigger(long t) {
 		if (idx > 0) return true;
-		int m = mode >> 16 & 3;
+		int m = mode & 3;
 		if (m == 3) return false;
 		if (m == 0) return t / (long)tickInt % 60L == 0;
-		int s = mode >> 18 & 7;
+		int s = mode >> 2 & 7;
 		double x;
 		ItemStack item;
 		if (m == 1) {
@@ -78,7 +89,7 @@ public class Oszillograph extends AutomatedTile implements IGuiData, IDirectiona
 		} else if ((item = inventory.items[s % 4]) != null && item.getItem() instanceof ISensor) {
 			x = ((ISensor)item.getItem()).measure(item, worldObj, pos);
 		} else x = 0;
-		return (mode & 0x200000) != 0 ? x < triggerLevel : x > triggerLevel;
+		return (mode & 0x20) != 0 ? x < triggerLevel : x > triggerLevel;
 	}
 
 	@Override
@@ -90,15 +101,17 @@ public class Oszillograph extends AutomatedTile implements IGuiData, IDirectiona
 			else if (tickInt > 1200) tickInt = 1200;
 		} else if (cmd == 9) {
 			mode = dis.readInt();
-			for (int i = 0; i < 4; i++) {
-				boolean active = (mode >> i * 4 & 8) != 0;
-				if (active && points[i] == null) points[i] = new int[Size];
-				else if (!active && points[i] != null) points[i] = null;
-			}
 		} else if (cmd < 14) {
 			info[cmd - 10] = dis.readStringFromBuffer(16);
 		} else if (cmd == 14) {
 			triggerLevel = dis.readFloat();
+		} else if (cmd == 15) {
+			cfg = dis.readLong();
+			for (int i = 0; i < 4; i++) {
+				boolean active = (cfg >> i * 16 & 1) != 0;
+				if (active && points[i] == null) points[i] = new int[Size];
+				else if (!active && points[i] != null) points[i] = null;
+			}
 		}
 		markUpdate();
 	}
@@ -111,6 +124,7 @@ public class Oszillograph extends AutomatedTile implements IGuiData, IDirectiona
 		if (tickInt <= 0) tickInt = 1;
 		idx = nbt.getShort("px");
 		mode = nbt.getInteger("mode");
+		cfg = nbt.getLong("cfgI");
 		triggerLevel = nbt.getFloat("level");
 		for (int i = 0; i < 4; i++) {
 			info[i] = nbt.getString("inf" + i);
@@ -130,6 +144,7 @@ public class Oszillograph extends AutomatedTile implements IGuiData, IDirectiona
 		nbt.setShort("px", (short)idx);
 		nbt.setShort("tick", (short)tickInt);
 		nbt.setInteger("mode", mode);
+		nbt.setLong("cfgI", cfg);
 		nbt.setFloat("level", triggerLevel);
 		for (int i = 0; i < 4; i++) {
 			nbt.setString("inf" + i, info[i]);
@@ -143,20 +158,22 @@ public class Oszillograph extends AutomatedTile implements IGuiData, IDirectiona
 	public void initContainer(DataContainer container) {
 		TileContainer cont = (TileContainer)container;
 		for (int i = 0; i < 4; i++)
-			cont.addItemSlot(new SlotItemHandler(inventory, i, 26, 16 + i * 18));
+			cont.addItemSlot(new SlotItemHandler(inventory, i, 80, 16 + i * 18));
 		cont.addPlayerInventory(8, 122);
 		super.initContainer(container);
 	}
 
 	@Override
 	public int[] getSyncVariables() {
-		int[] arr = new int[15];
+		int[] arr = new int[17];
 		for (int i = 0; i < 8; i++) arr[i] = Float.floatToIntBits(transf[i]);
 		for (int i = 0; i < 4; i++)
 			if (points[i] != null) arr[i + 8] = points[i][idx];
 		arr[12] = tickInt;
 		arr[13] = mode;
 		arr[14] = Float.floatToIntBits(triggerLevel);
+		arr[15] = (int)cfg;
+		arr[16] = (int)(cfg >> 32);
 		return arr;
 	}
 
@@ -166,6 +183,8 @@ public class Oszillograph extends AutomatedTile implements IGuiData, IDirectiona
 		else if (i == 12) tickInt = v;
 		else if (i == 13) mode = v;
 		else if (i == 14) triggerLevel = Float.intBitsToFloat(v);
+		else if (i == 15) cfg = Utils.setState(cfg, 0, 0xffffffffL, v);
+		else if (i == 16) cfg = Utils.setState(cfg, 32, 0xffffffffL, v);
 	}
 
 	@Override

@@ -49,6 +49,8 @@ public class OszillographRenderer extends TileEntitySpecialRenderer<Oszillograph
 		Tessellator.getInstance().draw();
 		renderInfoTexts(te);
 		GlStateManager.popMatrix();
+		GlStateManager.disableBlend();
+		GlStateManager.depthMask(true);
 	}
 
 	private void renderInfoTexts(Oszillograph te) {
