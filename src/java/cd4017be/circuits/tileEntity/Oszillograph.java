@@ -233,7 +233,6 @@ public class Oszillograph extends AutomatedTile implements IGuiData, IDirectiona
 		}
 	}
 
-	@SideOnly(Side.CLIENT)
 	public final int[][] vertexData = new int[4][];
 
 	@Override
