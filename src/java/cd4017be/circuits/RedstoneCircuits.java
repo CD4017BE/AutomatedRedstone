@@ -1,11 +1,12 @@
 package cd4017be.circuits;
 
-import cd4017be.api.recipes.RecipeAPI;
+import cd4017be.api.recipes.RecipeScriptContext;
 import cd4017be.circuits.block.*;
 import cd4017be.circuits.item.*;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.DefaultItemBlock;
 import cd4017be.lib.TileBlock;
+import cd4017be.lib.script.ScriptFiles.Version;
 import cd4017be.lib.templates.BlockPipe;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.Instance;
@@ -32,12 +33,16 @@ public class RedstoneCircuits {
 
 	public static CreativeTabs tabCircuits;
 
+	public RedstoneCircuits() {
+		RecipeScriptContext.scriptRegistry.add(new Version("automatedRedstone", 500, "/assets/circuits/config/recipes.rcp"));
+	}
+
 	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		tabCircuits = new CreativeTabCircuits("circuits");
 		initBlocks();
 		initItems();
-		RecipeAPI.registerScript(event, "automatedRedstone.rcp", "/assets/circuits/config/recipes.rcp");
+		RecipeScriptContext.instance.run("automatedRedstone.PRE_INIT");
 	}
 
 	@Mod.EventHandler

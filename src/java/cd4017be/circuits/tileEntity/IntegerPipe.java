@@ -5,7 +5,7 @@ import cd4017be.api.circuits.IQuickRedstoneHandler;
 import cd4017be.api.circuits.IntegerComp;
 import cd4017be.api.circuits.SharedInteger;
 import cd4017be.lib.templates.IPipe;
-import cd4017be.lib.templates.MutiblockTile;
+import cd4017be.lib.templates.MultiblockTile;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -21,7 +21,7 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
  *
  * @author CD4017BE
  */
-public class IntegerPipe extends MutiblockTile<IntegerComp, SharedInteger> implements IPipe, IQuickRedstoneHandler {
+public class IntegerPipe extends MultiblockTile<IntegerComp, SharedInteger> implements IPipe, IQuickRedstoneHandler {
 
 	private Cover cover = null;
 
