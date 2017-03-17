@@ -34,7 +34,7 @@ public class RedstoneCircuits {
 	public static CreativeTabs tabCircuits;
 
 	public RedstoneCircuits() {
-		RecipeScriptContext.scriptRegistry.add(new Version("automatedRedstone", 500, "/assets/circuits/config/recipes.rcp"));
+		RecipeScriptContext.scriptRegistry.add(new Version("automatedRedstone", 200, "/assets/circuits/config/recipes.rcp"));
 	}
 
 	@Mod.EventHandler

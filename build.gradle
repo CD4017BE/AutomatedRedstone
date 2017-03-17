@@ -23,6 +23,9 @@ version = "${mc_version}-${mod_version}"
 group= "com.cd4017be.circuits" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "AutomatedRedstone"
 
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
 sourceSets {
     main {
         java { srcDirs = ["$projectDir/src/java"] }
