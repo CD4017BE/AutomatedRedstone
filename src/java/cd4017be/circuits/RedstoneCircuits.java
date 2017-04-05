@@ -63,6 +63,7 @@ public class RedstoneCircuits {
 		new DefaultItemBlock((invConnector = new BlockInvConnector("invConnector", Material.GLASS, SoundType.GLASS)).setCreativeTab(tabCircuits).setHardness(0.5F).setResistance(10F));
 		new DefaultItemBlock((blockSensor = TileBlock.create("blockSensor", Material.ROCK, SoundType.STONE, 0x10)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F));
 		new DefaultItemBlock((oszillograph = TileBlock.create("oszillograph", Material.ROCK, SoundType.STONE, 0x1)).setCreativeTab(tabCircuits).setLightLevel(0.375F).setHardness(1.5F).setResistance(10F));
+		new DefaultItemBlock((designer = TileBlock.create("designer", Material.IRON, SoundType.METAL, 0x1)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F));
 		proxy.registerBlocks();
 	}
 

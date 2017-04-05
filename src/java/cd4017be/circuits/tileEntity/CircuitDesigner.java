@@ -1,0 +1,511 @@
+package cd4017be.circuits.tileEntity;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import com.mojang.authlib.GameProfile;
+
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
+import net.minecraft.nbt.NBTTagString;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.items.SlotItemHandler;
+import cd4017be.circuits.Objects;
+import cd4017be.lib.ModTileEntity;
+import cd4017be.lib.Gui.DataContainer;
+import cd4017be.lib.Gui.DataContainer.IGuiData;
+import cd4017be.lib.Gui.TileContainer;
+import cd4017be.lib.templates.LinkedInventory;
+
+public class CircuitDesigner extends ModTileEntity implements IGuiData {
+
+	public ItemStack dataItem;
+	private GameProfile lastPlayer;
+	public Module module0 = null, moduleL = null, selMod = null;
+	public ArrayList<Module> outputs;
+	public long modified = 1;
+	public boolean renderAll, mode;
+	ByteBuf data = Unpooled.buffer();
+	public String name;
+
+	@Override
+	public void readFromNBT(NBTTagCompound nbt) {
+		super.readFromNBT(nbt);
+		readNBT(nbt);
+	}
+
+	@Override
+	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+		writeNBT(nbt);
+		return super.writeToNBT(nbt);
+	}
+
+	private NBTTagCompound writeNBT(NBTTagCompound nbt) {
+		byte[] b = new byte[data.readableBytes()];
+		data.readBytes(b);
+		data.resetReaderIndex();
+		nbt.setByteArray("data", b);
+		nbt.setString("name", name);
+		return nbt;
+	}
+
+	private void readNBT(NBTTagCompound nbt) {
+		data.clear();
+		byte[] b = nbt.getByteArray("data");
+		data.writeBytes(b);
+		name = nbt.getString("name");
+	}
+
+	@Override
+	public void onPlayerCommand(PacketBuffer dis, EntityPlayerMP player) throws IOException {
+		byte cmd = dis.readByte();
+		if (cmd == 0) {
+			data.clear();
+			data.writeBytes(dis);
+			lastPlayer = player.getGameProfile();
+			modify();
+		} else if (cmd == 1) {
+			if (dataItem != null && dataItem.getItem() == Objects.circuitPlan) {
+				dataItem.setTagCompound(writeNBT(new NBTTagCompound()));
+			}
+		} else if (cmd == 2) {
+			if (dataItem != null && dataItem.getItem() == Objects.circuitPlan && dataItem.hasTagCompound()) {
+				readNBT(dataItem.getTagCompound());
+			} else {
+				data.clear();
+				data.writeByte(0).writeByte(0);
+				name = "";
+			}
+			modify();
+			lastPlayer = null;
+		} else if (cmd == 3) {
+			name = dis.readStringFromBuffer(16);
+		}
+	}
+
+	@Override
+	public void initContainer(DataContainer container) {
+		TileContainer cont = (TileContainer)container;
+		cont.addItemSlot(new SlotItemHandler(new LinkedInventory(1, (i) -> dataItem, (item, i) -> dataItem = item), 0, 194, 220));
+		cont.addPlayerInventory(8, 162);
+		if (worldObj.isRemote) {
+			modified = 0;
+			if (outputs == null) outputs = new ArrayList<Module>(6);
+		} else {
+			cont.extraRef = new LastState();
+			if (lastPlayer != null && lastPlayer.equals(container.player.getGameProfile())) lastPlayer = null;
+		}
+	}
+
+	@Override
+	public boolean detectAndSendChanges(DataContainer cont, PacketBuffer dos) {
+		LastState ls = (LastState)cont.extraRef;
+		int chng = 0, p = dos.writerIndex();
+		dos.writeByte(chng);
+		if (modified > ls.edited && (lastPlayer == null || !lastPlayer.equals(cont.player.getGameProfile()))) {
+			chng |= 1;
+			dos.writeBytes(data, 0, data.writerIndex());
+			ls.edited = modified;
+		}
+		if (!name.equals(ls.name)) {
+			chng |= 2;
+			dos.writeString(name);
+			ls.name = name;
+		}
+		if (renderAll != ls.drawAll) {
+			chng |= renderAll ? 8 : 4;
+			ls.drawAll = renderAll;
+		}
+		if (chng == 0) return false;
+		dos.setByte(p, chng);
+		return true; 
+	}
+
+	@Override
+	public void updateClientChanges(DataContainer container, PacketBuffer dis) {
+		int chng = dis.readByte();
+		if ((chng & 1) != 0) {
+			deserialize(dis);
+			fixCons();
+			modified = 0;
+		}
+		if ((chng & 2) != 0) name = dis.readStringFromBuffer(16);
+		if ((chng & 12) != 0) renderAll = (chng & 8) != 0;
+	}
+
+	public static void compile(ByteBuf data, NBTTagCompound nbt) {
+		int size = nbt.getByte("Cap"),
+		logic = nbt.getByte("Gate"),
+		calc = nbt.getByte("Calc"),
+		io = nbt.getByte("IO");
+		NBTTagList list = new NBTTagList();
+		HashMap<Integer, Byte> constants = new HashMap<Integer, Byte>();
+		ByteBuf out = Unpooled.buffer(), cst = Unpooled.buffer();
+		int p = 0;
+		for (int n = data.readByte() & 0xff; n > 0; n--) {
+			int t = data.readByte();
+			if (t < 0) {
+				int l = (data.readByte() - 1 & 0xf);
+				out.writeByte(Circuit.C_NULL | l);
+				p += l + 1;
+			} else if (t < 6) {
+				t = (t + Circuit.C_OR) << 4; 
+				int l = data.readByte() & 0xf;
+				out.writeByte(t|l);
+				for (int i = 0; i < l; i++) {
+					int a = data.readByte() & 0xff;
+					if (a >= size * 8) throw new RuntimeException();
+					out.writeByte(a);
+				}
+				p++; logic--;
+			} else if (t == 17) {
+				int l = data.readByte() & 0x3f;
+				p += l;
+				io -= l;
+				if (l > 8) l = l / 8 + 7;
+				out.writeByte(Circuit.C_1 | l);
+				byte[] str = new byte[data.readByte()];
+				data.readBytes(str);
+				list.appendTag(new NBTTagString(new String(str)));
+			} else {
+				int q = out.writerIndex(), r = 0;
+				out.writeByte(r);
+				if (t < 10) {
+					r = t - 6 + Circuit.C_COMP;
+					p++; calc--;
+				} else {
+					int s = data.readByte() / 8 - 1 & 3;
+					r = (t - 10) * 16 + Circuit.C_CNT | s;
+					p += s * 8 + 8; calc -= s + (t == 11 ? 1 : t < 14 ? 2 : 3);
+				}
+				ModuleType tp = ModuleType.values()[t];
+				for (int i = 0; i < tp.defCon; i++)
+					if (!tp.conType(i)) {
+						int a = data.readByte() & 0xff;
+						if (a >= size * 8) throw new RuntimeException();
+						out.writeByte(a);
+					} else {
+						int ct = data.readByte();
+						if (ct < 0) {
+							int x = data.readInt();
+							Byte l = constants.get(x);
+							if (l == null) {
+								int k = size + cst.writerIndex();
+								if (x < -8388608 || x >= 8388608) {cst.writeInt(x); k |= 0xc0;}
+								else if (x < -32768 || x >= 32768) {cst.writeMedium(x); k |= 0x80;}
+								else if (x < -128 || x >= 128) {cst.writeShort(x); k |= 0x40;}
+								else cst.writeByte(x);
+								constants.put(x, l = (byte)k);
+							}
+							data.writeByte(l);
+						} else {
+							r |= (ct & 4) << (i + 2 - tp.defCon);
+							ct &= 3;
+							int x = (data.readByte() & 0xff) / 8;
+							if (x + ct >= size) throw new RuntimeException();
+							out.writeByte(x | ct << 6);
+						}
+					}
+				out.setByte(q, r);
+			}
+			data.skipBytes(data.readByte());//skip labels
+		}
+		int n = data.readByte();
+		if (n + list.tagCount() > 6) throw new RuntimeException();
+		for (int i = 0; i < n; i++) {
+			out.writeByte(data.readByte());
+			int l = data.readByte() & 0x3f;
+			io -= l;
+			if (l > 8) l = l / 8 + 7;
+			out.writeByte(l);
+			byte[] str = new byte[data.readByte()];
+			data.readBytes(str);
+			list.appendTag(new NBTTagString(new String(str)));
+		}
+		if (size + cst.writerIndex() > 64) throw new RuntimeException();
+		if (p > size * 8) throw new RuntimeException();
+		if (calc < 0) throw new RuntimeException();
+		if (logic < 0) throw new RuntimeException();
+		if (io < 0) throw new RuntimeException();
+		byte[] b = new byte[out.writerIndex()];
+		out.readBytes(b);
+		nbt.setByteArray("code", b);
+		b = new byte[cst.writerIndex()];
+		cst.readBytes(b);
+		nbt.setByteArray("cst", b);
+		nbt.setByte("out", (byte)n);
+		nbt.setTag("labels", list);
+	}
+
+	public ByteBuf serialize() {
+		ByteBuf dos = Unpooled.buffer();
+		int n = 0, p = dos.writerIndex();
+		dos.writeByte(n);
+		int pnp = 0;
+		for (Module m = module0; m != null; m = m.next) {
+			if (m.pos > pnp) {
+				dos.writeByte(-1);
+				dos.writeByte(m.pos - pnp);
+				n++;
+			}
+			int t = m.type.ordinal();
+			dos.writeByte(t);
+			if (t < 6) {
+				int l = 0, q = dos.writerIndex();
+				dos.writeByte(l);
+				for (Con c : m.cons)
+					if (c != null) {
+						dos.writeByte(c.getAddr());
+						l++;
+					}
+				dos.setByte(q, l);
+			} else {
+				if (t >= 10) dos.writeByte(m.size);
+				for (int i = 0; i < m.cons.length; i++) {
+					Con c = m.cons[i];
+					if (!m.type.conType(i)) {
+						dos.writeByte(c == null ? m.pos : c.getAddr());
+					} else if (c == null || c.type == 1) {
+						dos.writeByte(-1);
+						dos.writeInt(c == null ? 0 : c.size);
+					} else {
+						dos.writeByte(c.size / 8 - 1 | (c.type == 3 ? 4 : 0));
+						dos.writeByte(c.getAddr());
+					}
+				}
+			}
+			byte[] b = m.label.getBytes();
+			dos.writeByte(b.length);
+			dos.writeBytes(b);
+			pnp = m.nextPos;
+			n++;
+		}
+		dos.setByte(p, n);
+		dos.writeByte(outputs.size());
+		for (Module m : outputs) {
+			dos.writeByte(m.pos);
+			dos.writeByte(m.size);
+			byte[] b = m.label.getBytes();
+			dos.writeByte(b.length);
+			dos.writeBytes(b);
+		}
+		return dos;
+	}
+
+	public void deserialize(ByteBuf dis) {
+		module0 = null; moduleL = null; selMod = null;
+		outputs.clear();
+		Module k = null;
+		int p = 0;
+		for (int n = dis.readByte() & 0xff; n > 0; n--) {
+			int t = dis.readByte();
+			if (t < 0 || t > 17) p += dis.readByte() & 0xff;
+			else {
+				Module m = new Module(ModuleType.values()[t]);
+				if (t < 6) {
+					int l = dis.readByte();
+					for (int i = 0; i < l; i++) {
+						m.cons[i] = new Con(null, dis.readByte() & 0xff, 1, (byte)0);
+					}
+				} else {
+					if (t >= 10) m.size = dis.readByte();
+					for (int i = 0; i < m.cons.length; i++)
+						if (!m.type.conType(i)) {
+							m.cons[i] = new Con(null, dis.readByte() & 0xff, 1, (byte)0);
+						} else {
+							int ct = dis.readByte();
+							if (ct < 0) m.cons[i] = new Con(null, -1, dis.readInt(), (byte)1);
+							else m.cons[i] = new Con(null, dis.readByte() & 0xff, 8 + 8 * (ct & 3), (byte)(2 + (ct >> 2)));
+						}
+				}
+				m.setPos(p);
+				p = m.nextPos;
+				byte[] b = new byte[dis.readByte()];
+				dis.readBytes(b);
+				m.label = new String(b);
+				if (k == null) module0 = moduleL = m;
+				else k.insert(m);
+				k = m;
+			}
+		}
+		for (int n = dis.readByte() & 0x7; n > 0; n--) {
+			int pos = dis.readByte() & 0xff;
+			Module m = new Module(ModuleType.IN);
+			m.size = dis.readByte();
+			m.setPos(pos);
+			byte[] b = new byte[dis.readByte()];
+			dis.readBytes(b);
+			m.label = new String(b);
+			outputs.add(m);
+		}
+	}
+
+	public void fixCons() {
+		for (Module m = module0; m != null; m = m.next)
+			for (Con c : m.cons)
+				if (c != null && c.type != 1) {
+					c.mod = find(m, c.addr, false);
+					if (c.mod != null) c.addr -= c.mod.pos;
+				}
+	}
+
+	public void modify() {
+		modified++;
+	}
+
+	public void add(ModuleType t) {
+		if (mode) {
+			if (outputs.size() >= 6) return;
+			int p = selMod == null ? 0 : selMod.nextPos;
+			selMod = new Module(t);
+			selMod.setPos(p);
+			outputs.add(selMod);
+		} else {
+			Module tgt = selMod == null ? moduleL : selMod;
+			selMod = new Module(t);
+			if (tgt == null) module0 = moduleL = selMod;
+			else tgt.insert(selMod);
+		}
+		modified++;
+	}
+
+	public void move(Module m, int pos) {
+		if (mode) {
+			m.setPos(pos);
+		} else {
+			Module m1 = find(m, pos, true);
+			if (m1 != m) {
+				remove(m);
+				m.setPos(pos);
+				if (m1 != null) m1.insert(m);
+				else insertPre(m);
+			} else m.setPos(pos);
+		}
+		modified++;
+	}
+
+	void insertPre(Module m) {
+		if (module0 == null) module0 = moduleL = m;
+		else {
+			module0.prev = m;
+			m.next = module0;
+			module0 = m;
+			if (m.nextPos > m.next.pos)  m.next.setPos(m.nextPos);
+		}
+	}
+
+	public Module find(Module m, int mp, boolean closest) {
+		if (m == null) return null;
+		if (mp >= m.nextPos) {
+			for (m = m.next; m != null; m = m.next) {
+				if (m.pos > mp) return closest ? m.prev : null;
+				else if (m.nextPos > mp) return m;
+			}
+			return closest ? moduleL : null;
+		} else if (mp < m.pos){
+			for (m = m.prev; m != null; m = m.prev) {
+				if (m.nextPos <= mp) return closest ? m : null;
+				else if (m.pos <= mp) return m;
+			}
+			return null;
+		} else return m;
+	}
+
+	public void remove(Module m) {
+		if (mode) {
+			outputs.remove(m);
+		} else {
+			if (m.prev != null) m.prev.next = m.next;
+			else module0 = m.next;
+			if (m.next != null) m.next.prev = m.prev;
+			else moduleL = m.prev;
+			m.prev = null;
+			m.next = null;
+		}
+	}
+
+	public static class Con {
+		public Con(Module m, int ad, int s, byte t) {mod = m; addr = ad; size = s; type = t;}
+		public Module mod;
+		public int addr, size;
+		/** 0:bit 1:const 2:unsigned 3:signed  */
+		public byte type;
+		public int getAddr() {return mod != null ? mod.pos + addr : addr;}
+	}
+
+	public class Module {
+
+		public final Con[] cons;
+		public final ModuleType type;
+		public int pos, nextPos, size, selCon;
+		public Module next, prev;
+		public String label = "";
+
+		public Module(ModuleType type) {
+			this.type = type;
+			this.size = type.idxLoc > 0 ? 8 : 1;
+			this.cons = new Con[type.defCon];
+			for (int i = 0 ; i < type.defCon; i++)
+				if (type.conType(i))
+					cons[i] = new Con(null, -1, 0, (byte)1);
+			this.nextPos = size;
+		}
+
+		public void setPos(int pos) {
+			pos = (pos & 7) + size > 8 ? pos + 7 & 0xf8 : pos;
+			if (pos != this.pos || pos + size != nextPos) {
+				this.pos = pos;
+				this.nextPos = pos + size;
+				if (nextPos > 256 && prev != null) {
+					prev.next = null;
+					moduleL = prev;
+					next = null;
+					prev = null;
+				} else if (next != null && nextPos > next.pos) next.setPos(nextPos);
+			}
+		}
+
+		public void resize(int s) {
+			size = s;
+			setPos(pos);
+		}
+
+		public void insert(Module m) {
+			m.next = next;
+			if (next != null) next.prev = m;
+			else moduleL = m;
+			next = m;
+			m.prev = this;
+			if (nextPos > m.pos) m.setPos(nextPos);
+			else if (m.next != null && m.nextPos > m.next.pos) m.next.setPos(m.nextPos);
+		}
+
+	}
+
+	public enum ModuleType {
+		OR(0,8), NOR(0,8), AND(0,8), NAND(0,8), XOR(0,8), XNOR(0,8),
+		LS(0,2) {@Override public boolean conType(int i) {return true;}},
+		NLS(0,2) {@Override public boolean conType(int i) {return true;}},
+		EQ(0,2) {@Override public boolean conType(int i) {return true;}},
+		NEQ(0,2) {@Override public boolean conType(int i) {return true;}},
+		COUNT(1,4) {@Override public boolean conType(int i) {return i >= 2;}},
+		SWITCH(5,3) {@Override public boolean conType(int i) {return i > 0;}},
+		ADD(8,2), SUB(8,2), MUL(8,2), DIV(8,2), MOD(8,2), IN(0, 0);
+		private ModuleType(int b, int n) {defCon = n; idxLoc = b;}
+		public final int defCon, idxLoc;
+		public boolean conType(int i) {return idxLoc > 0;}
+	}
+
+	public static class LastState {
+		String name;
+		boolean drawAll;
+		long edited;
+	}
+
+}

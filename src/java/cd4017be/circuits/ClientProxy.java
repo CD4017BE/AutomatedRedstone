@@ -29,6 +29,7 @@ public class ClientProxy extends CommonProxy {
 		TileBlockRegistry.registerGui(display8bit, GuiDisplay8bit.class);
 		TileBlockRegistry.registerGui(blockSensor, GuiBlockSensor.class);
 		TileBlockRegistry.registerGui(oszillograph, GuiOszillograph.class);
+		TileBlockRegistry.registerGui(designer, GuiCircuitDesigner.class);
 		
 		invConnector.setBlockLayer(BlockRenderLayer.CUTOUT);
 		

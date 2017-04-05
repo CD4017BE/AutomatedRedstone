@@ -7,6 +7,7 @@ import cd4017be.lib.templates.BlockPipe;
 
 public class Objects {
 	
+	public static TileBlock designer;
 	public static TileBlock programmer;
 	public static TileBlock assembler;
 	public static TileBlock circuit;
