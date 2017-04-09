@@ -264,17 +264,6 @@ public class GuiCircuitDesigner extends GuiMachine {
 		if (cs.length > w) GlStateManager.popMatrix();
 	}
 
-	@Override
-	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
-		//Depth buffer hacking to cut off everything that is rendered outside the desired area
-		GlStateManager.enableDepth();
-		GlStateManager.clearDepth(1);
-		GlStateManager.clear(GL11.GL_DEPTH_BUFFER_BIT);
-		GlStateManager.depthMask(true);
-		zLevel = 0;
-		super.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY);
-	}
-
 	class WorkPane extends GuiComp<Object> {
 
 		int targetPos = -1;
@@ -286,6 +275,9 @@ public class GuiCircuitDesigner extends GuiMachine {
 		@Override
 		public void draw() {
 			mc.renderEngine.bindTexture(COMP_TEX);
+			GlStateManager.enableDepth();
+			GlStateManager.depthMask(true);
+			GlStateManager.depthFunc(GL11.GL_ALWAYS);
 			zLevel = 0.5F;
 			drawTexturedModalRect(px, py, 0, 0, w, h/2);
 			drawTexturedModalRect(px, py + h/2, 0, 0, w, h/2);
@@ -349,7 +341,7 @@ public class GuiCircuitDesigner extends GuiMachine {
 				int y1 = py + ((targetPos >> 3) - scroll) * 16;
 				drawTexturedModalRect(x1, y1, 192, 224, 24, 16);
 			}
-			GlStateManager.depthFunc(GL11.GL_LESS);
+			GlStateManager.depthFunc(GL11.GL_LEQUAL);
 			GlStateManager.depthMask(false);
 			GlStateManager.disableDepth();
 			zLevel = 0;
