@@ -131,7 +131,7 @@ public class InvConnector extends ModTileEntity implements ILinkedInventory, IPi
 		if (s == -1) return 0;
 		if (s == conDir) return linkPos.getY() >= 0 ? 2 : 1;
 		TileEntity te = Utils.getTileOnSide(this, s);
-		return te != null && !(te instanceof ILinkedInventory && ((ILinkedInventory)te).getLinkDir() != EnumFacing.VALUES[s^1]) ? 0 : -1;
+		return te != null && te instanceof ILinkedInventory && ((ILinkedInventory)te).getLinkDir() == EnumFacing.VALUES[s^1] ? 0 : -1;
 	}
 
 	@Override

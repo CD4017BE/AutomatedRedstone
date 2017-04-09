@@ -42,8 +42,9 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public void registerRenderers() {
 		BlockItemRegistry.registerRender(programmer);
+		BlockItemRegistry.registerRender(designer);
 		BlockItemRegistry.registerRender(assembler);
-		BlockItemRegistry.registerRender(circuit);
+		BlockItemRegistry.registerRender(circuit, 0, 2);
 		BlockItemRegistry.registerRender(rsp8bit);
 		BlockItemRegistry.registerRender(rsp1bit, 0, 2);
 		BlockItemRegistry.registerRender(lever8bit);

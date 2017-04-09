@@ -1,4 +1,4 @@
-VERSION = 200;
+VERSION = 301;
 WILDCARD = 32767;
 
 PRE_INIT() {
@@ -11,10 +11,15 @@ PRE_INIT() {
 
 INIT() {
 	Loc slab = it("minecraft:stone_slab");
-	add("shapeless", it("minecraft:paper"), it("item.circuitPlan"));
+	Loc nbt = "#IO,#Cap,#Gate,#Calc,#data,#name,#io,#ofs";!<- DON'T EDIT (bad things would happen)
+	add("shapeless", it("item.circuitPlan"), it("item.circuitPlan"));
+	add("shaped", it("item.circuitPlan"), "0/1/2", "dyeBlack", it("minecraft:paper"), it("minecraft:glass_pane"));
+	add("shaped", it("tile.designer"), "010/232", "dustRedstone", it("item.circuitPlan"), slab, it("minecraft:crafting_table"));
 	add("shaped", it("tile.programmer"), "232/010", it("minecraft:wooden_slab", 1, WILDCARD), it("minecraft:crafting_table"), "dustRedstone", it("minecraft:writable_book"));
 	add("shaped", it("tile.assembler"), "010/232/010", "dustRedstone", it("minecraft:piston"), it("minecraft:chest"), it("minecraft:crafting_table"));
 	add("shaped", it("tile.circuit"), "000/010/000", slab, "ingotIron");
+	add("shapedNBT", nbt, it("tile.circuit", 1, 1), "0/1", it("tile.circuit"), "ingotGold");
+	add("shapedNBT", nbt, it("tile.circuit", 1, 2), " 1 /202/ 1 ", it("tile.circuit", 1, 1), "gemQuartz", it("minecraft:dye", 1, 4));
 	add("shaped", it("tile.lever8bit"), "000/010/000", it("minecraft:lever"), slab);
 	add("shaped", it("tile.display8bit"), "000/121/000", "dustGlowstone", slab, "gemQuartz");
 	add("shaped", it("tile.rsp8bit", 2), "000/010/000", it("rsp1bitN"), "nuggetGold");

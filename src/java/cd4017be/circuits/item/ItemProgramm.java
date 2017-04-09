@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package cd4017be.circuits.item;
 
 import java.util.List;
@@ -11,13 +5,13 @@ import java.util.List;
 import cd4017be.lib.DefaultItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 
 /**
  *
  * @author CD4017BE
  */
-public class ItemProgramm extends DefaultItem
-{
+public class ItemProgramm extends DefaultItem {
 
 	public ItemProgramm(String id) {
 		super(id);
@@ -25,8 +19,14 @@ public class ItemProgramm extends DefaultItem
 
 	@Override
 	public void addInformation(ItemStack item, EntityPlayer player, List<String> list, boolean par4) {
-		if (item.getTagCompound() != null) 
-			list.add(item.getTagCompound().getString("name"));
+		NBTTagCompound nbt = item.getTagCompound();
+		if (nbt != null) {
+			list.add(nbt.getString("name"));
+			if (nbt.hasKey("code") && !nbt.hasKey("data")) {
+				list.add("§cWarning: deprecated data format detected!");
+				list.add("load and save in §6Circuit Programmer§7 to convert");
+			}
+		}
 		super.addInformation(item, player, list, par4);
 	}
 

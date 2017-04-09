@@ -1,5 +1,8 @@
 package cd4017be.circuits.tileEntity;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -11,12 +14,9 @@ import cd4017be.lib.templates.AutomatedTile;
 import cd4017be.lib.templates.Inventory;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Items;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.items.SlotItemHandler;
-import static cd4017be.circuits.tileEntity.Circuit.*;
 
 /**
  *
@@ -127,14 +127,17 @@ public class Programmer extends AutomatedTile implements IGuiData {
 				errorCode = E_Load; errorArg = 0;
 			} else errorCode = E_invalid;
 		} else if (cmd == 4 && inventory.items[0] != null) {
-			if (inventory.items[0].getItem() == Items.PAPER) inventory.items[0] = new ItemStack(Objects.circuitPlan, inventory.items[0].stackSize);
+			//if (inventory.items[0].getItem() == Items.PAPER) inventory.items[0] = new ItemStack(Objects.circuitPlan, inventory.items[0].stackSize);
 			if (inventory.items[0].getItem() == Objects.circuitPlan) {
 				NBTTagCompound nbt = new NBTTagCompound();
 				nbt.setString("name", name);
 				nbt.setString("code", this.serializeCode());
+				byte[] data = compile();
+				if (data == null) return;
+				nbt.setByteArray("data", data);
 				inventory.items[0].setTagCompound(nbt);
 				errorCode = E_Save; errorArg = code.length;
-			} else if (inventory.items[0].getItem() == Item.getItemFromBlock(Objects.circuit)) {
+			}/*else if (inventory.items[0].getItem() == Item.getItemFromBlock(Objects.circuit)) {
 				NBTTagCompound nbt = inventory.items[0].getTagCompound();
 				if (nbt == null) nbt = new NBTTagCompound();
 				int n = (nbt.getByte("Cap") & 0xff) * 8;
@@ -149,7 +152,7 @@ public class Programmer extends AutomatedTile implements IGuiData {
 				nbt.setString("name", name);
 				nbt.setByteArray("code", data);
 				inventory.items[0].setTagCompound(nbt);
-			} else errorCode = E_invalid;
+			}*/else errorCode = E_invalid;
 		} /*if (cmd == 2) { //setLine
 			byte l = dis.readByte();
 			if (l >= 0 && l < gates.length) gates[l] = dis.readStringFromBuffer(40);
@@ -183,48 +186,52 @@ public class Programmer extends AutomatedTile implements IGuiData {
 		this.markUpdate();*/
 	}
 	
-	private byte[] compile(int g, int c) {
-		byte[] data = new byte[512];
-		int p = 0, l = 0, g1 = 0, c1 = 0;
+	private byte[] compile() {
+		ByteBuf data = Unpooled.buffer();
+		int n = 0, p = data.writerIndex();
+		data.writeByte(n);
+		int l = 0;
 		try {
 			while (l < code.length) {
 				if (code[l].isEmpty()) {
 					int k = l + 1;
 					while(k < code.length && code[k].isEmpty()) k++;
 					k -= l; l += k;
-					for (;k > 0; k -= 16) data[p++] = (byte)(C_NULL | (k >= 16 ? 0 : k));
+					data.writeByte(-1).writeByte(k);
+					n++;
 					continue;
 				}
+				String lab = label[l];
 				String s0 = code[l].substring(1);
 				byte cmd = 0;
 				switch (code[l].charAt(0)) {
-				case '+': p = addBitParams(data, p, C_OR, s0); g1++; l++; break;
-				case '-': p = addBitParams(data, p, C_NOR, s0); g1++; l++; break;
-				case '&': p = addBitParams(data, p, C_AND, s0); g1++; l++; break;
-				case '*': p = addBitParams(data, p, C_NAND, s0); g1++; l++; break;
-				case '/': p = addBitParams(data, p, C_XOR, s0); g1++; l++; break;
-				case '\\': p = addBitParams(data, p, C_XNOR, s0); g1++; l++; break;
-				case '<': p = addParameters(data, p, C_COMP, 0, s0); g1++; l++; break;
-				case '>': p = addParameters(data, p, C_COMP_1, 0, s0); g1++; l++; break;
-				case '=': p = addParameters(data, p, C_COMP_2, 0, s0); g1++; l++; break;
-				case '~': p = addParameters(data, p, C_COMP_3, 0, s0); g1++; l++; break;
+				case '+': addBitParams(data, 0, s0); l++; break;
+				case '-': addBitParams(data, 1, s0); l++; break;
+				case '&': addBitParams(data, 2, s0); l++; break;
+				case '*': addBitParams(data, 3, s0); l++; break;
+				case '/': addBitParams(data, 4, s0); l++; break;
+				case '\\': addBitParams(data, 5, s0); l++; break;
+				case '<': addParameters(data, 6, 1, 0, s0); l++; break;
+				case '>': addParameters(data, 7, 1, 0, s0); l++; break;
+				case '=': addParameters(data, 8, 1, 0, s0); l++; break;
+				case '~': addParameters(data, 9, 1, 0, s0); l++; break;
 				case 'i':
-				case 'I': c1 += 1; cmd++;
+				case 'I': cmd += 8;
 				case 'm':
-				case 'M': c1 += 1; cmd++;
+				case 'M': cmd += 8;
 				case 's':
-				case 'S': c1 += 1; cmd++;
+				case 'S': cmd += 8;
 				case 'b':
-				case 'B': c1 += 1;
+				case 'B': cmd += 8;
 					s0 = s0.substring(1);
 					switch(code[l].charAt(1)) {
-					case '$': p = addParameters(data, p, (byte)(C_CNT | cmd), 2, s0); c1+=1; break;
-					case '?': p = addParameters(data, p, (byte)(C_MUX | cmd), 1, s0); break;
-					case '+': p = addParameters(data, p, (byte)(C_ADD | cmd), 0, s0); c1+=1; break;
-					case '-': p = addParameters(data, p, (byte)(C_SUB | cmd), 0, s0); c1+=1; break;
-					case '*': p = addParameters(data, p, (byte)(C_MUL | cmd), 0, s0); c1+=2; break;
-					case '/': p = addParameters(data, p, (byte)(C_DIV | cmd), 0, s0); c1+=2; break;
-					case '%': p = addParameters(data, p, (byte)(C_MOD | cmd), 0, s0); c1+=2; break;
+					case '$': addParameters(data, 10, cmd, 2, s0); break;
+					case '?': addParameters(data, 11, cmd, 1, s0); break;
+					case '+': addParameters(data, 12, cmd, 0, s0); break;
+					case '-': addParameters(data, 13, cmd, 0, s0); break;
+					case '*': addParameters(data, 14, cmd, 0, s0); break;
+					case '/': addParameters(data, 15, cmd, 0, s0); break;
+					case '%': addParameters(data, 16, cmd, 0, s0); break;
 					default: errorCode = E_cmd; errorArg = l; return null;
 					}
 					l &= 0xf8; l++;
@@ -233,16 +240,18 @@ public class Programmer extends AutomatedTile implements IGuiData {
 					break;
 				default: errorCode = E_cmd; errorArg = l; return null;
 				}
+				byte[] b = lab.getBytes();
+				data.writeByte(b.length);
+				data.writeBytes(b);
+				n++;
 			}
-			if (g < g1) {errorCode = E_gate; errorArg = g1;}
-			else if (c < c1) {errorCode = E_calc; errorArg = c1;}
-			else {
-				byte[] ret = new byte[p];
-				System.arraycopy(data, 0, ret, 0, p);
-				errorCode = E_Comp; 
-				errorArg = p;
-				return ret;
-			}
+			data.setByte(p, n);
+			data.writeByte(0);
+			byte[] ret = new byte[data.writerIndex()];
+			data.readBytes(ret);
+			errorCode = E_Comp; 
+			errorArg = p;
+			return ret;
 		}
 		catch (NumberFormatException e) {errorCode = E_num; errorArg = l;}
 		catch (IllegalArgumentException e) {errorCode = E_arg; errorArg = l;}
@@ -251,59 +260,49 @@ public class Programmer extends AutomatedTile implements IGuiData {
 		return null;
 	}
 
-	private int addBitParams(byte[] data, int p, byte cmd, String s) {
-		if (s.isEmpty()) {
-			data[p++] = cmd;
-			return p;
-		}
+	private void addBitParams(ByteBuf data, int cmd, String s) {
+		data.writeByte(cmd);
 		String[] s1 = s.split(",");
 		if (s1.length > 15) throw new IllegalArgumentException();
-		data[p++] = (byte)(cmd | s1.length);
+		data.writeByte(s1.length);
 		for (String s2 : s1) {
 			if ((s2 = s2.trim()).length() > 2) throw new NumberFormatException();
-			data[p++] = (byte)Integer.parseInt(s2, 16);
+			data.writeByte(Integer.parseInt(s2, 16));
 		}
-		return p;
 	}
 
-	private int addParameters(byte[] data, int p, byte cmd, int n, String s) {
+	private void addParameters(ByteBuf data, int cmd, int t, int n, String s) {
 		String[] s1 = s.split(",");
 		if (s1.length != n + 2) throw new IllegalArgumentException();
-		int i = p + 1;
-		for (int j = 0; j < 2; j++)
-			try {
-				int x = Integer.parseInt(s1[j]);
-				cmd |= 4 << j;
-				data[i++] = (byte)x;
-				data[i++] = (byte)(x >> 8);
-				data[i++] = (byte)(x >> 16);
-				data[i++] = (byte)(x >> 24);
-			} catch (NumberFormatException e) {
-				data[i++] = decodeVar(s1[j]);
-			}
-		data[p] = cmd;
+		data.writeByte(cmd);
+		if (t >= 8) data.writeByte(t);
 		for (int j = 2; j < s1.length; j++) {
 			String s2 = s1[j].trim();
 			if (s2.length() > 2) throw new NumberFormatException();
-			data[i++] = (byte)Integer.parseInt(s2, 16);
+			data.writeByte(Integer.parseInt(s2, 16));
 		}
-		return i;
-	}
-	
-	private byte decodeVar(String s) {
-		byte x = Byte.parseByte(s.substring(1));
-		x &= 0x1f;
-		switch(s.charAt(0)) {
-		case 'B': return x |= 0x00;
-		case 'S': return x |= 0x20;
-		case 'M': return x |= 0x40;
-		case 'I': return x |= 0x60;
-		case 'b': return x |= 0x80;
-		case 's': return x |= 0xa0;
-		case 'm': return x |= 0xc0;
-		case 'i': return x |= 0xe0;
-		default: throw new NumberFormatException();
-		}
+		for (int j = 0; j < 2; j++)
+			try {
+				int x = Integer.parseInt(s1[j]);
+				data.writeByte(-1);
+				data.writeInt(x);
+			} catch (NumberFormatException e) {
+				String s3 = s1[j];
+				int x;
+				switch(s3.charAt(0)) {
+				case 'B': x = 4; break;
+				case 'S': x = 5; break;
+				case 'M': x = 6; break;
+				case 'I': x = 7; break;
+				case 'b': x = 0; break;
+				case 's': x = 1; break;
+				case 'm': x = 2; break;
+				case 'i': x = 3; break;
+				default: throw new NumberFormatException();
+				}
+				data.writeByte(x);
+				data.writeByte(Byte.parseByte(s3.substring(1)));
+			}
 	}
 
 	@Override
