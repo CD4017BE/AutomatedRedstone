@@ -1,15 +1,11 @@
 package cd4017be.circuits.gui;
 
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import cd4017be.circuits.tileEntity.Assembler;
-import cd4017be.lib.BlockGuiHandler;
-import cd4017be.lib.TooltipInfo;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.GuiMachine;
 import cd4017be.lib.Gui.TileContainer;
-import cd4017be.lib.templates.AutomatedTile;
 
 /**
  *
@@ -17,11 +13,8 @@ import cd4017be.lib.templates.AutomatedTile;
  */
 public class GuiAssembler extends GuiMachine {
 
-	private final Assembler tileEntity;
-
 	public GuiAssembler(Assembler tileEntity, EntityPlayer player) {
 		super(new TileContainer(tileEntity, player));
-		this.tileEntity = tileEntity;
 		this.MAIN_TEX = new ResourceLocation("circuits:textures/gui/assembler.png");
 	}
 
@@ -30,28 +23,16 @@ public class GuiAssembler extends GuiMachine {
 		this.xSize = 176;
 		this.ySize = 168;
 		super.initGui();
-		guiComps.add(new Button(0, 88, 24, 9, 9, -1).setTooltip("assembler.add0"));
-		guiComps.add(new Button(1, 88, 33, 9, 9, -1).setTooltip("assembler.add1"));
-		guiComps.add(new Button(2, 88, 42, 9, 9, -1).setTooltip("assembler.add2"));
-		guiComps.add(new Button(3, 88, 51, 9, 9, -1).setTooltip("assembler.add3"));
-		guiComps.add(new GuiComp(4, 7, 33, 18, 18).setTooltip("assembler.destr"));
-	}
-
-	@Override
-	protected void drawGuiContainerBackgroundLayer(float t, int mx, int my) {
-		super.drawGuiContainerBackgroundLayer(t, mx, my);
-		DataContainer cont = (DataContainer)inventorySlots;
-		this.drawStringCentered(TooltipInfo.format("gui.cd4017be.assembler.comp0", cont.refInts[0]), this.guiLeft + 124, this.guiTop + 25, 0x408040);
-		this.drawStringCentered(TooltipInfo.format("gui.cd4017be.assembler.comp1", cont.refInts[1]), this.guiLeft + 124, this.guiTop + 33, 0x408040);
-		this.drawStringCentered(TooltipInfo.format("gui.cd4017be.assembler.comp2", cont.refInts[2]), this.guiLeft + 124, this.guiTop + 43, 0x408040);
-		this.drawStringCentered(TooltipInfo.format("gui.cd4017be.assembler.comp3", cont.refInts[3]), this.guiLeft + 124, this.guiTop + 51, 0x408040);
-	}
-
-	@Override
-	protected void setDisplVar(int id, Object obj, boolean send) {
-		PacketBuffer dos = tileEntity.getPacketTargetData();
-		dos.writeByte(AutomatedTile.CmdOffset + id).writeByte(isShiftKeyDown() ? 64 : ((Integer)obj == 0 ? 1 : 8));
-		BlockGuiHandler.sendPacketToServer(dos);
+		final DataContainer cont = (DataContainer)inventorySlots;
+		for (int i = 0; i < 4; i++) {
+			final int j = i;
+			guiComps.add(new ProgressBar(2 * i, 62, 26 + i * 8, 52, 8, 176, 0, (byte)0, ()-> {
+				int a = cont.refInts[j + 4], b = cont.refInts[j];
+				return a == b ? 1F : a < b ? (float)a / (float)b : -1F / (float)(a - b + 1);
+			}));
+			guiComps.add(new Text<Object[]>(2 * i + 1, 62, 26 + i * 8, 52, 8, "\\%d / %d", ()-> new Object[]{cont.refInts[j + 4], cont.refInts[j]}).center().setTooltip("assembler.cmp" + i));
+		}
+		guiComps.add(new Text<Integer>(8, 62, 18, 52, 8, "assembler.err#", ()-> cont.refInts[8]).center().setTooltip("assembler.msg#"));
 	}
 
 }
