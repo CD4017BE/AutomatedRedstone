@@ -5,15 +5,11 @@ import io.netty.buffer.Unpooled;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-
 import com.mojang.authlib.GameProfile;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagString;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.items.SlotItemHandler;
 import cd4017be.circuits.Objects;
@@ -32,7 +28,7 @@ public class CircuitDesigner extends ModTileEntity implements IGuiData {
 	public long modified = 1;
 	public boolean renderAll, mode;
 	ByteBuf data = Unpooled.buffer();
-	public String name;
+	public String name = "";
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
@@ -122,6 +118,10 @@ public class CircuitDesigner extends ModTileEntity implements IGuiData {
 			chng |= renderAll ? 8 : 4;
 			ls.drawAll = renderAll;
 		}
+		if (mode != ls.output) {
+			chng |= mode ? 32 : 16;
+			ls.output = mode;
+		}
 		if (chng == 0) return false;
 		dos.setByte(p, chng);
 		return true; 
@@ -137,110 +137,7 @@ public class CircuitDesigner extends ModTileEntity implements IGuiData {
 		}
 		if ((chng & 2) != 0) name = dis.readStringFromBuffer(16);
 		if ((chng & 12) != 0) renderAll = (chng & 8) != 0;
-	}
-
-	public static void compile(ByteBuf data, NBTTagCompound nbt) {
-		int size = nbt.getByte("Cap"),
-		logic = nbt.getByte("Gate"),
-		calc = nbt.getByte("Calc"),
-		io = nbt.getByte("IO");
-		NBTTagList list = new NBTTagList();
-		HashMap<Integer, Byte> constants = new HashMap<Integer, Byte>();
-		ByteBuf out = Unpooled.buffer(), cst = Unpooled.buffer();
-		int p = 0;
-		for (int n = data.readByte() & 0xff; n > 0; n--) {
-			int t = data.readByte();
-			if (t < 0) {
-				int l = (data.readByte() - 1 & 0xf);
-				out.writeByte(Circuit.C_NULL | l);
-				p += l + 1;
-			} else if (t < 6) {
-				t = (t + Circuit.C_OR) << 4; 
-				int l = data.readByte() & 0xf;
-				out.writeByte(t|l);
-				for (int i = 0; i < l; i++) {
-					int a = data.readByte() & 0xff;
-					if (a >= size * 8) throw new RuntimeException();
-					out.writeByte(a);
-				}
-				p++; logic--;
-			} else if (t == 17) {
-				int l = data.readByte() & 0x3f;
-				p += l;
-				io -= l;
-				if (l > 8) l = l / 8 + 7;
-				out.writeByte(Circuit.C_1 | l);
-				byte[] str = new byte[data.readByte()];
-				data.readBytes(str);
-				list.appendTag(new NBTTagString(new String(str)));
-			} else {
-				int q = out.writerIndex(), r = 0;
-				out.writeByte(r);
-				if (t < 10) {
-					r = t - 6 + Circuit.C_COMP;
-					p++; calc--;
-				} else {
-					int s = data.readByte() / 8 - 1 & 3;
-					r = (t - 10) * 16 + Circuit.C_CNT | s;
-					p += s * 8 + 8; calc -= s + (t == 11 ? 1 : t < 14 ? 2 : 3);
-				}
-				ModuleType tp = ModuleType.values()[t];
-				for (int i = 0; i < tp.defCon; i++)
-					if (!tp.conType(i)) {
-						int a = data.readByte() & 0xff;
-						if (a >= size * 8) throw new RuntimeException();
-						out.writeByte(a);
-					} else {
-						int ct = data.readByte();
-						if (ct < 0) {
-							int x = data.readInt();
-							Byte l = constants.get(x);
-							if (l == null) {
-								int k = size + cst.writerIndex();
-								if (x < -8388608 || x >= 8388608) {cst.writeInt(x); k |= 0xc0;}
-								else if (x < -32768 || x >= 32768) {cst.writeMedium(x); k |= 0x80;}
-								else if (x < -128 || x >= 128) {cst.writeShort(x); k |= 0x40;}
-								else cst.writeByte(x);
-								constants.put(x, l = (byte)k);
-							}
-							data.writeByte(l);
-						} else {
-							r |= (ct & 4) << (i + 2 - tp.defCon);
-							ct &= 3;
-							int x = (data.readByte() & 0xff) / 8;
-							if (x + ct >= size) throw new RuntimeException();
-							out.writeByte(x | ct << 6);
-						}
-					}
-				out.setByte(q, r);
-			}
-			data.skipBytes(data.readByte());//skip labels
-		}
-		int n = data.readByte();
-		if (n + list.tagCount() > 6) throw new RuntimeException();
-		for (int i = 0; i < n; i++) {
-			out.writeByte(data.readByte());
-			int l = data.readByte() & 0x3f;
-			io -= l;
-			if (l > 8) l = l / 8 + 7;
-			out.writeByte(l);
-			byte[] str = new byte[data.readByte()];
-			data.readBytes(str);
-			list.appendTag(new NBTTagString(new String(str)));
-		}
-		if (size + cst.writerIndex() > 64) throw new RuntimeException();
-		if (p > size * 8) throw new RuntimeException();
-		if (calc < 0) throw new RuntimeException();
-		if (logic < 0) throw new RuntimeException();
-		if (io < 0) throw new RuntimeException();
-		byte[] b = new byte[out.writerIndex()];
-		out.readBytes(b);
-		nbt.setByteArray("code", b);
-		b = new byte[cst.writerIndex()];
-		cst.readBytes(b);
-		nbt.setByteArray("cst", b);
-		nbt.setByte("out", (byte)n);
-		nbt.setTag("labels", list);
+		if ((chng & 48) != 0) mode = (chng & 32) != 0;
 	}
 
 	public ByteBuf serialize() {
@@ -504,7 +401,7 @@ public class CircuitDesigner extends ModTileEntity implements IGuiData {
 
 	public static class LastState {
 		String name;
-		boolean drawAll;
+		boolean drawAll, output;
 		long edited;
 	}
 

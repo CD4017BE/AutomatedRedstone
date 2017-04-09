@@ -140,6 +140,7 @@ public class GuiCircuitDesigner extends GuiMachine {
 				else if (n > 32) n = 32;
 				else if (n > 8) n &= 0xf8;
 				tile.selMod.resize(n);
+				tile.modified++;
 			} catch (NumberFormatException e) {}
 			else {
 				Con c = tile.selMod.cons[tile.selMod.selCon];
@@ -189,7 +190,7 @@ public class GuiCircuitDesigner extends GuiMachine {
 	protected void keyTyped(char c, int k) throws IOException {
 		if (k == Keyboard.KEY_PRIOR && scroll > 0) scroll--;
 		else if (k == Keyboard.KEY_NEXT && scroll < ScrollSize) scroll++;
-		else if (k == Keyboard.KEY_DELETE) setDisplVar(17, null, false);
+		else if (k == Keyboard.KEY_DELETE) setDisplVar(18, null, false);
 		super.keyTyped(c, k);
 	}
 

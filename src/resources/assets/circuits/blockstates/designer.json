@@ -1,0 +1,8 @@
+{
+    "variants": {
+        "orient=n": { "model": "circuits:designer" },
+		"orient=e": { "model": "circuits:designer" , "y": 90 },
+		"orient=s": { "model": "circuits:designer" , "y": 180 },
+		"orient=w": { "model": "circuits:designer" , "y": 270 }
+    }
+}
