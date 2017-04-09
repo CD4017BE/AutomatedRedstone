@@ -1,17 +1,10 @@
 package cd4017be.circuits.tileEntity;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
-import li.cil.oc.api.machine.Arguments;
-import li.cil.oc.api.machine.Callback;
-import li.cil.oc.api.machine.Context;
-import li.cil.oc.api.network.Environment;
-import li.cil.oc.api.network.Message;
-import li.cil.oc.api.network.Node;
 import cd4017be.api.circuits.IDirectionalRedstone;
 import cd4017be.api.circuits.IQuickRedstoneHandler;
-import cd4017be.api.computers.ComputerAPI;
 import cd4017be.lib.ModTileEntity;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
@@ -21,23 +14,24 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.fml.common.Optional;
 
 /**
  *
  * @author CD4017BE
  */
-@Optional.Interface(modid = "OpenComputers", iface = "li.cil.oc.api.network.Environment")
-public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGuiData, ITickable, Environment, IQuickRedstoneHandler {
+public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGuiData, ITickable, IQuickRedstoneHandler {
 
+	public static final int[] ClockSpeed = {20, 5, 1};
 	public static final byte 
 		C_NULL = 0x00,	//empty gates[0xf]
-		C_1 = 0x10,		//unused
+		C_IN = 0x10,	//input
 		C_OR = 0x20,	//OR (bit^[0xf]) -> bit
 		C_NOR = 0x30,	//NOR (bit^[0xf]) -> bit
 		C_AND = 0x40,	//AND (bit^[0xf]) -> bit
@@ -59,344 +53,432 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 		return name.length() > 0 ? "\"" + name + "\"" : super.getName();
 	}
 
-	public final int[] ioCache = new int[6];
-	public byte[] ram = new byte[0];
-	public byte[] code = new byte[0];
 	public String name = "";
 	/** var[0-7]: IO, var[8-15]: cap, var[16-23]: gates, var[24-31]: calc */
 	public int var;
-	/** cfgI[0-47 6*8]: side*ramAddr, cfgI[48-59 6*2]: side*dir, cfgI[60]: on/off, cfgE[0-59 6*(5+5)]: side*(offset+size) */
-	public long cfgI, cfgE;
-	public int tickInt = 1;
+	public final IOacc[] ioacc = new IOacc[6];
+	public IOcfg[] iocfg = new IOcfg[0];
+	public byte[] ram = new byte[0];
+	public int tickInt = ClockSpeed[0];
 	private long nextUpdate = 0;
-	private byte update = 0;
+	public byte mode = 0;
+	public byte memoryOfs;
+	public int startIdx;
+
+	public class IOcfg {
+		public final String label;
+		public final byte size, addr;
+		public final boolean dir;
+		public byte ofs, side;
+		IOcfg(boolean dir, String label, byte size, byte addr) {
+			this.dir = dir; this.label = label; this.size = size; this.addr = addr;
+		}
+		IOcfg(NBTTagCompound tag) {
+			dir = tag.getBoolean("d");
+			label = tag.getString("n");
+			size = tag.getByte("s");
+			addr = tag.getByte("p");
+			side = tag.getByte("a");
+			ofs = tag.getByte("o");
+		}
+		NBTTagCompound write() {
+			NBTTagCompound tag = new NBTTagCompound();
+			tag.setBoolean("d", dir);
+			tag.setByte("p", addr);
+			tag.setByte("s", size);
+			tag.setString("n", label);
+			tag.setByte("a", side);
+			tag.setByte("o", ofs);
+			return tag;
+		}
+	}
+
+	class IOacc {
+		int stateI, stateO;
+		IQuickRedstoneHandler te;
+		final EnumFacing side;
+		byte dir;
+		IOacc(int s) {side = EnumFacing.VALUES[s];}
+		void update(int state) {
+			if (state != stateO) {
+				stateO = state;
+				if (te == null || te.invalid()) {
+					ICapabilityProvider t = getTileOnSide(side);
+					if (t instanceof IQuickRedstoneHandler) te = (IQuickRedstoneHandler)t;
+				}
+				if (te != null) te.onRedstoneStateChange(side.getOpposite(), state, Circuit.this);
+				else worldObj.notifyBlockOfStateChange(pos.offset(side), blockType);
+			}
+			if ((dir & 4) != 0) {
+				state = worldObj.getRedstonePower(pos.offset(side), side);
+				if (state != stateI) setIn(state);
+				dir &= 3;
+			}
+		}
+		void setIn(int state) {
+			long t = worldObj.getTotalWorldTime();
+			if (t != nextUpdate) {
+				stateI = state;
+				if (mode >= 2 && t > nextUpdate) {
+					nextUpdate += tickInt + 1;
+					if (t >= nextUpdate) nextUpdate = t + 1L;
+				}
+			} else dir |= 4;
+		}
+	}
 
 	@Override
 	public void update() {
-		if (worldObj.isRemote) return;
-		if (node != null) ComputerAPI.update(this, node, 0);
+		if (worldObj.isRemote || mode == 0 || ram.length == 0) return;
 		long t = worldObj.getTotalWorldTime();
-		if (t % tickInt == 0 && ram.length > 0 && (cfgI & 1L<<60) != 0) {
-			nextUpdate = t + (long)tickInt;
-			int rs;
-			if ((update & 64) != 0) {
-				for (int i = 0; i < 6; i++)
-					if (getDir(i) == 1) {
-						rs = ioCache[i];
-						rs >>>= getExtIdx(i);
-						writeInt(getRamIdx(i), getSize(i), rs);
-					}
-				update &= 63;
-			}
-			try {cpuTick();} catch (Exception e) {
+		if (t == nextUpdate) {
+			if (mode == 1) nextUpdate += tickInt;
+			else if (mode == 3) {nextUpdate++; mode = 7;}
+			else {nextUpdate--; mode &= 3;}
+			try {
+				int[] out = cpuTick();
+				for (IOacc acc : ioacc)
+					if (acc != null)
+						acc.update(out[acc.side.ordinal()]);
+			} catch (Exception e) {
 				e.printStackTrace();
-				code = new byte[0];
+				ram = new byte[0];
 				name = "§cERROR: invalid code!§8";
 			}
-			for (int i = 0; i < 6; i++) {
-				switch(getDir(i)) {
-				case 1:
-					if ((update >> i & 1) != 0) {
-						EnumFacing side = EnumFacing.VALUES[i];
-						rs = worldObj.getRedstonePower(pos.offset(side), side);
-						if (rs != ioCache[i]) {
-							ioCache[i] = rs;
-							update |= 64;
-						}
-					} continue;
-				case 2: rs = this.readInt(getRamIdx(i), getSize(i)) << getExtIdx(i); break;
-				default: rs = 0;
-				}
-				if (rs != ioCache[i]) {
-					ioCache[i] = rs;
-					EnumFacing side = EnumFacing.VALUES[i];
-					ICapabilityProvider te = getTileOnSide(side);
-					if (te != null && te instanceof IQuickRedstoneHandler)
-						((IQuickRedstoneHandler)te).onRedstoneStateChange(side.getOpposite(), rs, this);
-					else worldObj.notifyBlockOfStateChange(pos.offset(side), blockType);
-				}
-			}
-			update &= 64;
 		}
 	}
 
-	private int readInt(int pos, int size) {
-		int e = (pos + size + 7) >> 3;
-		long l = 0;
-		for (int i = pos >> 3, j = 0; i < e; i++, j+=8) l |= (ram[i % ram.length] & 0xff) << j;
-		return (int)(l >>> (pos & 7)) & 0xffffffff >>> (32 - size);
-	}
-
-	private void writeInt(int pos, int size, int val) {
-		int i0, i = pos >> 3, i1 = (pos + size + 7) >> 3, j = pos & 7;
-		long r = (0xffffffffL >>> (32 - size)) << j, v = (long)val << j & r; 
-		for (j = 0; i < i1; i++, j += 8) 
-			ram[i0 = i % ram.length] = (byte)(ram[i0] & ~(r >>> j) | v >>> j);
-	}
-
-	private void cpuTick() {
-		int n = 0;
-		for (int i = 0, j = 0; i < code.length && n >> 3 < ram.length; j = ++i) {
-			int mask = 1 << (n & 7);
-			int cmd = code[i];
+	private int[] cpuTick() {
+		int m = 0;
+		for (int n = 0, i = startIdx; i < ram.length; i++) {
+			byte cmd = ram[i];
 			int con = cmd & 0x0f;
+			int p = n >> 3, x;
 			cmd &= 0xf0;
-			int x, a, b;
-			if (cmd >= 0x80) {
-				if ((con & 4) != 0) {
-					a = consT(++i);
-					i += 3;
-				} else a = param(code[++i] & 0xff);
-				if ((con & 8) != 0) {
-					b = consT(++i);
-					i += 3;
-				} else b = param(code[++i] & 0xff);
-			} else {a = 0; b = 0;}
-			switch ((byte)cmd) {
+			switch (cmd) {
 			case C_NULL:
-				n += con == 0 ? 16 : con;
+				n += con + 1;
 				continue;
-			case C_OR:
-				for (x = 0; i < j + con;)
-					if (getBit(++i)) {x = mask; break;}
-				i = j + con;
-				break;
-			case C_NOR:
-				for (x = mask; i < j + con;)
-					if (getBit(++i)) {x = 0; break;}
-				i = j + con;
-				break;
-			case C_AND:
-				for (x = mask; i < j + con;)
-					if (!getBit(++i)) {x = 0; break;}
-				i = j + con;
-				break;
-			case C_NAND:
-				for (x = 0; i < j + con;)
-					if (!getBit(++i)) {x = mask; break;}
-				i = j + con;
-				break;
-			case C_XOR:
-				for (x = 0; i < j + con;)
-					if (getBit(++i)) x ^= mask;
-				i = j + con;
-				break;
-			case C_XNOR:
-				for (x = mask; i < j + con;)
-					if (getBit(++i)) x ^= mask;
-				i = j + con;
-				break;
-			case C_COMP:
-				switch(con & 3) {
-				case 0: x = a < b ? mask : 0; break;
-				case 1: x = a < b ? 0 : mask; break;
-				case 2: x = a == b ? mask : 0; break;
-				default: x = a == b ? 0 : mask;
-				}
-				break;
-			case C_CNT:
-				boolean set = getBit(++i), rst = getBit(++i);
-				if (rst) {
-					x = b;
-					break;
-				} else if (set) {
-					x = param(n >> 3 | (con & 3) << 5) + a;
-					break;
-				} else {
-					n += (con & 3) * 8 + 8;
+			case C_IN: {
+				IOcfg cfg = iocfg[m++];
+				x = ioacc[cfg.side].stateI >> cfg.ofs;
+				if (cfg.size < 8) {
+					int f = n & 7;
+					int mask = 0xff >> (8 - cfg.size) << f;
+					x <<= f;
+					ram[p] = (byte)((ram[p] & ~mask) | (x & mask));
+					n += cfg.size;
 					continue;
 				}
+			} break;
+			case C_OR: {
+				int j = i; i += con;
+				boolean s = true;
+				while(s && j < i) s = !getBit(++j);
+				int mask = 1 << (n & 7);
+				if (s) ram[p] &= ~mask;
+				else ram[p] |= mask;
+			} n++; continue;
+			case C_NOR: {
+				int j = i; i += con;
+				boolean s = true;
+				while(s && j < i) s = !getBit(++j);
+				int mask = 1 << (n & 7);
+				if (s) ram[p] |= mask;
+				else ram[p] &= ~mask;
+			} n++; continue;
+			case C_AND: {
+				int j = i; i += con;
+				boolean s = true;
+				while(s && j < i) s = getBit(++j);
+				int mask = 1 << (n & 7);
+				if (s) ram[p] |= mask;
+				else ram[p] &= ~mask;
+			} n++; continue;
+			case C_NAND: {
+				int j = i; i += con;
+				boolean s = true;
+				while(s && j < i) s = getBit(++j);
+				int mask = 1 << (n & 7);
+				if (s) ram[p] &= ~mask;
+				else ram[p] |= mask;
+			} n++; continue;
+			case C_XOR: {
+				int j = i; i += con;
+				boolean s = false;
+				while(j < i) s ^= getBit(++j);
+				int mask = 1 << (n & 7);
+				if (s) ram[p] |= mask;
+				else ram[p] &= ~mask;
+			} n++; continue;
+			case C_XNOR: {
+				int j = i; i += con;
+				boolean s = false;
+				while(j < i) s ^= getBit(++j);
+				int mask = 1 << (n & 7);
+				if (s) ram[p] &= ~mask;
+				else ram[p] |= mask;
+			} n++; continue;
+			case C_COMP: {
+				boolean s;
+				int a = param(ram[++i], con >> 2), b = param(ram[++i], con >> 3);
+				switch(con & 3) {
+				case 0: s = a < b; break;
+				case 1: s = a >= b; break;
+				case 2: s = a == b; break;
+				default: s = a != b;
+				}
+				int mask = 1 << (n & 7);
+				if (s) ram[p] |= mask;
+				else ram[p] &= ~mask;
+			} n++; continue;
+			case C_CNT: {
+				i += 4;
+				if (getBit(i - 2)) x = param(ram[i], con >> 3);
+				else if (getBit(i - 3)) x = param(p | (con & 3) << 6, 0) + param(ram[i - 1], con >> 2);
+				else {n += (con & 3) * 8 + 8; continue;}
+			} break;
 			case C_MUX:
-				x = getBit(++i) ? b : a;
+				x = getBit(++i) ? param(ram[i + 2], con >> 3) : param(ram[i + 1], con >> 2);
+				i += 2;
 				break;
 			case C_ADD:
-				x = a + b;
+				x = param(ram[++i], con >> 2) + param(ram[++i], con >> 3);
 				break;
 			case C_SUB:
-				x = a - b;
+				x = param(ram[++i], con >> 2) - param(ram[++i], con >> 3);
 				break;
 			case C_MUL:
-				x = a * b;
+				x = param(ram[++i], con >> 2) * param(ram[++i], con >> 3);
 				break;
-			case C_DIV:
+			case C_DIV: {
+				int a = param(ram[++i], con >> 2), b = param(ram[++i], con >> 3);
 				x = b == 0 ? -1 : a / b;
-				break;
-			case C_MOD:
+			} break;
+			case C_MOD: {
+				int a = param(ram[++i], con >> 2), b = param(ram[++i], con >> 3);
 				x = b == 0 ? -1 : a % b;
-				break;
-			default: continue;
+			} break;
+			default: continue;//won't ever be called
 			}
-			int p = n >> 3;
-			if (cmd <= 0x80) {
-				if (x == 0) ram[p] &= ~mask;
-				else ram[p] |= mask;
-				n++;
-			} else {
-				con &= 3;
-				n += con * 8 + 8;
-				for (;con >= 0; con--, x >>>= 8) ram[p++] = (byte)x;
+			con &= 3;
+			n += con * 8 + 8;
+			switch(con) {//store result
+			case 3: ram[p + 3] = (byte)(x >> 24);
+			case 2: ram[p + 2] = (byte)(x >> 16);
+			case 1: ram[p + 1] = (byte)(x >> 8);
+			default: ram[p] = (byte)x;
 			}
 		}
+		int[] rsOut = new int[6];
+		while (m < iocfg.length) {
+			IOcfg cfg = iocfg[m++];
+			int p = cfg.addr >> 3 & 0x1f, x;
+			if (cfg.size < 8) {
+				x = ram[p] >> (cfg.addr & 0x7);
+				x &= 0xff >> (8 - cfg.size);
+			} else {
+				x = 0;
+				switch(cfg.size) {
+				case 32: x |= ram[p + 3] << 24;
+				case 24: x |= (ram[p + 2] & 0xff) << 16;
+				case 16: x |= (ram[p + 1] & 0xff) << 8;
+				default: x |= ram[p] & 0xff;
+				}
+			}
+			rsOut[cfg.side] |= x << cfg.ofs;
+		}
+		return rsOut;
 	}
 
 	private boolean getBit(int i) {
-		int p = code[i] & 0xff;
-		return (ram[(p >> 3) % ram.length] >> (p & 7) & 1) != 0;
+		int p = ram[i] & 0xff;
+		return (ram[p >> 3 & 0x1f] & 1 << (p & 7)) != 0;
 	}
 
 	/**
-	 * @param p bit[0-4]: index, bit[5,6]: size, bit[7]: signed
+	 * @param p bit[0-5]: index, bit[6,7]: size bit[8]: signed
 	 * @return number
 	 */
-	private int param(int p) {
-		int t0 = p & 0x1f, t = t0 + (p >> 5 & 3), x;
-		if ((p & 0x80) != 0) x = (int)ram[t-- % ram.length];
-		else x = 0;
-		for (;t >= t0; t--) {
-			x <<= 8;
-			x |= ram[t % ram.length] & 0xff;
+	private int param(int p, int sign) {
+		int t = p & 0x3f;
+		p |= sign << 8;
+		switch(p & 0x1c0) {
+		case 0x00: return ram[t] & 0xff;
+		case 0x40: return (ram[t++] & 0xff) | (ram[t] & 0xff) << 8;
+		case 0x80: return (ram[t++] & 0xff) | (ram[t++] & 0xff) << 8 | (ram[t] & 0xff) << 16;
+		case 0x100: return ram[t];
+		case 0x140: return (ram[t++] & 0xff) | ram[t] << 8;
+		case 0x180: return (ram[t++] & 0xff) | (ram[t++] & 0xff) << 8 | ram[t] << 16;
+		default: return (ram[t++] & 0xff) | (ram[t++] & 0xff) << 8 | (ram[t++] & 0xff) << 16 | ram[t] << 24;
 		}
-		return x;
-	}
-
-	private int consT(int i) {
-		return (code[i++] & 0xff) | (code[i++] & 0xff) << 8 | (code[i++] & 0xff) << 16 | (code[i] & 0xff) << 24;
-	}
-
-	/** @return 0: none, 1: input, 2: output */
-	public int getDir(int s) {return (int)(cfgI >>> (48 + s * 2)) & 3;}
-	public int getRamIdx(int s) {return (int)(cfgI >>> (s * 8)) & 0xff;}
-	public int getExtIdx(int s) {return (int)(cfgE >>> (s * 10)) & 0x1f;}
-	public int getSize(int s) {return ((int)(cfgE >>> (s * 10 + 5)) & 0x1f) + 1;}
-	/** @param v 0: none, 1: input, 2: output */
-	public void setDir(int s, int v) {int p = 48 + s * 2; cfgI &= ~(3L << p); cfgI |= (long)(v & 3) << p;}
-	public void setRamIdx(int s, int v) {int p = s * 8; cfgI &= ~(0xffL << p); cfgI |= (long)(v & 0xff) << p;}
-	public void setExtIdx(int s, int v) {int p = s * 10; cfgE &= ~(0x1fL << p); cfgE |= (long)(v & 0x1f) << p;}
-	public void setSize(int s, int v) {int p = s * 10 + 5; cfgE &= ~(0x1fL << p); cfgE |= (long)(v - 1 & 0x1f) << p;}
-	
-	public int usedIO() {
-		int n = 0;
-		for (int i = 0; i < 6; i++) 
-			if (getDir(i) != 0) n += getSize(i);
-		return n;
 	}
 
 	@Override
 	public void onPlayerCommand(PacketBuffer data, EntityPlayerMP player) {
 		byte cmd = data.readByte();
 		if (cmd == 0) {
-			cfgI = data.readLong();
-			cfgE = data.readLong();
-			if (this.usedIO() > (var & 0xff)) cfgI &= 0xf000ffffffffffffL;
-			update = 127;
+			IOcfg cfg = iocfg[data.readByte()];
+			byte side = data.readByte();
+			if (side != cfg.side) {
+				byte dir = 0;
+				for (IOcfg c : iocfg)
+					if (c.side == cfg.side)
+						dir |= c.dir ? 2 : 1;
+				if (dir == 0) ioacc[cfg.side] = null;
+				else ioacc[cfg.side].dir &= dir | 4;
+				cfg.side = side;
+				IOacc acc = ioacc[side];
+				if (acc == null) ioacc[side] = acc = new IOacc(side);
+				acc.dir |= cfg.dir ? 2 : 1;
+			}
+			byte ofs = data.readByte();
+			if (ofs < 0) cfg.ofs = 0;
+			else if (ofs > 32 - cfg.size) cfg.ofs = (byte)(32 - cfg.size);
+			else cfg.ofs = ofs;
 		} else if (cmd == 1) {
-			cfgI ^= 1L<<60;
+			mode = (byte)(data.readByte() & 3);
+			if (mode == 1) {
+				long t = worldObj.getTotalWorldTime();
+				nextUpdate = t + (long)tickInt - t % (long)tickInt;
+			}
 		} else if (cmd == 2) {
+			int min = ClockSpeed[getBlockMetadata() % ClockSpeed.length];
 			tickInt = data.readInt();
-			if (tickInt < 1) tickInt = 1;
+			if (tickInt < min) tickInt = min;
 			else if (tickInt > 1200) tickInt = 1200;
+			if (mode == 1) {
+				long t = worldObj.getTotalWorldTime();
+				nextUpdate = t + (long)tickInt - t % (long)tickInt;
+			}
 		} else if (cmd == 3) {
-			Arrays.fill(ram, (byte)0);
-			update = 127;
+			Arrays.fill(ram, 0, memoryOfs, (byte)0);
 		} else if (cmd == 4) {
-			byte i = data.readByte();
-			ram[i >> 3 & 0x1f] ^= 1 << (i & 7);
+			int i = data.readByte() & 0xff;
+			if (i < startIdx) ram[i >> 3] ^= 1 << (i & 7);
 		}
+	}
+
+	private NBTTagCompound write(NBTTagCompound nbt) {
+		nbt.setByte("IO", (byte)(var));
+		nbt.setByte("Cap", (byte)(var >> 8));
+		nbt.setByte("Gate", (byte)(var >> 16));
+		nbt.setByte("Calc", (byte)(var >> 24));
+		nbt.setByteArray("data", Arrays.copyOf(ram, ram.length));//Don't let other things use the same reference to this array
+		nbt.setString("name", name);
+		NBTTagList list = new NBTTagList();
+		for (IOcfg cfg : iocfg) list.appendTag(cfg.write());
+		nbt.setTag("io", list);
+		nbt.setByte("ofs", memoryOfs);
+		return nbt;
+	}
+
+	private void read(NBTTagCompound nbt) {
+		var = (nbt.getByte("IO") & 0xff) 
+			| (nbt.getByte("Cap") & 0xff) << 8 
+			| (nbt.getByte("Gate") & 0xff) << 16 
+			| (nbt.getByte("Calc") & 0xff) << 24
+			| nbt.getInteger("var");//TODO can be removed in later version
+		ram = nbt.getByteArray("data");
+		name = nbt.getString("name");
+		NBTTagList list = nbt.getTagList("io", 10);
+		Arrays.fill(ioacc, null);
+		iocfg = new IOcfg[list.tagCount()];
+		for (int i = 0; i < iocfg.length; i++) {
+			IOcfg cfg = new IOcfg(list.getCompoundTagAt(i));
+			iocfg[i] = cfg;
+			IOacc acc = ioacc[cfg.side];
+			if (acc == null) ioacc[cfg.side] = acc = new IOacc(cfg.side);
+			acc.dir |= cfg.dir ? 2 : 1;
+		}
+		memoryOfs = nbt.getByte("ofs");
+		startIdx = Math.min((var >> 8 & 0xff), ram.length);
 	}
 
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
-		nbt.setByteArray("ram", ram);
-		nbt.setByteArray("code", code);
-		nbt.setInteger("var", var);
-		nbt.setString("name", name);
+		write(nbt);
+		int[] cache = new int[12];
+		for (IOacc acc : ioacc)
+			if (acc != null) {
+				int i = acc.side.ordinal() * 2;
+				cache[i] = acc.stateI;
+				cache[i + 1] = acc.stateO;
+			}
+		nbt.setIntArray("out", cache);
+		nbt.setByte("mode", mode);
 		nbt.setInteger("tick", tickInt);
-		nbt.setLong("cfgI", cfgI);
-		nbt.setLong("cfgE", cfgE);
-		nbt.setIntArray("out", ioCache);
-		if (node != null) ComputerAPI.saveNode(node, nbt);
 		return super.writeToNBT(nbt);
 	}
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
-		var = nbt.getInteger("var");
-		ram = new byte[Math.min(var >> 8 & 0xff, 32)];
-		byte[] b = nbt.getByteArray("ram");
-		System.arraycopy(b, 0, ram, 0, Math.min(ram.length, b.length));
-		int[] i = nbt.getIntArray("out");
-		System.arraycopy(i, 0, ioCache, 0, Math.min(ioCache.length, i.length));
-		code = nbt.getByteArray("code");
-		name = nbt.getString("name");
+		read(nbt);
+		int[] o = nbt.getIntArray("out");
+		for (IOacc acc : ioacc)
+			if (acc != null) {
+				int i = acc.side.ordinal() * 2;
+				acc.stateI = o[i];
+				acc.stateO = o[i + 1];
+			}
+		mode = nbt.getByte("mode");
 		tickInt = nbt.getInteger("tick");
-		cfgI = nbt.getLong("cfgI");
-		cfgE = nbt.getLong("cfgE");
-		update = 127;
-		if (node != null) ComputerAPI.readNode(node, nbt);
 	}
 
 	@Override
-	public ArrayList<ItemStack> dropItem(IBlockState m, int fortune) {
-		ArrayList<ItemStack> list = new ArrayList<ItemStack>();
-		ItemStack item = new ItemStack(this.getBlockType());
-		NBTTagCompound nbt = new NBTTagCompound();
-		nbt.setByte("IO", (byte)(var));
-		nbt.setByte("Cap", (byte)(var >> 8));
-		nbt.setByte("Gate", (byte)(var >> 16));
-		nbt.setByte("Calc", (byte)(var >> 24));
-		if (code.length > 0) {
-			nbt.setString("name", name);
-			nbt.setByteArray("code", code);
+	public void setWorldObj(World world) {
+		super.setWorldObj(world);
+		if (mode == 1) {
+			long t = worldObj.getTotalWorldTime();
+			nextUpdate = t + (long)tickInt - t % (long)tickInt;
 		}
-		item.setTagCompound(nbt);
-		list.add(item);
-		return list;
+	}
+
+	@Override
+	public List<ItemStack> dropItem(IBlockState m, int fortune) {
+		ItemStack item = new ItemStack(this.getBlockType(), 1, this.getBlockMetadata());
+		item.setTagCompound(write(new NBTTagCompound()));
+		return Arrays.asList(item);
 	}
 
 	@Override
 	public void onPlaced(EntityLivingBase entity, ItemStack item) {
-		NBTTagCompound nbt = item.getTagCompound();
-		if (nbt != null) {
-			var = (nbt.getByte("IO") & 0xff) 
-				| (nbt.getByte("Cap") & 0xff) << 8 
-				| (nbt.getByte("Gate") & 0xff) << 16 
-				| (nbt.getByte("Calc") & 0xff) << 24;
-			ram = new byte[Math.min(var >> 8 & 0xff, 32)];
-			if (nbt.hasKey("code")) {
-				code = nbt.getByteArray("code");
-				name = nbt.getString("name");
-			}
-		}
+		if (item.hasTagCompound()) read(item.getTagCompound());
 	}
 
 	@Override
 	public int redstoneLevel(int s, boolean str) {
-		return str || getDir(s) != 2 ? 0 : ioCache[s];
+		if (str) return 0;
+		IOacc acc = ioacc[s];
+		return acc != null ? acc.stateO : 0;
 	}
 
 	@Override
 	public void onRedstoneStateChange(EnumFacing side, int value, TileEntity src) {
-		if (worldObj.getTotalWorldTime() < nextUpdate && getDir(side.ordinal()) == 1) {
-			ioCache[side.ordinal()] = value;
-			update |= 64;
-		} else 
-			update |= 1 << side.ordinal();
+		IOacc acc = ioacc[side.ordinal()];
+		if (acc != null && value != acc.stateI && (acc.dir & 1) != 0) acc.setIn(value);
 	}
 
 	@Override
 	public void onNeighborBlockChange(Block b) {
-		for (EnumFacing s : EnumFacing.VALUES) {
-			if (getDir(s.ordinal()) != 1) continue;
-			int rs = worldObj.getRedstonePower(pos.offset(s), s);
-			if (rs != ioCache[s.ordinal()])
-				onRedstoneStateChange(s, rs, null);
-		}
+		for (IOacc acc : ioacc)
+			if (acc != null && (acc.dir & 1) != 0) {
+				int rs = worldObj.getRedstonePower(pos.offset(acc.side), acc.side);
+				if (rs != acc.stateI) acc.setIn(rs);
+			}
+	}
+
+	@Override
+	public byte getRSDirection(EnumFacing s) {
+		IOacc acc = ioacc[s.ordinal()];
+		return acc == null ? (byte)0 : (byte)(acc.dir & 3);
 	}
 
 	@Override
 	public void initContainer(DataContainer container) {
-		if (!worldObj.isRemote) container.extraRef = new LastState();
+		if (worldObj.isRemote) Arrays.fill(ram, 0, memoryOfs, (byte)0);
+		else container.extraRef = new LastState();
 	}
 
 	@Override
@@ -405,17 +487,24 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 		int p = dos.writerIndex();
 		dos.writeByte(0);
 		byte chng = 0;
-		if (tickInt != ls.tickInt) {dos.writeInt(ls.tickInt = tickInt); chng |= 1;}
-		if (cfgI != ls.cfgI) {dos.writeLong(ls.cfgI = cfgI); chng |= 2;}
-		if (cfgE != ls.cfgE) {dos.writeLong(ls.cfgE = cfgE); chng |= 4;}
-		if (name != ls.name) {dos.writeString(ls.name = name); chng |= 8;}
-		if (var != ls.var) {dos.writeShort(ls.var = var); chng |= 16;}
+		if (tickInt != ls.tickInt || mode != ls.mode) {
+			dos.writeShort(ls.tickInt = tickInt);
+			dos.writeByte(ls.mode = mode);
+			chng |= 1;}
+		for (int i = 0; i < iocfg.length; i++) {
+			IOcfg cfg = iocfg[i];
+			short x = (short)(cfg.ofs | cfg.side << 8);
+			if (x != ls.iocfg[i]) {
+				dos.writeShort(ls.iocfg[i] = x);
+				chng |= 2 << i;
+			}
+		}
 		int chng1 = 0;
-		for (int i = 0; i < ram.length; i++)
+		for (int i = 0; i < startIdx; i++)
 			if (ram[i] != ls.ram[i]) chng1 |= 1 << i;
 		if (chng1 != 0) {
 			dos.writeInt(chng1);
-			chng |= 32;
+			chng |= 128;
 			for (int i = 0; chng1 != 0; i++, chng1 >>= 1)
 				if ((chng1 & 1) != 0) dos.writeByte(ls.ram[i] = ram[i]);
 		}
@@ -427,15 +516,18 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 	@Override
 	public void updateClientChanges(DataContainer container, PacketBuffer dis) {
 		byte chng = dis.readByte();
-		if ((chng & 1) != 0) tickInt = dis.readInt();
-		if ((chng & 2) != 0) cfgI = dis.readLong();
-		if ((chng & 4) != 0) cfgE = dis.readLong();
-		if ((chng & 8) != 0) name = dis.readStringFromBuffer(32);
-		if ((chng & 16) != 0) {
-			var = dis.readShort() & 0xffff;
-			ram = new byte[Math.min(var >>> 8 & 0xff, 32)];
+		if ((chng & 1) != 0) {
+			tickInt = dis.readShort();
+			mode = dis.readByte();
 		}
-		if ((chng & 32) != 0) {
+		for (int i = 0; i < iocfg.length; i++)
+			if ((chng >> i & 2) != 0) {
+				IOcfg cfg = iocfg[i];
+				short x = dis.readShort();
+				cfg.ofs = (byte)x;
+				cfg.side = (byte)(x >> 8);
+			}
+		if ((chng & 128) != 0) {
 			int chng1 = dis.readInt();
 			for (int i = 0; chng1 != 0 && i < ram.length; i++, chng1 >>= 1)
 				if ((chng1 & 1) != 0) ram[i] = dis.readByte();
@@ -443,95 +535,10 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 	}
 
 	private static final class LastState {
-		int tickInt, var;
-		long cfgI, cfgE;
-		String name;
+		int tickInt;
+		byte mode;
+		final short[] iocfg = new short[6];
 		final byte[] ram = new byte[32];
-	}
-
-	@Override
-	public byte getRSDirection(EnumFacing s) {
-		return (byte)getDir(s.ordinal());
-	}
-
-	//---------------- OpenComputers integration ----------------//
-
-	Object node = ComputerAPI.newOCnode(this, "circuit", false);
-
-	@Override
-	public void invalidate() {
-		super.invalidate();
-		ComputerAPI.removeOCnode(node);
-	}
-
-	@Override
-	public void onChunkUnload() {
-		super.onChunkUnload();
-		ComputerAPI.removeOCnode(node);
-	}
-
-	@Override
-	public Node node() {
-		return (Node)node;
-	}
-
-	@Override
-	public void onConnect(Node node) {}
-
-	@Override
-	public void onDisconnect(Node node) {}
-
-	@Override
-	public void onMessage(Message message) {}
-
-	@Optional.Method(modid = "OpenComputers")
-	@Callback(doc = "" , direct = true)
-	public Object[] getBytes(Context cont, Arguments args) throws Exception {
-		return new Object[]{ram};
-	}
-
-	@Optional.Method(modid = "OpenComputers")
-	@Callback(doc = "" , direct = true)
-	public Object[] setBytes(Context cont, Arguments args) throws Exception {
-		byte[] data = args.checkByteArray(0);
-		int ofs = args.optInteger(2, 0);
-		int size = Math.min(data.length, ram.length - ofs);
-		if (size > 0) System.arraycopy(data, 0, ram, ofs, size);
-		return null;
-	}
-
-	@Optional.Method(modid = "OpenComputers")
-	@Callback(doc = "" , direct = true)
-	public Object[] getBit(Context cont, Arguments args) throws Exception {
-		int p = args.checkInteger(0);
-		return new Object[]{p >= 0 && p < ram.length * 8 && (ram[p >> 3] >> (p & 7) & 1) != 0};
-	}
-
-	@Optional.Method(modid = "OpenComputers")
-	@Callback(doc = "" , direct = true)
-	public Object[] setBit(Context cont, Arguments args) throws Exception {
-		int p = args.checkInteger(0);
-		if (p >= 0 && p < ram.length * 8) {
-			if (args.checkBoolean(1)) ram[p >> 3] |= 1 << (p & 7);
-			else ram[p >> 3] &= ~(1 << (p & 7));
-		}
-		return null;
-	}
-
-	@Optional.Method(modid = "OpenComputers")
-	@Callback(doc = "" , direct = true)
-	public Object[] getInt(Context cont, Arguments args) throws Exception {
-		int pos = args.optInteger(0, 0), size = args.optInteger(1, 32);
-		return new Object[]{this.readInt(pos, size)};
-	}
-
-	@Optional.Method(modid = "OpenComputers")
-	@Callback(doc = "" , direct = true)
-	public Object[] setInt(Context cont, Arguments args) throws Exception {
-		int val = args.checkInteger(0);
-		int pos = args.optInteger(1, 0), size = args.optInteger(2, 32);
-		this.writeInt(pos, size, val);
-		return null;
 	}
 
 }

@@ -1,5 +1,7 @@
 {
     "variants": {
-        "normal": { "model": "circuits:circuit" }
+        "type=0": { "model": "circuits:circuit" },
+		"type=1": { "model": "circuits:circuit1" },
+		"type=2": { "model": "circuits:circuit2" }
     }
 }
