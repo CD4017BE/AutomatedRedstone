@@ -321,13 +321,13 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 			IOcfg cfg = iocfg[data.readByte()];
 			byte side = data.readByte();
 			if (side != cfg.side) {
-				byte dir = 0;
-				for (IOcfg c : iocfg)
-					if (c.side == cfg.side)
-						dir |= c.dir ? 2 : 1;
-				if (dir == 0) ioacc[cfg.side] = null;
-				else ioacc[cfg.side].dir &= dir | 4;
+				byte dir = 0, prev = cfg.side;
 				cfg.side = side;
+				for (IOcfg c : iocfg)
+					if (c.side == prev)
+						dir |= c.dir ? 2 : 1;
+				if (dir == 0) ioacc[prev] = null;
+				else ioacc[prev].dir &= dir | 4;
 				IOacc acc = ioacc[side];
 				if (acc == null) ioacc[side] = acc = new IOacc(side);
 				acc.dir |= cfg.dir ? 2 : 1;

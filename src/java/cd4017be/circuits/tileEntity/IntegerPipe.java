@@ -2,12 +2,14 @@ package cd4017be.circuits.tileEntity;
 
 import cd4017be.api.circuits.IDirectionalRedstone;
 import cd4017be.api.circuits.IQuickRedstoneHandler;
-import cd4017be.api.circuits.IntegerComp;
-import cd4017be.api.circuits.SharedInteger;
 import cd4017be.lib.templates.IPipe;
-import cd4017be.lib.templates.MultiblockTile;
+import cd4017be.lib.templates.PassiveMultiblockTile;
+import multiblock.IntegerComp;
+import multiblock.SharedInteger;
 import net.minecraft.block.Block;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -21,14 +23,16 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
  *
  * @author CD4017BE
  */
-public class IntegerPipe extends MultiblockTile<IntegerComp, SharedInteger> implements IPipe, IQuickRedstoneHandler {
+public class IntegerPipe extends PassiveMultiblockTile<IntegerComp, SharedInteger> implements IPipe, IQuickRedstoneHandler {
 
-	private Cover cover = null;
+	protected Cover cover = null;
 
 	public IntegerPipe() {
-		comp = new IntegerComp(this);
+		comp = new IntegerComp(this, bitSize());
 		new SharedInteger(comp);
 	}
+
+	protected int bitSize() {return 32;}
 
 	@Override
 	public void onRedstoneStateChange(EnumFacing side, int value, TileEntity src) {
@@ -37,6 +41,16 @@ public class IntegerPipe extends MultiblockTile<IntegerComp, SharedInteger> impl
 
 	@Override
 	public void onNeighborBlockChange(Block b) {
+		if (b != Blocks.REDSTONE_TORCH) checkCons();
+		comp.updateInput();
+	}
+
+	@Override
+	public void onPlaced(EntityLivingBase entity, ItemStack item) {
+		checkCons();
+	}
+
+	protected void checkCons() {
 		ICapabilityProvider te;
 		byte d;
 		short io = comp.rsIO;
@@ -47,7 +61,6 @@ public class IntegerPipe extends MultiblockTile<IntegerComp, SharedInteger> impl
 			comp.network.setIO(comp, io);
 			this.markUpdate();
 		}
-		comp.updateInput();
 	}
 
 	@Override
@@ -89,7 +102,7 @@ public class IntegerPipe extends MultiblockTile<IntegerComp, SharedInteger> impl
 
 	@Override
 	public int redstoneLevel(int s, boolean str) {
-		return !str && (comp.rsIO >> (s * 2) & 2) != 0 ? comp.network.outputState : 0;
+		return !str && (comp.rsIO >> (s * 2) & 2) != 0 ? comp.convertSignal(comp.network.outputState) : 0;
 	}
 
 	@Override

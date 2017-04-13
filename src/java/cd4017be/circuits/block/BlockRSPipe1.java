@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package cd4017be.circuits.block;
 
 import java.util.ArrayList;
@@ -23,13 +17,13 @@ import net.minecraft.item.ItemStack;
  *
  * @author CD4017BE
  */
-public class BlockRSPipe1 extends BlockPipe
-{
+public class BlockRSPipe1 extends BlockPipe {
+
 	public static final PropertyInteger prop = PropertyInteger.create("type", 0, 2);
 
 	public static final byte ID_Transport = 0;
-	public static final byte ID_Extraction = 2;
-	public static final byte ID_Injection = 1;
+	public static final byte ID_Extraction = 1;
+	public static final byte ID_Injection = 2;
 
 	public BlockRSPipe1(String id, Material m, SoundType sound) {
 		super(id, m, sound, 0x30);
