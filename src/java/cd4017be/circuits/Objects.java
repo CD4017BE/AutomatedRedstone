@@ -4,6 +4,7 @@ import multiblock.IntegerComp;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import cd4017be.api.Capabilities;
@@ -34,6 +35,7 @@ public class Objects {
 	public static TileBlock blockSensor;
 	public static TileBlock oszillograph;
 	public static TileBlock potentiometer;
+	public static TileBlock bitShifter;
 	public static BlockInvConnector invConnector;
 
 	//Items
@@ -60,6 +62,7 @@ public class Objects {
 		new DefaultItemBlock((rsp8bit = new BlockPipe("rsp8bit", Material.IRON, SoundType.METAL, 0x10)).setCreativeTab(tabCircuits).setHardness(1.0F).setResistance(10F));
 		rsp8bit.size = 0.5F;
 		new ItemRSPipe((rsp1bit = new BlockRSPipe1("rsp1bit", Material.IRON, SoundType.METAL)).setCreativeTab(tabCircuits).setHardness(1.0F).setResistance(10F));
+		new DefaultItemBlock((bitShifter = TileBlock.create("bitShifter", Material.IRON, SoundType.METAL, 0x32)).setBlockBounds(new AxisAlignedBB(0.25, 0.25, 0.0, 0.75, 0.75, 1.0)).setCreativeTab(tabCircuits).setHardness(1.0F).setResistance(10F));
 		new DefaultItemBlock((invConnector = new BlockInvConnector("invConnector", Material.GLASS, SoundType.GLASS)).setCreativeTab(tabCircuits).setHardness(0.5F).setResistance(10F));
 		new DefaultItemBlock((programmer = TileBlock.create("programmer", Material.WOOD, SoundType.WOOD, 0x1)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F));
 		

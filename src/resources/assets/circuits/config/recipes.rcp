@@ -1,4 +1,4 @@
-VERSION = 302;
+VERSION = 304;
 WILDCARD = 32767;
 
 PRE_INIT() {
@@ -28,6 +28,7 @@ INIT() {
 	if(hasit("RstMetall")) {add("shaped", it("rsp1bitN", 8), "000", it("RstMetall"));}
 	add("shaped", it("rsp1bitI", 2), "001", it("rsp1bitN"), "dustRedstone");
 	add("shaped", it("rsp1bitO", 2), "001", it("rsp1bitN"), it("minecraft:redstone_torch"));
+	add("shaped", it("tile.bitShifter"), "0/1", it("m.IORelay"), it("tile.rsp8bit"));
 	add("shaped", it("tile.blockSensor"), " 3 /010/ 2 ", slab, "gemQuartz", it("tile.rsp8bit"), it("minecraft:chest"));
 	add("shaped", it("tile.oszillograph"), "222/010", it("m.CalcPrc"), it("tile.display8bit"), it("minecraft:glass_pane"));
 	add("shaped", it("tile.invConnector", 12), "000/121/000", "gemQuartz", "blockGlass", it("minecraft:ender_eye"));
