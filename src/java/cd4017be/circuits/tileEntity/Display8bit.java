@@ -6,7 +6,9 @@ import cd4017be.api.circuits.IDirectionalRedstone;
 import cd4017be.lib.ModTileEntity;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
 import net.minecraft.block.Block;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.PacketBuffer;
@@ -24,6 +26,11 @@ public class Display8bit extends ModTileEntity implements IDirectionalRedstone, 
 	public String text0 = "", text1 = "";
 	public String format = "###";
 	public int display = 0x03080808;
+
+	@Override
+	public void onPlaced(EntityLivingBase entity, ItemStack item) {
+		onNeighborBlockChange(null);
+	}
 
 	@Override
 	public void onNeighborBlockChange(Block b) {
