@@ -61,7 +61,7 @@ public class Display8bit extends ModTileEntity implements IDirectionalRedstone, 
 
 	private void formatState() {
 		int m = dspType & 3;
-		long s = (long)state >> (dspType >> 2 & 0x1f) & 0xffffffffL >>> (31 - (dspType >> 7 & 0x1f));
+		long s = state;//(long)state >> (dspType >> 2 & 0x1f) & 0xffffffffL >>> (31 - (dspType >> 7 & 0x1f));
 		if (m == 0 || m == 3) {
 			display = (int)s;
 			return;
