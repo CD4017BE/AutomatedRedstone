@@ -1,0 +1,8 @@
+{
+    "variants": {
+        "orient=n": { "model": "circuits:potentiometer" },
+		"orient=e": { "model": "circuits:potentiometer" , "y": 90 },
+		"orient=s": { "model": "circuits:potentiometer" , "y": 180 },
+		"orient=w": { "model": "circuits:potentiometer" , "y": 270 }
+    }
+}

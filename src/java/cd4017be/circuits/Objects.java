@@ -33,6 +33,7 @@ public class Objects {
 	public static TileBlock display8bit;
 	public static TileBlock blockSensor;
 	public static TileBlock oszillograph;
+	public static TileBlock potentiometer;
 	public static BlockInvConnector invConnector;
 
 	//Items
@@ -52,6 +53,7 @@ public class Objects {
 		new DefaultItemBlock((assembler = TileBlock.create("assembler", Material.ROCK, SoundType.STONE, 0x1)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F));
 		new ItemCircuit((circuit = new BlockCircuit("circuit", Material.ROCK, SoundType.STONE)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F));
 		new DefaultItemBlock((lever8bit = TileBlock.create("lever8bit", Material.ROCK, SoundType.STONE, 0x11)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F));
+		new DefaultItemBlock((potentiometer = TileBlock.create("potentiometer", Material.ROCK, SoundType.STONE, 0x11)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F));
 		new DefaultItemBlock((display8bit = TileBlock.create("display8bit", Material.ROCK, SoundType.STONE, 0x1)).setCreativeTab(tabCircuits).setLightLevel(0.375F).setHardness(1.5F).setResistance(10F));
 		new DefaultItemBlock((blockSensor = TileBlock.create("blockSensor", Material.ROCK, SoundType.STONE, 0x10)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F));
 		new DefaultItemBlock((oszillograph = TileBlock.create("oszillograph", Material.ROCK, SoundType.STONE, 0x1)).setCreativeTab(tabCircuits).setLightLevel(0.375F).setHardness(1.5F).setResistance(10F));

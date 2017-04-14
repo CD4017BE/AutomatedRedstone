@@ -1,4 +1,4 @@
-VERSION = 301;
+VERSION = 302;
 WILDCARD = 32767;
 
 PRE_INIT() {
@@ -20,6 +20,7 @@ INIT() {
 	add("shaped", it("tile.circuit"), "000/010/000", slab, "ingotIron");
 	add("shapedNBT", nbt, it("tile.circuit", 1, 1), "0/1", it("tile.circuit"), "ingotGold");
 	add("shapedNBT", nbt, it("tile.circuit", 1, 2), " 1 /202/ 1 ", it("tile.circuit", 1, 1), "gemQuartz", it("minecraft:dye", 1, 4));
+	add("shaped", it("tile.potentiometer"), "01/02/01", it("minecraft:coal", 1, WILDCARD), slab, it("minecraft:redstone_torch"));
 	add("shaped", it("tile.lever8bit"), "000/010/000", it("minecraft:lever"), slab);
 	add("shaped", it("tile.display8bit"), "000/121/000", "dustGlowstone", slab, "gemQuartz");
 	add("shaped", it("tile.rsp8bit", 2), "000/010/000", it("rsp1bitN"), "nuggetGold");

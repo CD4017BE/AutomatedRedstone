@@ -21,6 +21,7 @@ public class CommonProxy {
 		TileBlockRegistry.register(rsp8bit, IntegerPipe.class, null);
 		TileBlockRegistry.register(rsp1bit, BasicRSPipe.class, null);
 		TileBlockRegistry.register(lever8bit, MultiLever.class, null);
+		TileBlockRegistry.register(potentiometer, Potentiometer.class, DataContainer.class);
 		TileBlockRegistry.register(display8bit, Display8bit.class, DataContainer.class);
 		TileBlockRegistry.register(invConnector, InvConnector.class, null);
 		TileBlockRegistry.register(blockSensor, BlockSensor.class, TileContainer.class);

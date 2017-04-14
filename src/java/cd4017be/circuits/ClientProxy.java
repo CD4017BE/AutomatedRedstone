@@ -2,10 +2,12 @@ package cd4017be.circuits;
 
 import cd4017be.circuits.gui.*;
 import cd4017be.circuits.render.OszillographRenderer;
+import cd4017be.circuits.render.PotentiometerRenderer;
 import cd4017be.circuits.render.RSInterfaceRenderer;
 import cd4017be.circuits.tileEntity.Display8bit;
 import cd4017be.circuits.tileEntity.MultiLever;
 import cd4017be.circuits.tileEntity.Oszillograph;
+import cd4017be.circuits.tileEntity.Potentiometer;
 import cd4017be.lib.BlockItemRegistry;
 import cd4017be.lib.TileBlockRegistry;
 import cd4017be.lib.render.ModelPipe;
@@ -26,6 +28,7 @@ public class ClientProxy extends CommonProxy {
 		TileBlockRegistry.registerGui(programmer, GuiProgrammer.class);
 		TileBlockRegistry.registerGui(assembler, GuiAssembler.class);
 		TileBlockRegistry.registerGui(circuit, GuiCircuit.class);
+		TileBlockRegistry.registerGui(potentiometer, GuiPotentiometer.class);
 		TileBlockRegistry.registerGui(display8bit, GuiDisplay8bit.class);
 		TileBlockRegistry.registerGui(blockSensor, GuiBlockSensor.class);
 		TileBlockRegistry.registerGui(oszillograph, GuiOszillograph.class);
@@ -48,6 +51,7 @@ public class ClientProxy extends CommonProxy {
 		BlockItemRegistry.registerRender(rsp8bit);
 		BlockItemRegistry.registerRender(rsp1bit, 0, 2);
 		BlockItemRegistry.registerRender(lever8bit);
+		BlockItemRegistry.registerRender(potentiometer);
 		BlockItemRegistry.registerRender(display8bit);
 		BlockItemRegistry.registerRender(blockSensor);
 		BlockItemRegistry.registerRender(invConnector);
@@ -60,6 +64,7 @@ public class ClientProxy extends CommonProxy {
 		ClientRegistry.bindTileEntitySpecialRenderer(MultiLever.class, new RSInterfaceRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(Display8bit.class, new RSInterfaceRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(Oszillograph.class, new OszillographRenderer());
+		ClientRegistry.bindTileEntitySpecialRenderer(Potentiometer.class, new PotentiometerRenderer());
 	}
 
 }
