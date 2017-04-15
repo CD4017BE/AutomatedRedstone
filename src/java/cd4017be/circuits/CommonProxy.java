@@ -28,6 +28,8 @@ public class CommonProxy {
 		TileBlockRegistry.register(blockSensor, BlockSensor.class, TileContainer.class);
 		TileBlockRegistry.register(oszillograph, Oszillograph.class, TileContainer.class);
 		TileBlockRegistry.register(designer, CircuitDesigner.class, TileContainer.class);
+		TileBlockRegistry.register(fluidValve, FluidValve.class, DataContainer.class);
+		TileBlockRegistry.register(energyValve, EnergyValve.class, DataContainer.class);
 	}
 
 }

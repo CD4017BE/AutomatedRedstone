@@ -1,0 +1,10 @@
+{
+	"parent": "circuits:block/base1",
+    "textures": {
+        "side": "circuits:blocks/fluidValve",
+		"top": "circuits:blocks/fluidValve",
+		"bot": "circuits:blocks/fluidValve",
+		"front": "circuits:blocks/valveIn",
+		"back": "circuits:blocks/valveOut"
+    }
+}

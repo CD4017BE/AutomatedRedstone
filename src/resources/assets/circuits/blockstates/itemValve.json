@@ -1,0 +1,10 @@
+{
+	"variants": {
+		"orient=n": { "model": "circuits:itemValve" },
+		"orient=e": { "model": "circuits:itemValve" , "y": 90 },
+		"orient=s": { "model": "circuits:itemValve" , "y": 180 },
+		"orient=w": { "model": "circuits:itemValve" , "y": 270 },
+		"orient=b": { "model": "circuits:itemValve" , "x": 90 },
+		"orient=t": { "model": "circuits:itemValve" , "x": 270 }
+	}
+}

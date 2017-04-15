@@ -1,4 +1,4 @@
-VERSION = 304;
+VERSION = 306;
 WILDCARD = 32767;
 
 PRE_INIT() {
@@ -32,6 +32,8 @@ INIT() {
 	add("shaped", it("tile.blockSensor"), " 3 /010/ 2 ", slab, "gemQuartz", it("tile.rsp8bit"), it("minecraft:chest"));
 	add("shaped", it("tile.oszillograph"), "222/010", it("m.CalcPrc"), it("tile.display8bit"), it("minecraft:glass_pane"));
 	add("shaped", it("tile.invConnector", 12), "000/121/000", "gemQuartz", "blockGlass", it("minecraft:ender_eye"));
+	add("shaped", it("tile.fluidValve"), "010/232/040", slab, it("minecraft:comparator"), it("minecraft:bucket"), it("minecraft:piston"), it("tile.rsp8bit"));
+	add("shaped", it("tile.energyValve"), "010/232/040", slab, it("minecraft:comparator"), "ingotGold", "blockRedstone", it("tile.rsp8bit"));
 	add("shaped", it("m.emptySensor", 4), " 0 /010/232", "nuggetGold", it("minecraft:paper"), "ingotIron", it("minecraft:comparator"));
 	add("shapeless", it("item.itemSensor"), it("m.emptySensor"), it("minecraft:chest"));
 	add("shapeless", it("item.fluidSensor"), it("m.emptySensor"), it("minecraft:bucket"));

@@ -35,6 +35,8 @@ public class ClientProxy extends CommonProxy {
 		TileBlockRegistry.registerGui(blockSensor, GuiBlockSensor.class);
 		TileBlockRegistry.registerGui(oszillograph, GuiOszillograph.class);
 		TileBlockRegistry.registerGui(designer, GuiCircuitDesigner.class);
+		TileBlockRegistry.registerGui(fluidValve, GuiFluidValve.class);
+		TileBlockRegistry.registerGui(energyValve, GuiEnergyValve.class);
 		
 		invConnector.setBlockLayer(BlockRenderLayer.CUTOUT);
 		
@@ -64,6 +66,8 @@ public class ClientProxy extends CommonProxy {
 		BlockItemRegistry.registerRender(energySensor);
 		BlockItemRegistry.registerRender(timeSensor);
 		BlockItemRegistry.registerRender(oszillograph);
+		BlockItemRegistry.registerRender(fluidValve);
+		BlockItemRegistry.registerRender(energyValve);
 		ClientRegistry.bindTileEntitySpecialRenderer(MultiLever.class, new RSInterfaceRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(Display8bit.class, new RSInterfaceRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(Oszillograph.class, new OszillographRenderer());
