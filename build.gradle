@@ -67,6 +67,7 @@ dependencies {
 	String libDir = new File(file('./').getParentFile(), "CD4017BE_lib").getAbsolutePath()
 	compile files("${libDir}/build/libs/CD4017BE_lib-${mc_version}-${lib_version}-deobf.jar")
 	compile files("${libDir}/libs/OpenComputers-MC${mc_version}-${oc_version}-api.jar")
+	compile files("${libDir}/libs/Tesla-${tesla_version}-deobf.jar")
 	//compile files("${libDir}/libs/ComputerCraft1.75.jar")
 }
 
