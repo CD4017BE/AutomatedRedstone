@@ -85,7 +85,10 @@ public class BasicRSPipe extends IntegerPipe {
 		if (s == -1) return getBlockMetadata();
 		int c = comp.rsIO >> (s * 2) & 3;
 		if (c != 0) return c;
-		return comp.canConnect(s) && comp.getNeighbor(s) != null ? 0 : -1;
+		if (!comp.canConnect(s)) return -1;
+		EnumFacing dir = EnumFacing.VALUES[s];
+		ICapabilityProvider te = getTileOnSide(dir);
+		return te != null && te.hasCapability(comp.getCap(), dir.getOpposite()) ? 0 : -1;
 	}
 
 }

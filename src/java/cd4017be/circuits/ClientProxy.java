@@ -68,6 +68,7 @@ public class ClientProxy extends CommonProxy {
 		BlockItemRegistry.registerRender(oszillograph);
 		BlockItemRegistry.registerRender(fluidValve);
 		BlockItemRegistry.registerRender(energyValve);
+		BlockItemRegistry.registerRender(wirelessCon, 0, 1);
 		ClientRegistry.bindTileEntitySpecialRenderer(MultiLever.class, new RSInterfaceRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(Display8bit.class, new RSInterfaceRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(Oszillograph.class, new OszillographRenderer());

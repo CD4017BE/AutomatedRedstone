@@ -1,0 +1,10 @@
+{
+	"variants": {
+		"orient=n": { "model": "circuits:wirelessCon" },
+		"orient=e": { "model": "circuits:wirelessCon" , "y": 90 },
+		"orient=s": { "model": "circuits:wirelessCon" , "y": 180 },
+		"orient=w": { "model": "circuits:wirelessCon" , "y": 270 },
+		"orient=b": { "model": "circuits:wirelessCon" , "x": 90 },
+		"orient=t": { "model": "circuits:wirelessCon" , "x": 270 }
+	}
+}

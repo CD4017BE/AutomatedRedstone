@@ -1,0 +1,42 @@
+{
+	"parent": "block/block",
+    "textures": {
+        "particle": "circuits:blocks/wirelessCon",
+		"side": "circuits:blocks/wirelessCon",
+		"bot": "circuits:blocks/RSPipe32N"
+    },
+    "elements": [
+        {
+			"from": [ 4, 4, 0 ],
+            "to": [ 12, 12, 2 ],
+            "faces": {
+                "down":  { "uv": [ 0, 4, 2, 12 ], "rotation": 90, "texture": "#side"},
+                "up":    { "uv": [ 0, 4, 2, 12 ], "rotation": 270, "texture": "#side"},
+                "north": { "uv": [ 4, 4, 12, 12 ], "texture": "#bot", "cullface": "north" },
+				"south": { "uv": [ 4, 4, 12, 12 ], "texture": "#bot"},
+                "west":  { "uv": [ 0, 4, 2, 12 ], "rotation": 180, "texture": "#side"},
+                "east":  { "uv": [ 0, 4, 2, 12 ], "texture": "#side"}
+            }
+        }, {
+			"from": [ 6, 6, 2 ],
+            "to": [ 10, 10, 8 ],
+            "faces": {
+                "down":  { "uv": [ 2, 6, 8, 10 ], "rotation": 90, "texture": "#side"},
+                "up":    { "uv": [ 2, 6, 8, 10 ], "rotation": 270, "texture": "#side"},
+                "west":  { "uv": [ 2, 6, 8, 10 ], "rotation": 180, "texture": "#side"},
+                "east":  { "uv": [ 2, 6, 8, 10 ], "texture": "#side"}
+            }
+		}, {
+			"from": [ 5, 5, 8 ],
+            "to": [ 11, 11, 14 ],
+            "faces": {
+                "down":  { "uv": [ 8, 5, 14, 11 ], "texture": "#side"},
+                "up":    { "uv": [ 8, 5, 14, 11 ], "texture": "#side"},
+                "north": { "uv": [ 8, 5, 14, 11 ], "texture": "#side"},
+				"south": { "uv": [ 8, 5, 14, 11 ], "texture": "#side"},
+                "west":  { "uv": [ 8, 5, 14, 11 ], "texture": "#side"},
+                "east":  { "uv": [ 8, 5, 14, 11 ], "texture": "#side"}
+            }
+		}
+    ]
+}

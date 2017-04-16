@@ -70,11 +70,10 @@ public class SharedInteger extends SharedNetwork<IntegerComp, SharedInteger> imp
 	}
 
 	public void setIO(IntegerComp c, short con) {
-		int add = con & ~c.rsIO, rem = c.rsIO & ~con;
-		if ((add & AllIn) != 0) inputs.add(c);
-		else if ((rem & AllIn) != 0) inputs.remove(c);
-		if ((add & AllOut) != 0) outputs.add(c);
-		else if ((rem & AllOut) != 0) outputs.remove(c);
+		if ((con & AllIn) != 0 && (c.rsIO & AllIn) == 0) inputs.add(c);
+		else if ((con & AllIn) == 0 && (c.rsIO & AllIn) != 0) inputs.remove(c);
+		if ((con & AllOut) != 0 && (c.rsIO & AllOut) == 0) outputs.add(c);
+		else if ((con & AllOut) == 0 && (c.rsIO & AllOut) != 0) outputs.remove(c);
 		c.rsIO = con;
 		markStateDirty();
 	}

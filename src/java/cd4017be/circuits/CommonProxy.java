@@ -30,6 +30,7 @@ public class CommonProxy {
 		TileBlockRegistry.register(designer, CircuitDesigner.class, TileContainer.class);
 		TileBlockRegistry.register(fluidValve, FluidValve.class, DataContainer.class);
 		TileBlockRegistry.register(energyValve, EnergyValve.class, DataContainer.class);
+		TileBlockRegistry.register(wirelessCon, WirelessConnector.class, null);
 	}
 
 }

@@ -20,6 +20,8 @@ tile.cd4017be.invConnector.name=Remote Block Connector
 tile.cd4017be.designer.name=Circuit Designer
 tile.cd4017be.fluidValve.name=Fluid Valve
 tile.cd4017be.energyValve.name=Energy Valve
+tile.cd4017be.wirelessCon\:0.name=Wireless Signal Connectors
+tile.cd4017be.wirelessCon\:1.name=§bLinked§f Wireless Signal Connector
 # tooltips
 tile.cd4017be.programmer.tip=Deprecated, will be removed soon.\nLoad and save your old\nSchematics here for conversion.
 tile.cd4017be.designer.tip=Used to design the circuit architecture\nand write it on a §6Schematic§7 for Assembling.
@@ -40,11 +42,19 @@ tile.cd4017be.oszillograph.tip=Displays the graph of up to 4 input values over t
 tile.cd4017be.invConnector.tip=Provides remote access to capabilities\n(Item, Fluid, ...) of a connected Block.\nConnection shows green if linked and red if not.\nClick with empty hand to change orientation.\nClick with solid block to cover.
 tile.cd4017be.fluidValve.tip=Can control or measure fluid flow with redstone signals.\n(counts in units of 1mB)
 tile.cd4017be.energyValve.tip=Can control or measure energy flow with redstone signals.\nSupports §3RF§7 and §3Tesla§7 (counts in unit of 1RF).
+tile.cd4017be.wirelessCon\:0.tip=Connects two §6Solid Redstone§7 or §632-bit-Signal Wires\nacross any distance and even between dimensions.\nYou'll get the second connector when placing this one.
+tile.cd4017be.wirelessCon\:1.tip=Place to establish a connection with linked block.\nWarning: At least one of both connectors must\nstay placed in world to keep up the linkage.\nSneak-Click block to remove both connectors at once\nand get them back as the unlinked connector.
 
 tile.cd4017be.lever8bit.click0=Output as bits 0-7 [1-128]
 tile.cd4017be.lever8bit.click1=Output as bits 8-15 [256-32768]
 tile.cd4017be.lever8bit.click2=Output as bits 16-23 [65536-8388608]
 tile.cd4017be.lever8bit.click3=Output as bits 24-31 [16777216-2147483648]
+msg.cd4017be.wireless0=The dropped second Connector will link to this.
+msg.cd4017be.wireless1=§2Found linked Connector in dim %d @ [%d, %d, %d]
+msg.cd4017be.wireless2=§4No Connector could be found in dim %d @ [%d, %d, %d] !
+msg.cd4017be.wireless3=Linked to [%d, %d, %d] in dim %d
+msg.cd4017be.wireless4=§2Both linked connectors removed
+msg.cd4017be.wireless5=§4Can't find other connector!
 
 # Items
 # names
@@ -71,8 +81,6 @@ gui.cd4017be.tickInt=%.2fs
 gui.cd4017be.programmer.name=Programm:
 gui.cd4017be.assembler.name=Circuit Assembler
 gui.cd4017be.circuit.name=Circuit
-gui.cd4017be.invReader.name=Inventory Sensor
-gui.cd4017be.itemTranslocator.name=Item Translocator
 gui.cd4017be.display8bit.name=Display
 gui.cd4017be.blockSensor.name=Sensor Module Container
 gui.cd4017be.itemSensor.name=Item Filter

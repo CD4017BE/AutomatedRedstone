@@ -38,6 +38,7 @@ public class Objects {
 	public static TileBlock bitShifter;
 	public static TileBlock fluidValve;
 	public static TileBlock energyValve;
+	public static TileBlock wirelessCon;
 	public static BlockInvConnector invConnector;
 
 	//Items
@@ -68,6 +69,7 @@ public class Objects {
 		new DefaultItemBlock((fluidValve = TileBlock.create("fluidValve", Material.IRON, SoundType.METAL, 0x12)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F));
 		new DefaultItemBlock((energyValve = TileBlock.create("energyValve", Material.IRON, SoundType.METAL, 0x12)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F));
 		new DefaultItemBlock((invConnector = new BlockInvConnector("invConnector", Material.GLASS, SoundType.GLASS)).setCreativeTab(tabCircuits).setHardness(0.5F).setResistance(10F));
+		new ItemWirelessCon((wirelessCon = TileBlock.create("wirelessCon", Material.IRON, SoundType.METAL, 0x62)).setBlockBounds(new AxisAlignedBB(0.25, 0.25, 0.0, 0.75, 0.75, 0.875)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F));
 		new DefaultItemBlock((programmer = TileBlock.create("programmer", Material.WOOD, SoundType.WOOD, 0x1)).setCreativeTab(tabCircuits).setHardness(1.5F).setResistance(10F));
 		
 		(circuitPlan = new ItemProgramm("circuitPlan")).setCreativeTab(tabCircuits);
