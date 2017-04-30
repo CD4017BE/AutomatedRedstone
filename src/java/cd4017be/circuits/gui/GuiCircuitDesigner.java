@@ -160,7 +160,12 @@ public class GuiCircuitDesigner extends GuiMachine {
 					tile.modified++;
 				}
 			} break;
-		case 25: tile.renderAll = !tile.renderAll; break;//TODO SYNC
+		case 25: {
+				PacketBuffer dos = tile.getPacketTargetData();
+				dos.writeByte((tile.renderAll = !tile.renderAll) ? 7 : 6);
+				dos.writeString(tile.name = (String)obj);
+				BlockGuiHandler.sendPacketToServer(dos);
+			} break;
 		case 26: {
 				PacketBuffer dos = tile.getPacketTargetData();
 				dos.writeByte(3);
@@ -179,10 +184,13 @@ public class GuiCircuitDesigner extends GuiMachine {
 				dos.writeByte(2);
 				BlockGuiHandler.sendPacketToServer(dos);
 			} break;
-		case 29:
-			tile.mode = !tile.mode;
-			tile.selMod = null;
-			break;
+		case 29: {
+				PacketBuffer dos = tile.getPacketTargetData();
+				dos.writeByte((tile.mode = !tile.mode) ? 5 : 4);
+				dos.writeString(tile.name = (String)obj);
+				BlockGuiHandler.sendPacketToServer(dos);
+				tile.selMod = null;
+			} break;
 		}
 	}
 

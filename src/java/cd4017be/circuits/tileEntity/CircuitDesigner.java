@@ -48,6 +48,7 @@ public class CircuitDesigner extends ModTileEntity implements IGuiData {
 		data.resetReaderIndex();
 		nbt.setByteArray("data", b);
 		nbt.setString("name", name);
+		nbt.setByte("mode", (byte)((mode ? 1 : 0) | (renderAll ? 2 : 0)));
 		return nbt;
 	}
 
@@ -56,21 +57,26 @@ public class CircuitDesigner extends ModTileEntity implements IGuiData {
 		byte[] b = nbt.getByteArray("data");
 		data.writeBytes(b);
 		name = nbt.getString("name");
+		byte m = nbt.getByte("mode");
+		mode = (m & 1) != 0;
+		renderAll = (m & 2) != 0;
 	}
 
 	@Override
 	public void onPlayerCommand(PacketBuffer dis, EntityPlayerMP player) throws IOException {
 		byte cmd = dis.readByte();
-		if (cmd == 0) {
+		switch(cmd) {
+		case 0:
 			data.clear();
 			data.writeBytes(dis);
 			lastPlayer = player.getGameProfile();
 			modify();
-		} else if (cmd == 1) {
+			break;
+		case 1:
 			if (dataItem != null && dataItem.getItem() == Objects.circuitPlan) {
 				dataItem.setTagCompound(writeNBT(new NBTTagCompound()));
-			}
-		} else if (cmd == 2) {
+			} break;
+		case 2:
 			if (dataItem != null && dataItem.getItem() == Objects.circuitPlan && dataItem.hasTagCompound()) {
 				readNBT(dataItem.getTagCompound());
 			} else {
@@ -80,8 +86,14 @@ public class CircuitDesigner extends ModTileEntity implements IGuiData {
 			}
 			modify();
 			lastPlayer = null;
-		} else if (cmd == 3) {
+			break;
+		case 3:
 			name = dis.readStringFromBuffer(16);
+			break;
+		case 4: mode = false; break;
+		case 5: mode = true; break;
+		case 6: renderAll = false; break;
+		case 7: renderAll = true; break;
 		}
 	}
 
