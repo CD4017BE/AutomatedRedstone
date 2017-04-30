@@ -1,6 +1,7 @@
 package cd4017be.circuits;
 
 import cd4017be.api.recipes.RecipeScriptContext;
+import cd4017be.api.recipes.RecipeScriptContext.ConfigConstants;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.script.ScriptFiles.Version;
 import net.minecraftforge.fml.common.Mod;
@@ -23,7 +24,7 @@ public class RedstoneCircuits {
 	public static CommonProxy proxy;
 
 	public RedstoneCircuits() {
-		RecipeScriptContext.scriptRegistry.add(new Version("automatedRedstone", 308, "/assets/circuits/config/recipes.rcp"));
+		RecipeScriptContext.scriptRegistry.add(new Version("automatedRedstone", 309, "/assets/circuits/config/recipes.rcp"));
 	}
 
 	@Mod.EventHandler
@@ -31,6 +32,7 @@ public class RedstoneCircuits {
 		Objects.init();
 		proxy.registerBlocks();
 		RecipeScriptContext.instance.run("automatedRedstone.PRE_INIT");
+		Objects.initConstants(new ConfigConstants(RecipeScriptContext.instance.modules.get("automatedRedstone")));
 	}
 
 	@Mod.EventHandler

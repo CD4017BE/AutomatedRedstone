@@ -17,7 +17,6 @@ import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.items.ItemHandlerHelper;
 import cd4017be.circuits.Objects;
 import cd4017be.circuits.tileEntity.CircuitDesigner.ModuleType;
-import cd4017be.lib.BlockItemRegistry;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.Gui.SlotItemType;
@@ -36,7 +35,7 @@ public class Assembler extends AutomatedTile implements IAccessHandler, IGuiData
 	
 	private static final Item circuit = Item.getItemFromBlock(Objects.circuit);
 	public static final String[] tagNames = {"IO", "Cap", "Gate", "Calc"};
-	public static final String[] materials = {"m.IORelay", "m.RAMPlate", "m.LogicPrc", "m.CalcPrc"};
+	public static final ItemStack[] materials = new ItemStack[4];
 	/**0-3:needed 4-7: provided 8:errCode{-1:clear 0:successful 1:outOfBounds 2:tooManyConstants 3:tooManyIO 4:dataSyntaxErr} */
 	public int[] N = new int[9];
 	NBTTagCompound code;
@@ -63,7 +62,7 @@ public class Assembler extends AutomatedTile implements IAccessHandler, IGuiData
 			for (int i = 0; i < 4; i++) {
 				int n = N[i], m = N[i + 4];
 				if (m > n) {
-					stack = inventory.insertItem(3 + i, BlockItemRegistry.stack(materials[i], 1), false);
+					stack = inventory.insertItem(3 + i, materials[i].copy(), false);
 					if (stack == null) N[i + 4] = --m;
 				} else if (m < n) {
 					stack = inventory.extractItem(3 + i, 1, false);
@@ -243,10 +242,10 @@ public class Assembler extends AutomatedTile implements IAccessHandler, IGuiData
 		c.clickHandler = this;
 		c.addItemSlot(new SlotItemType(inventory, 0, 152, 16, new ItemStack(circuit, 64), new ItemStack(circuit, 64, 1), new ItemStack(circuit, 64, 2)));
 		c.addItemSlot(new SlotItemType(inventory, 2, 152, 52));
-		c.addItemSlot(new SlotItemType(inventory, 3, 26, 16, BlockItemRegistry.stack(materials[0], 64)));
-		c.addItemSlot(new SlotItemType(inventory, 4, 8, 16, BlockItemRegistry.stack(materials[1], 64)));
-		c.addItemSlot(new SlotItemType(inventory, 5, 8, 52, BlockItemRegistry.stack(materials[2], 64)));
-		c.addItemSlot(new SlotItemType(inventory, 6, 26, 52, BlockItemRegistry.stack(materials[3], 64)));
+		c.addItemSlot(new SlotItemType(inventory, 3, 26, 16, ItemHandlerHelper.copyStackWithSize(materials[0], 64)));
+		c.addItemSlot(new SlotItemType(inventory, 4, 8, 16, ItemHandlerHelper.copyStackWithSize(materials[1], 64)));
+		c.addItemSlot(new SlotItemType(inventory, 5, 8, 52, ItemHandlerHelper.copyStackWithSize(materials[2], 64)));
+		c.addItemSlot(new SlotItemType(inventory, 6, 26, 52, ItemHandlerHelper.copyStackWithSize(materials[3], 64)));
 		c.addItemSlot(new SlotItemType(inventory, 7, 116, 34, new ItemStack(Objects.circuitPlan, 1)));
 		c.addPlayerInventory(8, 86);
 	}
@@ -267,7 +266,7 @@ public class Assembler extends AutomatedTile implements IAccessHandler, IGuiData
 
 	@Override
 	public int insertAm(int g, int s, ItemStack item, ItemStack insert) {
-		if ((s >= 3 && s < 7 && !insert.isItemEqual(BlockItemRegistry.stack(materials[s - 3], 1)))
+		if ((s >= 3 && s < 7 && !insert.isItemEqual(materials[s - 3]))
 			|| (s == 7 && insert.getItem() != Objects.circuitPlan)
 			|| (s == 0 && insert.getItem() != circuit)) return 0;
 		int m = insert.getMaxStackSize(); 

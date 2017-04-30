@@ -26,9 +26,9 @@ tile.cd4017be.wirelessCon\:1.name=§bLinked§f Wireless Signal Connector
 tile.cd4017be.programmer.tip=Deprecated, will be removed soon.\nLoad and save your old\nSchematics here for conversion.
 tile.cd4017be.designer.tip=Used to design the circuit architecture\nand write it on a §6Schematic§7 for Assembling.
 tile.cd4017be.assembler.tip=Used to install components into a\n§6Circuit Casing§7 based on a §6Schematic§7.
-tile.cd4017be.circuit\:0.tip=Compact container for complicated redstone logic.\nInstall Components in §6Circuit Assembler§7.\nMax 1 cycle per second
-tile.cd4017be.circuit\:1.tip=Max 4 cycles per second
-tile.cd4017be.circuit\:2.tip=Max 20 cycles per second
+tile.cd4017be.circuit\:0.tip=Compact container for complicated redstone logic.\nInstall Components in §6Circuit Assembler§7.\nMax \\<circuit_speed:0> cycles per second
+tile.cd4017be.circuit\:1.tip=Max \\<circuit_speed:1> cycles per second
+tile.cd4017be.circuit\:2.tip=Max \\<circuit_speed:2> cycles per second
 tile.cd4017be.rsp8bit.tip=Lossless instant omnidirectional\ntransfer of 32-bit redstone signals.\nClick on sides to change their IO mode.\nSneak-Click to disconnect Wires.\nClick with solid block to cover.
 tile.cd4017be.rsp1bit\:0.tip=Lossless redstone signal transfer\nfrom §6Receiver§7 to §6Emitter§7 Wires\n(long distances will cause delay)\nSneak-Click to disconnect Wires\nClick with solid block to cover.
 tile.cd4017be.rsp1bit\:1.tip=Emits a redstone signal.\nSupports 8-bit RS-strength (0-255).
@@ -70,9 +70,9 @@ item.cd4017be.energySensor.name=Energy Sensor §e(%.0fkJ)
 item.cd4017be.timeSensor.name=Time Sensor Module
 # tooltips
 item.cd4017be.circuitPlan.tip=Contains the building instructions for a cicuit.\nAfter being written in the §6Circuit Designer§7\nit can be used in the §6Circuit Assembler§7.
-item.cd4017be.itemSensor.tip=§6Sensor§7 module for counting items.\nUses block drops and items laying around\nif target block is not an inventory.\nRight-Click to configure filter.\nSneak-Click block to link (max 20m range).
-item.cd4017be.fluidSensor.tip=§6Sensor§7 module for counting fluids.\nUses tank contents or fluids placed in world.\nRight-Click to configure filter.\nSneak-Click block to link (max 20m range).
-item.cd4017be.energySensor.tip=§6Sensor§7 module for counting energy.\nSupports: §3kJ§7[x1], §3Tesla/RF§7[x0.1], §3EU§7[x0.4]\nSneak-Click block to link (max 20m range).
+item.cd4017be.itemSensor.tip=§6Sensor§7 module for counting items.\nUses block drops and items laying around\nif target block is not an inventory.\nRight-Click to configure filter.\nSneak-Click block to link (max \\<itemSensor_range>m range).
+item.cd4017be.fluidSensor.tip=§6Sensor§7 module for counting fluids.\nUses tank contents or fluids placed in world.\nRight-Click to configure filter.\nSneak-Click block to link (max \\<fluidSensor_range>m range).
+item.cd4017be.energySensor.tip=§6Sensor§7 module for counting energy.\nSupports: §3kJ§7[x1], §3Tesla/RF§7[x0.1], §3EU§7[x0.4]\nSneak-Click block to link (max \\<energySensor_range>m range).
 item.cd4017be.timeSensor.tip=§6Sensor§7 module for time measurement [s].\nCan use §3server-tick§7, §3ingame§7 or §3real-world§7 time.\nRight-Click to configure settings.\nSneak-Click block to link as signal source.
 
 # GUI
@@ -122,8 +122,8 @@ gui.cd4017be.assembler.err3=§4Invalid
 gui.cd4017be.assembler.msg3=Schematic contains more than the maximum of 6 allowed IO channels!
 gui.cd4017be.assembler.err4=§4Error
 gui.cd4017be.assembler.msg4=Compiler crashed with java Exception (see log)!\nCorrupted Schematic data?
-gui.cd4017be.assembler.cmp0=§6IO bus Relay§fs for external communication.
-gui.cd4017be.assembler.cmp1=§6Memory Board§fs for data storage capacity.
+gui.cd4017be.assembler.cmp0=§6IO bus Relay§fs for communication bandwith.
+gui.cd4017be.assembler.cmp1=§6Memory Board§fs for storage capacity.
 gui.cd4017be.assembler.cmp2=§6Logic Processor§fs for logic operations.
 gui.cd4017be.assembler.cmp3=§6Arithmetic Processor§fs for nummeric operations.
 gui.cd4017be.circuit.on0=Offline

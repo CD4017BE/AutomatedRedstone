@@ -27,7 +27,7 @@ import cd4017be.lib.Gui.ItemGuiData;
 
 public class ItemTimeSensor extends DefaultItem implements ISensor, IGuiItem {
 
-	private static double RangeSQ = 400D;
+	public double RangeSQ = 400D;
 
 	public ItemTimeSensor(String id) {
 		super(id);

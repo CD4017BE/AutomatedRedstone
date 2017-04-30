@@ -8,8 +8,12 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
 import cd4017be.api.Capabilities;
+import cd4017be.api.recipes.RecipeScriptContext.ConfigConstants;
 import cd4017be.circuits.block.*;
 import cd4017be.circuits.item.*;
+import cd4017be.circuits.tileEntity.Assembler;
+import cd4017be.circuits.tileEntity.Circuit;
+import cd4017be.lib.BlockItemRegistry;
 import cd4017be.lib.DefaultItemBlock;
 import cd4017be.lib.TileBlock;
 import cd4017be.lib.templates.BlockPipe;
@@ -77,5 +81,21 @@ public class Objects {
 		(fluidSensor = new ItemFluidSensor("fluidSensor")).setCreativeTab(tabCircuits);
 		(energySensor = new ItemEnergySensor("energySensor")).setCreativeTab(tabCircuits);
 		(timeSensor = new ItemTimeSensor("timeSensor")).setCreativeTab(tabCircuits);
+	}
+
+	public static void initConstants(ConfigConstants c) {
+		c.getVect("circuit_ticks", Circuit.ClockSpeed);
+		itemSensor.RangeSQ = c.getNumber("itemSensor_rangeSQ", 20);
+		itemSensor.RangeSQ *= itemSensor.RangeSQ;
+		fluidSensor.RangeSQ = c.getNumber("fluidSensor_rangeSQ", 20);
+		fluidSensor.RangeSQ *= fluidSensor.RangeSQ;
+		energySensor.RangeSQ = c.getNumber("energySensor_rangeSQ", 20);
+		energySensor.RangeSQ *= energySensor.RangeSQ;
+		timeSensor.RangeSQ = c.getNumber("timeSensor_rangeSQ", 20);
+		timeSensor.RangeSQ *= timeSensor.RangeSQ;
+		Assembler.materials[0] = BlockItemRegistry.stack("m.IORelay", 1);
+		Assembler.materials[1] = BlockItemRegistry.stack("m.RAMPlate", 1);
+		Assembler.materials[2] = BlockItemRegistry.stack("m.LogicPrc", 1);
+		Assembler.materials[3] = BlockItemRegistry.stack("m.CalcPrc", 1);
 	}
 }
