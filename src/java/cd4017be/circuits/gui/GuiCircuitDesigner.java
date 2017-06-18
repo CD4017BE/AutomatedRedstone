@@ -163,7 +163,6 @@ public class GuiCircuitDesigner extends GuiMachine {
 		case 25: {
 				PacketBuffer dos = tile.getPacketTargetData();
 				dos.writeByte((tile.renderAll = !tile.renderAll) ? 7 : 6);
-				dos.writeString(tile.name = (String)obj);
 				BlockGuiHandler.sendPacketToServer(dos);
 			} break;
 		case 26: {
@@ -187,7 +186,6 @@ public class GuiCircuitDesigner extends GuiMachine {
 		case 29: {
 				PacketBuffer dos = tile.getPacketTargetData();
 				dos.writeByte((tile.mode = !tile.mode) ? 5 : 4);
-				dos.writeString(tile.name = (String)obj);
 				BlockGuiHandler.sendPacketToServer(dos);
 				tile.selMod = null;
 			} break;

@@ -3,7 +3,7 @@
   "modid": "Circuits",
   "name": "Automated Redstone",
   "description": "Better redstone cables, programmable circuits and fancy measurement and display devices",
-  "version": "4.4.2",
+  "version": "4.4.3",
   "acceptableRemoteVersions": "[4.4.0,4.5.0)",
   "acceptableSaveVersions": "[4.2.0,4.5.0)",
   "acceptedMinecraftVersions": "[1.9.4,1.11)",
