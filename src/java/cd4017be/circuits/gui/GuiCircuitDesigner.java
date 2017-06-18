@@ -163,7 +163,6 @@ public class GuiCircuitDesigner extends GuiMachine {
 		case 25: {
 				PacketBuffer dos = tile.getPacketTargetData();
 				dos.writeByte((tile.renderAll = !tile.renderAll) ? 7 : 6);
-				dos.writeString(tile.name = (String)obj);
 				BlockGuiHandler.sendPacketToServer(dos);
 			} break;
 		case 26: {
