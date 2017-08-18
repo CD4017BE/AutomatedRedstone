@@ -5,7 +5,7 @@ import cd4017be.circuits.Objects;
 import cd4017be.lib.TickRegistry;
 import cd4017be.lib.TickRegistry.IUpdatable;
 import cd4017be.lib.templates.MultiblockComp;
-import net.minecraft.init.Blocks;
+import cd4017be.lib.util.Utils;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -27,11 +27,9 @@ public class IntegerComp extends MultiblockComp<IntegerComp, SharedInteger> {
 	public short rsIO;
 
 	public void onStateChange() {
-		World world = ((TileEntity)tile).getWorld();
-		BlockPos pos = ((TileEntity)tile).getPos();
 		for (int i = 0; i < 6; i++)
 			if ((rsIO >> (i * 2) & 2) != 0)
-				world.notifyBlockOfStateChange(pos.offset(EnumFacing.VALUES[i]), Blocks.REDSTONE_TORCH);
+				Utils.updateRedstoneOnSide((TileEntity)tile, network.outputState, EnumFacing.VALUES[i]);
 	}
 
 	@Override

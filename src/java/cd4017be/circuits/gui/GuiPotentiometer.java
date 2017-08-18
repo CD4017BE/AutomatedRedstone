@@ -26,13 +26,13 @@ public class GuiPotentiometer extends GuiMachine {
 		super.initGui();
 		guiComps.add(new TextField(0, 8, 16, 64, 7, 11, ()-> "" + tile.max, (t)-> {
 			try {
-				PacketBuffer dos = tile.getPacketTargetData();
+				PacketBuffer dos = BlockGuiHandler.getPacketTargetData(tile.pos());
 				dos.writeByte(1).writeInt(Integer.parseInt(t));
 				BlockGuiHandler.sendPacketToServer(dos);
 			} catch(NumberFormatException e) {}}).setTooltip("potent.max"));
 		guiComps.add(new TextField(1, 8, 27, 64, 7, 11, ()-> "" + tile.min, (t)-> {
 			try {
-				PacketBuffer dos = tile.getPacketTargetData();
+				PacketBuffer dos = BlockGuiHandler.getPacketTargetData(tile.pos());
 				dos.writeByte(0).writeInt(Integer.parseInt(t));
 				BlockGuiHandler.sendPacketToServer(dos);
 			} catch(NumberFormatException e) {}}).setTooltip("potent.min"));

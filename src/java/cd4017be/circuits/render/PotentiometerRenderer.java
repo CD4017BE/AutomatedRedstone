@@ -19,7 +19,7 @@ public class PotentiometerRenderer extends TileEntitySpecialRenderer<Potentiomet
 	@Override
 	public void renderTileEntityAt(Potentiometer te, double x, double y, double z, float partialTicks, int destroyStage) {
 		GlStateManager.pushMatrix();
-		Util.moveAndOrientToBlock(x, y, z, te.getOrientation()^1);
+		Util.moveAndOrientToBlock(x, y, z, te.getOrientation());
 		GlStateManager.translate(0, ((float)te.cur - (float)te.min) / ((float)te.max - (float)te.min) * 25F / 32F, 0);
 		bindTexture(texture);
 		VertexBuffer buff = Tessellator.getInstance().getBuffer();

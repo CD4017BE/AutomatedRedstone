@@ -25,13 +25,13 @@ public class GuiEnergyValve extends GuiMachine {
 		ySize = 40;
 		super.initGui();
 		guiComps.add(new NumberSel(0, 7, 15, 36, 18, "", 1, 1200, 20, ()-> tile.tickInt, (i)-> {
-			PacketBuffer dos = tile.getPacketTargetData();
+			PacketBuffer dos = BlockGuiHandler.getPacketTargetData(tile.pos());
 			dos.writeByte(0).writeInt(tile.tickInt = i);
 			BlockGuiHandler.sendPacketToServer(dos);
 		}).setup(8, 0xff404040, 2, true).around());
 		guiComps.add(new Text<Float>(1, 8, 20, 34, 8, "valve.tick", ()-> (float)tile.tickInt / 20F).center().setTooltip("valve.timer"));
 		guiComps.add(new Button(2, 52, 15, 18, 18, 0, ()-> tile.measure?1:0, (i)-> {
-			PacketBuffer dos = tile.getPacketTargetData();
+			PacketBuffer dos = BlockGuiHandler.getPacketTargetData(tile.pos());
 			dos.writeByte(1);
 			BlockGuiHandler.sendPacketToServer(dos);
 		}).texture(158, 0).setTooltip("energyvalve.mode#"));

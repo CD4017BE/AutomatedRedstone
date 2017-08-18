@@ -9,10 +9,16 @@ import java.util.HashMap;
 
 import org.apache.logging.log4j.Level;
 
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.ClickType;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.ITickable;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.items.ItemHandlerHelper;
 import cd4017be.circuits.Objects;
@@ -22,41 +28,40 @@ import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.Gui.SlotItemType;
 import cd4017be.lib.Gui.TileContainer;
 import cd4017be.lib.Gui.TileContainer.ISlotClickHandler;
-import cd4017be.lib.templates.AutomatedTile;
-import cd4017be.lib.templates.Inventory;
-import cd4017be.lib.templates.Inventory.IAccessHandler;
+import cd4017be.lib.block.BaseTileEntity;
+import cd4017be.lib.templates.BasicInventory;
 
 /**
  *
  * @author CD4017BE
  */
-public class Assembler extends AutomatedTile implements IAccessHandler, IGuiData, ISlotClickHandler {
+public class Assembler extends BaseTileEntity implements ITickable, IGuiData, ISlotClickHandler {
 
-	
 	private static final Item circuit = Item.getItemFromBlock(Objects.circuit);
 	public static final String[] tagNames = {"IO", "Cap", "Gate", "Calc"};
 	public static final ItemStack[] materials = new ItemStack[4];
 	/**0-3:needed 4-7: provided 8:errCode{-1:clear 0:successful 1:outOfBounds 2:tooManyConstants 3:tooManyIO 4:dataSyntaxErr} */
 	public int[] N = new int[9];
+	public final BasicInventory inventory = new BasicInventory(8);
 	NBTTagCompound code;
 	private boolean recompile;
 
 	public Assembler() {
-		inventory = new Inventory(8, 3, this).group(0, 0, 1, -1).group(1, 2, 3, 1).group(2, 3, 7, 0);
+		inventory.onModify = this::onSetSlot;
+		inventory.restriction = this::insertAmount;
 		N[8] = -1;
 	}
 
 	@Override
 	public void update() {
-		super.update();
-		if (worldObj.isRemote) return;
+		if (world.isRemote) return;
 		if (recompile) {
 			compile();
 			recompile = false;
 		}
 		if (N[8] > 0) return;
 		ItemStack item = inventory.items[1];
-		if (item != null) {
+		if (!item.isEmpty()) {
 			ItemStack stack;
 			boolean done = true;
 			for (int i = 0; i < 4; i++) {
@@ -75,7 +80,7 @@ public class Assembler extends AutomatedTile implements IAccessHandler, IGuiData
 				inventory.items[1] = inventory.insertItem(2, item, false);
 				for (int i = 4; i < 8; i++) N[i] = 0;
 			}
-		} else if (inventory.items[0] != null && inventory.items[0].getItem() == circuit) {
+		} else if (inventory.items[0].getItem() == circuit) {
 			inventory.items[1] = item = inventory.extractItem(0, 1, false);
 			NBTTagCompound nbt = item.getTagCompound();
 			if (nbt == null) for (int i = 4; i < 8; i++) N[i] = 0;
@@ -85,7 +90,7 @@ public class Assembler extends AutomatedTile implements IAccessHandler, IGuiData
 
 	public void compile() {
 		ItemStack item = inventory.items[7];
-		if (item == null || item.getItem() != Objects.circuitPlan || !item.hasTagCompound()) {
+		if (item.getItem() != Objects.circuitPlan || !item.hasTagCompound()) {
 			for (int i = 0; i < 4; i++) N[i] = 0;
 			N[8] = -1;
 			code = null;
@@ -233,7 +238,14 @@ public class Assembler extends AutomatedTile implements IAccessHandler, IGuiData
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
+		inventory.read(nbt.getTagList("items", Constants.NBT.TAG_COMPOUND));
 		recompile = true;
+	}
+
+	@Override
+	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+		nbt.setTag("items", inventory.write());
+		return super.writeToNBT(nbt);
 	}
 
 	@Override
@@ -259,29 +271,49 @@ public class Assembler extends AutomatedTile implements IAccessHandler, IGuiData
 	public boolean transferStack(ItemStack item, int s, TileContainer container) {
 		if (s < 7) return false;
 		container.mergeItemStack(item, 2, 6, false);
-		if (item.stackSize > 0) container.mergeItemStack(item, 0, 1, false);
-		if (item.stackSize > 0) container.mergeItemStack(item, 6, 7, false);
+		if (item.getCount() > 0) container.mergeItemStack(item, 0, 1, false);
+		if (item.getCount() > 0) container.mergeItemStack(item, 6, 7, false);
 		return true;
 	}
 
-	@Override
-	public int insertAm(int g, int s, ItemStack item, ItemStack insert) {
+	public int insertAmount(int s, ItemStack insert) {
 		if ((s >= 3 && s < 7 && !insert.isItemEqual(materials[s - 3]))
 			|| (s == 7 && insert.getItem() != Objects.circuitPlan)
 			|| (s == 0 && insert.getItem() != circuit)) return 0;
-		int m = insert.getMaxStackSize(); 
-		return item == null ? Math.min(m, insert.stackSize) : item.stackSize < m && ItemHandlerHelper.canItemStacksStack(item, insert) ? Math.min(m - item.stackSize, insert.stackSize): 0;
+		return Math.min(64, insert.getMaxStackSize());
+	}
+
+	public void onSetSlot(ItemStack item, int s) {
+		recompile |= s == 7;
 	}
 
 	@Override
-	public int extractAm(int g, int s, ItemStack item, int extract) {
-		return item == null ? 0 : item.stackSize < extract ? item.stackSize : extract;
+	public boolean slotClick(ItemStack item, Slot slot, int b, ClickType c, TileContainer cont) {
+		return false;
 	}
 
 	@Override
-	public void setSlot(int g, int s, ItemStack item) {
-		inventory.items[s] = item;
-		if (s == 7) recompile = true;
+	public boolean canPlayerAccessUI(EntityPlayer player) {
+		return false;
+	}
+
+	@Override
+	public void setSyncVariable(int i, int v) {
+	}
+
+	@Override
+	public boolean detectAndSendChanges(DataContainer container, PacketBuffer dos) {
+		return false;
+	}
+
+	@Override
+	public void updateClientChanges(DataContainer container, PacketBuffer dis) {
+	}
+
+	@Override
+	public String getName() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

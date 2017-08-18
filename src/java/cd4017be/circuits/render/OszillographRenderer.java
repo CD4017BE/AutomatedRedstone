@@ -35,7 +35,7 @@ public class OszillographRenderer extends TileEntitySpecialRenderer<Oszillograph
 		GlStateManager.depthMask(false);
 		GlStateManager.disableLighting();
 		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240.0F, 240.0F);
-		Util.moveAndOrientToBlock(x, y, z, te.getOrientation()^1);
+		Util.moveAndOrientToBlock(x, y, z, te.getOrientation());
 		GL11.glScalef(0.9375F, 0.9375F, 1F);
 		bindTexture(texture);
 		VertexBuffer buff = Tessellator.getInstance().getBuffer();

@@ -72,7 +72,7 @@ public class GuiOszillograph extends GuiMachine {
 
 	@Override
 	protected void setDisplVar(int id, Object obj, boolean send) {
-		PacketBuffer dos = tile.getPacketTargetData();
+		PacketBuffer dos = BlockGuiHandler.getPacketTargetData(tile.pos());
 		if (id < 8) try {
 			dos.writeByte(AutomatedTile.CmdOffset + id);
 			dos.writeFloat(Float.parseFloat((String)obj));

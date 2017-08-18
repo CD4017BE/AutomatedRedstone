@@ -6,7 +6,6 @@
 
 package cd4017be.circuits.item;
 
-import cd4017be.circuits.block.BlockRSPipe1;
 import cd4017be.lib.BlockItemRegistry;
 import cd4017be.lib.DefaultItemBlock;
 import net.minecraft.block.Block;
@@ -26,9 +25,9 @@ public class ItemRSPipe extends DefaultItemBlock
 
 	@Override
 	protected void init() {
-		BlockItemRegistry.registerItemStack(new ItemStack(this, 1, BlockRSPipe1.ID_Transport), "rsp1bitN");
-		BlockItemRegistry.registerItemStack(new ItemStack(this, 1, BlockRSPipe1.ID_Extraction), "rsp1bitI");
-		BlockItemRegistry.registerItemStack(new ItemStack(this, 1, BlockRSPipe1.ID_Injection), "rsp1bitO");
+		BlockItemRegistry.registerItemStack(new ItemStack(this, 1, 0), "rsp1bitN");
+		BlockItemRegistry.registerItemStack(new ItemStack(this, 1, 1), "rsp1bitI");
+		BlockItemRegistry.registerItemStack(new ItemStack(this, 1, 2), "rsp1bitO");
 	}
 
 	@Override

@@ -31,7 +31,7 @@ public class GuiItemSensor extends GuiMachine {
 
 	@Override
 	protected Object getDisplVar(int id) {
-		ItemStack item = inv.mainInventory[inv.currentItem];
+		ItemStack item = inv.mainInventory.get(inv.currentItem);
 		byte mode = item != null && item.hasTagCompound() ? item.getTagCompound().getByte("mode") : 0;
 		return (int)mode >> id & 1;
 	}
@@ -39,7 +39,7 @@ public class GuiItemSensor extends GuiMachine {
 	@Override
 	protected void setDisplVar(int id, Object obj, boolean send) {
 		PacketBuffer dos = BlockGuiHandler.getPacketTargetData(((TileContainer)inventorySlots).data.pos());
-		ItemStack item = inv.mainInventory[inv.currentItem];
+		ItemStack item = inv.mainInventory.get(inv.currentItem);
 		byte mode = item != null && item.hasTagCompound() ? item.getTagCompound().getByte("mode") : 0;
 		dos.writeByte(mode ^ 1 << id);
 		BlockGuiHandler.sendPacketToServer(dos);

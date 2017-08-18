@@ -1,5 +1,6 @@
 package cd4017be.circuits.item;
 
+import java.io.IOException;
 import java.util.List;
 
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -27,6 +28,7 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import cd4017be.api.circuits.ItemBlockSensor;
 import cd4017be.circuits.gui.GuiFluidSensor;
 import cd4017be.lib.BlockGuiHandler;
+import cd4017be.lib.BlockGuiHandler.ClientItemPacketReceiver;
 import cd4017be.lib.IGuiItem;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.ItemGuiData;
@@ -34,16 +36,17 @@ import cd4017be.lib.Gui.TileContainer;
 import cd4017be.lib.Gui.TileContainer.TankSlot;
 import cd4017be.lib.templates.ITankContainer;
 
-public class ItemFluidSensor extends ItemBlockSensor implements IGuiItem {
+public class ItemFluidSensor extends ItemBlockSensor implements IGuiItem, ClientItemPacketReceiver {
 
 	public ItemFluidSensor(String id) {
 		super(id, 20F);
 	}
 
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(ItemStack item, World world, EntityPlayer player, EnumHand hand) {
+	public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {
+		ItemStack item = player.getHeldItem(hand);
 		if (hand != EnumHand.MAIN_HAND) return new ActionResult<ItemStack>(EnumActionResult.PASS, item);
-		BlockGuiHandler.openItemGui(player, world, 0, -1, 0);
+		BlockGuiHandler.openItemGui(player, hand);
 		return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, item);
 	}
 
@@ -68,22 +71,22 @@ public class ItemFluidSensor extends ItemBlockSensor implements IGuiItem {
 	}
 
 	@Override
-	public Container getContainer(World world, EntityPlayer player, int x, int y, int z) {
+	public Container getContainer(ItemStack item, EntityPlayer player, World world, BlockPos pos, int slot) {
 		return new TileContainer(new GuiData(), player);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public GuiContainer getGui(World world, EntityPlayer player, int x, int y, int z) {
+	public GuiContainer getGui(ItemStack item, EntityPlayer player, World world, BlockPos pos, int slot) {
 		return new GuiFluidSensor(new TileContainer(new GuiData(), player));
 	}
 
 	@Override
-	public void onPlayerCommand(ItemStack item, EntityPlayer player, PacketBuffer data) {
+	public void onPacketFromClient(PacketBuffer data, EntityPlayer sender, ItemStack item, int slot) throws IOException {
 		if (!item.hasTagCompound()) item.setTagCompound(new NBTTagCompound());
 		byte cmd = data.readByte();
 		if (cmd == 0) item.getTagCompound().setBoolean("inv", !item.getTagCompound().getBoolean("inv"));
-		else if (cmd == 1) item.getTagCompound().setString("type", data.readStringFromBuffer(32));
+		else if (cmd == 1) item.getTagCompound().setString("type", data.readString(32));
 	}
 
 	class GuiData extends ItemGuiData implements ITankContainer {
@@ -104,7 +107,7 @@ public class ItemFluidSensor extends ItemBlockSensor implements IGuiItem {
 
 		@Override
 		public FluidStack getTank(int i) {
-			ItemStack item = player.mainInventory[player.currentItem];
+			ItemStack item = player.mainInventory.get(player.currentItem);
 			Fluid fluid = item != null ? getFluid(item) : null;
 			return fluid != null ? new FluidStack(fluid, 0) : null;
 		}

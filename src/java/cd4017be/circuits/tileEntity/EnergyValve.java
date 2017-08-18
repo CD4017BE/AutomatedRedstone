@@ -2,11 +2,8 @@ package cd4017be.circuits.tileEntity;
 
 import java.io.IOException;
 
-import cofh.api.energy.IEnergyReceiver;
-import net.darkhax.tesla.api.ITeslaConsumer;
-import net.darkhax.tesla.capability.TeslaCapabilities;
 import net.minecraft.block.Block;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
@@ -15,22 +12,19 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.fml.common.Loader;
+import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.energy.IEnergyStorage;
 import cd4017be.api.circuits.IDirectionalRedstone;
-import cd4017be.lib.ModTileEntity;
+import cd4017be.lib.BlockGuiHandler.ClientPacketReceiver;
+import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
-import net.minecraftforge.fml.common.Optional;
+import cd4017be.lib.block.AdvancedBlock.INeighborAwareTile;
+import cd4017be.lib.block.AdvancedBlock.IRedstoneTile;
+import cd4017be.lib.block.BaseTileEntity;
+import cd4017be.lib.util.Utils;
 
-public class EnergyValve extends ModTileEntity implements ITickable, IDirectionalRedstone, IGuiData, IEnergyReceiver {
+public class EnergyValve extends BaseTileEntity implements INeighborAwareTile, IRedstoneTile, ITickable, IDirectionalRedstone, IGuiData, ClientPacketReceiver, IEnergyStorage {
 
-	public static final Capability<?> TeslaConsumer;
-	static {
-		if (Loader.isModLoaded("Tesla")) {
-			TeslaConsumer = TeslaCapabilities.CAPABILITY_CONSUMER;
-		} else {
-			TeslaConsumer = null;
-		}
-	}
 	private TileEntity out;
 	public int tickInt = 1;
 	public boolean measure, update;
@@ -38,17 +32,17 @@ public class EnergyValve extends ModTileEntity implements ITickable, IDirectiona
 
 	@Override
 	public void update() {
-		if (worldObj.isRemote) return;
+		if (world.isRemote) return;
 		if (update) {
-			EnumFacing dir = EnumFacing.VALUES[getOrientation()];
-			out = getLoadedTile(pos.offset(dir.getOpposite()));
+			EnumFacing dir = getOrientation().front;
+			out = Utils.neighborTile(this, dir.getOpposite());
 		}
-		if (worldObj.getTotalWorldTime() % tickInt != 0) return;
+		if (world.getTotalWorldTime() % tickInt != 0) return;
 		if (measure) {
 			flow = Integer.MAX_VALUE - flow;
 			if (flow != state) {
 				state = flow;
-				worldObj.notifyNeighborsOfStateChange(pos, Blocks.REDSTONE_TORCH);
+				world.notifyNeighborsOfStateChange(pos, Blocks.REDSTONE_TORCH, false);
 			}
 			flow = Integer.MAX_VALUE;
 		} else if (state > 0) {
@@ -57,21 +51,26 @@ public class EnergyValve extends ModTileEntity implements ITickable, IDirectiona
 	}
 
 	@Override
-	public void onNeighborBlockChange(Block b) {
-		if (worldObj.isRemote || measure) return;
+	public void neighborBlockChange(Block b, BlockPos src) {
+		if (world.isRemote || measure) return;
 		state = 0;
 		for (EnumFacing s : EnumFacing.VALUES)
-			state |= worldObj.getRedstonePower(pos.offset(s), s);
+			state |= world.getRedstonePower(pos.offset(s), s);
 	}
 
 	@Override
-	public void onNeighborTileChange(BlockPos pos) {
+	public void neighborTileChange(BlockPos src) {
 		update = true;
 	}
 
 	@Override
-	public int redstoneLevel(int s, boolean str) {
-		return str || !measure ? 0 : state;
+	public int redstoneLevel(EnumFacing side, boolean strong) {
+		return strong || !measure ? 0 : state;
+	}
+
+	@Override
+	public boolean connectRedstone(EnumFacing side) {
+		return getRSDirection(side) != 0;
 	}
 
 	@Override
@@ -94,7 +93,7 @@ public class EnergyValve extends ModTileEntity implements ITickable, IDirectiona
 	}
 
 	@Override
-	public void onPlayerCommand(PacketBuffer data, EntityPlayerMP player) throws IOException {
+	public void onPacketFromClient(PacketBuffer data, EntityPlayer sender) throws IOException {
 		byte cmd = data.readByte();
 		if (cmd == 0) {
 			tickInt = data.readInt();
@@ -103,7 +102,7 @@ public class EnergyValve extends ModTileEntity implements ITickable, IDirectiona
 		} else if (cmd == 1) {
 			measure = !measure;
 			if (measure) flow = 0;
-			else onNeighborBlockChange(null);
+			else neighborBlockChange(null, pos);
 		}
 	}
 
@@ -129,59 +128,75 @@ public class EnergyValve extends ModTileEntity implements ITickable, IDirectiona
 
 	@Override
 	public boolean hasCapability(Capability<?> cap, EnumFacing facing) {
-		return cap == null && cap == TeslaConsumer && facing != null && facing.ordinal() == getOrientation();
+		return (cap == CapabilityEnergy.ENERGY) && facing != null && facing == getOrientation().front;
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getCapability(Capability<T> cap, EnumFacing facing) {
-		if (cap != null && cap == TeslaConsumer && facing != null && facing.ordinal() == getOrientation()) {
-			return (T)getTeslaConsumer();
-		}
+		if (facing != null && facing == getOrientation().front && cap == CapabilityEnergy.ENERGY) return (T) this;
 		return null;
 	}
 
-	@Optional.Method(modid = "Tesla")
-	private ITeslaConsumer getTeslaConsumer() {
-		return (am, sim) -> {
-			if (am > flow) am = flow;
-			if (am > 0 && out != null && !out.isInvalid()) {
-				ITeslaConsumer acc = (ITeslaConsumer)out.getCapability(TeslaConsumer, EnumFacing.VALUES[getOrientation()]);
-				if (acc == null) return 0;
-				am = acc.givePower(am, sim);
-				if (!sim) flow -= am;
-				return am;
-			} else return 0;
-		};
-	}
-
 	@Override
-	public boolean canConnectEnergy(EnumFacing from) {
-		byte dir = getOrientation();
-		return from.ordinal() == dir || from.ordinal() == (dir^1);
-	}
-
-	@Override
-	public int getEnergyStored(EnumFacing from) {
-		return 0;
-	}
-
-	@Override
-	public int getMaxEnergyStored(EnumFacing from) {
-		return 0;
-	}
-
-	@Override
-	public int receiveEnergy(EnumFacing from, int am, boolean sim) {
-		if (from.ordinal() == getOrientation()) {
-			if (am > flow) am = flow;
-			if (am > 0 && out != null && !out.isInvalid() && out instanceof IEnergyReceiver) {
-				am = ((IEnergyReceiver)out).receiveEnergy(from, am, sim);
-				if (!sim) flow -= am;
-				return am;
-			} else return 0;
+	public int receiveEnergy(int am, boolean sim) {
+		if (am > flow) am = flow;
+		IEnergyStorage stor;
+		if (am > 0 && out != null && !out.isInvalid() && (stor = out.getCapability(CapabilityEnergy.ENERGY, getOrientation().front)) != null) {
+			am = stor.receiveEnergy(am, sim);
+			if (!sim) flow -= am;
+			return am;
 		}
 		return 0;
+	}
+
+	@Override
+	public int extractEnergy(int am, boolean sim) {
+		return 0;
+	}
+
+	@Override
+	public int getEnergyStored() {
+		return 0;
+	}
+
+	@Override
+	public int getMaxEnergyStored() {
+		return 0;
+	}
+
+	@Override
+	public boolean canExtract() {
+		return false;
+	}
+
+	@Override
+	public boolean canReceive() {
+		return true;
+	}
+
+	@Override
+	public void initContainer(DataContainer container) {
+	}
+
+	@Override
+	public boolean canPlayerAccessUI(EntityPlayer player) {
+		return !player.isDead;
+	}
+
+	@Override
+	public boolean detectAndSendChanges(DataContainer container, PacketBuffer dos) {
+		return false;
+	}
+
+	@Override
+	public void updateClientChanges(DataContainer container, PacketBuffer dis) {
+	}
+
+	@Override
+	public String getName() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

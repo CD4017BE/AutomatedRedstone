@@ -43,7 +43,7 @@ public class GuiTimeSensor extends GuiMachine {
 	}
 
 	private NBTTagCompound getTag() {
-		NBTTagCompound nbt = inv.mainInventory[inv.currentItem] != null ? inv.mainInventory[inv.currentItem].getTagCompound() : null;
+		NBTTagCompound nbt = inv.mainInventory.get(inv.currentItem) != null ? inv.mainInventory.get(inv.currentItem).getTagCompound() : null;
 		return nbt != null ? nbt : new NBTTagCompound();
 	}
 

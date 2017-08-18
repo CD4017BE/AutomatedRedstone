@@ -15,14 +15,14 @@ import org.lwjgl.opengl.GL11;
 
 import cd4017be.circuits.tileEntity.Display8bit;
 import cd4017be.circuits.tileEntity.MultiLever;
-import cd4017be.lib.ModTileEntity;
+import cd4017be.lib.block.BaseTileEntity;
 import cd4017be.lib.render.Util;
 
 /**
  *
  * @author CD4017BE
  */
-public class RSInterfaceRenderer extends TileEntitySpecialRenderer<ModTileEntity> {
+public class RSInterfaceRenderer extends TileEntitySpecialRenderer<BaseTileEntity> {
 
 	private final RenderManager manager = Minecraft.getMinecraft().getRenderManager();
 
@@ -66,7 +66,7 @@ public class RSInterfaceRenderer extends TileEntitySpecialRenderer<ModTileEntity
 	}
 
 	@Override
-	public void renderTileEntityAt(ModTileEntity te, double x, double y, double z, float partialTicks, int destroyStage) {
+	public void renderTileEntityAt(BaseTileEntity te, double x, double y, double z, float partialTicks, int destroyStage) {
 		GlStateManager.color(1, 1, 1, 1);
 		GlStateManager.disableLighting();
 		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240.0F, 240.0F);

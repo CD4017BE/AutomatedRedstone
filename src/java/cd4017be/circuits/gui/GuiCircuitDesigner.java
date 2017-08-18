@@ -161,30 +161,30 @@ public class GuiCircuitDesigner extends GuiMachine {
 				}
 			} break;
 		case 25: {
-				PacketBuffer dos = tile.getPacketTargetData();
+				PacketBuffer dos = BlockGuiHandler.getPacketTargetData(tile.pos());
 				dos.writeByte((tile.renderAll = !tile.renderAll) ? 7 : 6);
 				BlockGuiHandler.sendPacketToServer(dos);
 			} break;
 		case 26: {
-				PacketBuffer dos = tile.getPacketTargetData();
+				PacketBuffer dos = BlockGuiHandler.getPacketTargetData(tile.pos());
 				dos.writeByte(3);
 				dos.writeString(tile.name = (String)obj);
 				BlockGuiHandler.sendPacketToServer(dos);
 			} break;
 		case 27: if (isShiftKeyDown()) saveAsFile();
 			else {
-				PacketBuffer dos = tile.getPacketTargetData();
+				PacketBuffer dos = BlockGuiHandler.getPacketTargetData(tile.pos());
 				dos.writeByte(1);
 				BlockGuiHandler.sendPacketToServer(dos);
 			} break;
 		case 28: if (isShiftKeyDown()) readAsFile();
 			else {
-				PacketBuffer dos = tile.getPacketTargetData();
+				PacketBuffer dos = BlockGuiHandler.getPacketTargetData(tile.pos());
 				dos.writeByte(2);
 				BlockGuiHandler.sendPacketToServer(dos);
 			} break;
 		case 29: {
-				PacketBuffer dos = tile.getPacketTargetData();
+				PacketBuffer dos = BlockGuiHandler.getPacketTargetData(tile.pos());
 				dos.writeByte((tile.mode = !tile.mode) ? 5 : 4);
 				BlockGuiHandler.sendPacketToServer(dos);
 				tile.selMod = null;
@@ -214,7 +214,7 @@ public class GuiCircuitDesigner extends GuiMachine {
 
 	private void save() {
 		tile.modified = 0;
-		PacketBuffer dos = tile.getPacketTargetData();
+		PacketBuffer dos = BlockGuiHandler.getPacketTargetData(tile.pos());
 		dos.writeByte(0);
 		dos.writeBytes(tile.serialize());
 		BlockGuiHandler.sendPacketToServer(dos);

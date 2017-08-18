@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import multiblock.IntegerComp;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
@@ -19,17 +20,21 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.capabilities.Capability;
 import cd4017be.circuits.Objects;
-import cd4017be.lib.ModTileEntity;
 import cd4017be.lib.TickRegistry;
 import cd4017be.lib.TickRegistry.IUpdatable;
 import cd4017be.lib.TooltipInfo;
+import cd4017be.lib.block.AdvancedBlock.IInteractiveTile;
+import cd4017be.lib.block.AdvancedBlock.INeighborAwareTile;
+import cd4017be.lib.block.AdvancedBlock.ITilePlaceHarvest;
+import cd4017be.lib.block.BaseTileEntity;
+import cd4017be.lib.util.Utils;
 
-public class WirelessConnector extends ModTileEntity implements IUpdatable {
+public class WirelessConnector extends BaseTileEntity implements INeighborAwareTile, IInteractiveTile, ITilePlaceHarvest, IUpdatable {
 
 	protected BlockPos linkPos = BlockPos.ORIGIN;
 	protected int linkDim;
 	protected WirelessConnector linkTile;
-	protected ModTileEntity conTile;
+	protected TileEntity conTile;
 	private boolean updateLink, updateCon;
 
 	protected void link(WirelessConnector tile) {
@@ -37,10 +42,11 @@ public class WirelessConnector extends ModTileEntity implements IUpdatable {
 			linkTile = tile;
 			if (linkTile != null) {
 				linkPos = linkTile.pos;
-				linkDim = linkTile.dimensionId;
-				if (!tileEntityInvalid && conTile != null && !conTile.isInvalid()) conTile.onNeighborTileChange(pos);
+				linkDim = linkTile.world.provider.getDimension();
+				if (!tileEntityInvalid && conTile instanceof INeighborAwareTile && !conTile.isInvalid())
+					((INeighborAwareTile)conTile).neighborTileChange(pos);
 			} else if (conTile != null && !conTile.isInvalid()) {
-				IntegerComp c = conTile.getCapability(Objects.RS_INTEGER_CAPABILITY, EnumFacing.VALUES[getOrientation()^1]);
+				IntegerComp c = conTile.getCapability(Objects.RS_INTEGER_CAPABILITY, getOrientation().front.getOpposite());
 				if (c != null) c.network.markDirty();
 			}
 		}
@@ -64,11 +70,11 @@ public class WirelessConnector extends ModTileEntity implements IUpdatable {
 	public void process() {
 		if (updateLink) checkLink(false);
 		if (updateCon) {
-			TileEntity te = getLoadedTile(pos.offset(EnumFacing.VALUES[getOrientation()]));
-			if (!(te instanceof ModTileEntity) || te instanceof WirelessConnector) te = null;
+			TileEntity te = Utils.neighborTile(this, getOrientation().front);
+			if (te instanceof WirelessConnector) te = null;
 			if (te != conTile) {
-				conTile = (ModTileEntity)te;
-				if (linkTile != null && linkTile.conTile != null && !linkTile.conTile.isInvalid()) linkTile.conTile.onNeighborTileChange(linkTile.pos);
+				conTile = te;
+				if (linkTile != null && linkTile.conTile instanceof INeighborAwareTile && !linkTile.conTile.isInvalid()) ((INeighborAwareTile)linkTile.conTile).neighborTileChange(linkTile.pos);
 			}
 			updateCon = false;
 		}
@@ -114,7 +120,11 @@ public class WirelessConnector extends ModTileEntity implements IUpdatable {
 	}
 
 	@Override
-	public void onNeighborTileChange(BlockPos pos) {
+	public void neighborBlockChange(Block b, BlockPos src) {
+	}
+
+	@Override
+	public void neighborTileChange(BlockPos src) {
 		if (!updateCon) {
 			updateCon = true;
 			TickRegistry.instance.updates.add(this);
@@ -123,19 +133,19 @@ public class WirelessConnector extends ModTileEntity implements IUpdatable {
 
 	@Override
 	public boolean hasCapability(Capability<?> cap, EnumFacing facing) {
-		return cap == Objects.RS_INTEGER_CAPABILITY && facing.ordinal() == getOrientation();
+		return cap == Objects.RS_INTEGER_CAPABILITY && facing == getOrientation().front;
 	}
 
 	@Override
 	public <T> T getCapability(Capability<T> cap, EnumFacing facing) {
-		return cap == Objects.RS_INTEGER_CAPABILITY && facing.ordinal() == getOrientation()
+		return cap == Objects.RS_INTEGER_CAPABILITY && facing == getOrientation().front
 			&& linkTile != null && linkTile.conTile != null ?
-			linkTile.conTile.getCapability(cap, EnumFacing.VALUES[linkTile.getOrientation()^1]) : null;
+			linkTile.conTile.getCapability(cap, linkTile.getOrientation().front.getOpposite()) : null;
 	}
 
 	@Override
 	public void onPlaced(EntityLivingBase entity, ItemStack item) {
-		if (worldObj.isRemote) return;
+		if (world.isRemote) return;
 		String msg;
 		if (item.getItemDamage() == 0) {
 			ItemStack drop = new ItemStack(item.getItem(), 1, 1);
@@ -143,10 +153,10 @@ public class WirelessConnector extends ModTileEntity implements IUpdatable {
 			nbt.setInteger("lx", pos.getX());
 			nbt.setInteger("ly", pos.getY());
 			nbt.setInteger("lz", pos.getZ());
-			nbt.setInteger("ld", dimensionId);
+			nbt.setInteger("ld", world.provider.getDimension());
 			drop.setTagCompound(nbt);
-			EntityItem eitem = new EntityItem(worldObj, entity.posX, entity.posY, entity.posZ, drop);
-			worldObj.spawnEntityInWorld(eitem);
+			EntityItem eitem = new EntityItem(world, entity.posX, entity.posY, entity.posZ, drop);
+			world.spawnEntity(eitem);
 			msg = TooltipInfo.format("msg.cd4017be.wireless0");
 		} else if (item.hasTagCompound()) {
 			NBTTagCompound nbt = item.getTagCompound();
@@ -155,24 +165,28 @@ public class WirelessConnector extends ModTileEntity implements IUpdatable {
 			checkLink(true);
 			msg = TooltipInfo.format(linkTile != null ? "msg.cd4017be.wireless1" : "msg.cd4017be.wireless2", linkDim, linkPos.getX(), linkPos.getY(), linkPos.getZ());
 		} else return;
-		if (entity instanceof EntityPlayer) ((EntityPlayer)entity).addChatMessage(new TextComponentString(msg));
+		if (entity instanceof EntityPlayer) ((EntityPlayer)entity).sendMessage(new TextComponentString(msg));
 	}
 
 	@Override
 	public boolean onActivated(EntityPlayer player, EnumHand hand, ItemStack item, EnumFacing s, float X, float Y, float Z) {
-		if (worldObj.isRemote || !player.isSneaking() || item != null) return true;
+		if (world.isRemote || !player.isSneaking() || item != null) return true;
 		checkLink(true);
 		String msg;
 		if (linkTile != null && linkTile.linkTile == this) {
 			item = new ItemStack(getBlockType());
-			linkTile.worldObj.setBlockToAir(linkTile.pos);
-			worldObj.setBlockToAir(getPos());
-			EntityItem eitem = new EntityItem(worldObj, player.posX, player.posY, player.posZ, item);
-			worldObj.spawnEntityInWorld(eitem);
+			linkTile.world.setBlockToAir(linkTile.pos);
+			world.setBlockToAir(getPos());
+			EntityItem eitem = new EntityItem(world, player.posX, player.posY, player.posZ, item);
+			world.spawnEntity(eitem);
 			msg = TooltipInfo.format("msg.cd4017be.wireless4");
 		} else msg = TooltipInfo.format("msg.cd4017be.wireless5");
-		player.addChatMessage(new TextComponentString(msg));
+		player.sendMessage(new TextComponentString(msg));
 		return true;
+	}
+
+	@Override
+	public void onClicked(EntityPlayer player) {
 	}
 
 	@Override

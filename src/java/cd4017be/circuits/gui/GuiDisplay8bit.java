@@ -47,7 +47,7 @@ public class GuiDisplay8bit extends GuiMachine {
 
 	@Override
 	protected void setDisplVar(int id, Object obj, boolean send) {
-		PacketBuffer dos = tile.getPacketTargetData();
+		PacketBuffer dos = BlockGuiHandler.getPacketTargetData(tile.pos());
 		switch(id) {
 		/*case 0: try {
 			int i = Integer.parseInt((String)obj) << 2;

@@ -3,7 +3,7 @@ package cd4017be.circuits.tileEntity;
 import java.io.IOException;
 
 import net.minecraft.block.Block;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
@@ -15,10 +15,15 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import cd4017be.api.circuits.IDirectionalRedstone;
-import cd4017be.lib.ModTileEntity;
+import cd4017be.lib.BlockGuiHandler.ClientPacketReceiver;
+import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
+import cd4017be.lib.block.AdvancedBlock.INeighborAwareTile;
+import cd4017be.lib.block.AdvancedBlock.IRedstoneTile;
+import cd4017be.lib.block.BaseTileEntity;
+import cd4017be.lib.util.Utils;
 
-public class FluidValve extends ModTileEntity implements ITickable, IDirectionalRedstone, IGuiData {
+public class FluidValve extends BaseTileEntity implements INeighborAwareTile, IRedstoneTile, ITickable, IDirectionalRedstone, IGuiData, ClientPacketReceiver {
 
 	private TileEntity in, out;
 	public int tickInt = 1;
@@ -27,18 +32,18 @@ public class FluidValve extends ModTileEntity implements ITickable, IDirectional
 
 	@Override
 	public void update() {
-		if (worldObj.isRemote) return;
+		if (world.isRemote) return;
 		if (update) {
-			EnumFacing dir = EnumFacing.VALUES[getOrientation()];
-			in = getLoadedTile(pos.offset(dir));
-			out = getLoadedTile(pos.offset(dir.getOpposite()));
+			EnumFacing dir = getOrientation().front;
+			in = Utils.neighborTile(this, dir);
+			out = Utils.neighborTile(this, dir.getOpposite());
 		}
 		if (measure) flow += transferFluid(Integer.MAX_VALUE);
-		if (worldObj.getTotalWorldTime() % tickInt != 0) return;
+		if (world.getTotalWorldTime() % tickInt != 0) return;
 		if (measure) {
 			if (flow != state) {
 				state = flow;
-				worldObj.notifyNeighborsOfStateChange(pos, Blocks.REDSTONE_TORCH);
+				world.notifyNeighborsOfStateChange(pos, Blocks.REDSTONE_TORCH, false);
 			}
 			flow = 0;
 		} else if (state > 0) {
@@ -53,7 +58,7 @@ public class FluidValve extends ModTileEntity implements ITickable, IDirectional
 			update = true;
 			return 0;
 		}
-		EnumFacing dir = EnumFacing.VALUES[getOrientation()];
+		EnumFacing dir = getOrientation().front;
 		IFluidHandler accIn = in.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, dir.getOpposite());
 		if (accIn == null) return 0;
 		IFluidHandler accOut = out.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, dir);
@@ -66,21 +71,26 @@ public class FluidValve extends ModTileEntity implements ITickable, IDirectional
 	}
 
 	@Override
-	public void onNeighborBlockChange(Block b) {
-		if (worldObj.isRemote || measure) return;
+	public void neighborBlockChange(Block b, BlockPos src) {
+		if (world.isRemote || measure) return;
 		state = 0;
 		for (EnumFacing s : EnumFacing.VALUES)
-			state |= worldObj.getRedstonePower(pos.offset(s), s);
+			state |= world.getRedstonePower(pos.offset(s), s);
 	}
 
 	@Override
-	public void onNeighborTileChange(BlockPos pos) {
+	public void neighborTileChange(BlockPos src) {
 		update = true;
 	}
 
 	@Override
-	public int redstoneLevel(int s, boolean str) {
-		return str || !measure ? 0 : state;
+	public int redstoneLevel(EnumFacing side, boolean strong) {
+		return strong || !measure ? 0 : state;
+	}
+
+	@Override
+	public boolean connectRedstone(EnumFacing side) {
+		return getRSDirection(side) != 0;
 	}
 
 	@Override
@@ -103,7 +113,7 @@ public class FluidValve extends ModTileEntity implements ITickable, IDirectional
 	}
 
 	@Override
-	public void onPlayerCommand(PacketBuffer data, EntityPlayerMP player) throws IOException {
+	public void onPacketFromClient(PacketBuffer data, EntityPlayer sender) throws IOException {
 		byte cmd = data.readByte();
 		if (cmd == 0) {
 			tickInt = data.readInt();
@@ -112,7 +122,7 @@ public class FluidValve extends ModTileEntity implements ITickable, IDirectional
 		} else if (cmd == 1) {
 			measure = !measure;
 			if (measure) flow = 0;
-			else onNeighborBlockChange(null);
+			else neighborBlockChange(null, pos);
 		}
 	}
 
@@ -134,6 +144,30 @@ public class FluidValve extends ModTileEntity implements ITickable, IDirectional
 	@Override
 	public byte getRSDirection(EnumFacing s) {
 		return measure ? (byte)2 : (byte)1;
+	}
+
+	@Override
+	public void initContainer(DataContainer container) {
+	}
+
+	@Override
+	public boolean canPlayerAccessUI(EntityPlayer player) {
+		return !player.isDead;
+	}
+
+	@Override
+	public boolean detectAndSendChanges(DataContainer container, PacketBuffer dos) {
+		return false;
+	}
+
+	@Override
+	public void updateClientChanges(DataContainer container, PacketBuffer dis) {
+	}
+
+	@Override
+	public String getName() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

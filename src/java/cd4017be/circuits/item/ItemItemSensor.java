@@ -1,5 +1,6 @@
 package cd4017be.circuits.item;
 
+import java.io.IOException;
 import java.util.List;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -26,6 +27,7 @@ import cd4017be.api.circuits.ItemBlockSensor;
 import cd4017be.circuits.gui.GuiItemSensor;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.IGuiItem;
+import cd4017be.lib.BlockGuiHandler.ClientItemPacketReceiver;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.ItemGuiData;
 import cd4017be.lib.Gui.SlotHolo;
@@ -34,7 +36,7 @@ import cd4017be.lib.templates.InventoryItem;
 import cd4017be.lib.templates.InventoryItem.IItemInventory;
 import cd4017be.lib.util.Utils.ItemType;
 
-public class ItemItemSensor extends ItemBlockSensor implements IGuiItem, IItemInventory {
+public class ItemItemSensor extends ItemBlockSensor implements IGuiItem, IItemInventory, ClientItemPacketReceiver {
 
 	public ItemItemSensor(String id) {
 		super(id, 20F);
@@ -63,25 +65,26 @@ public class ItemItemSensor extends ItemBlockSensor implements IGuiItem, IItemIn
 	}
 
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(ItemStack item, World world, EntityPlayer player, EnumHand hand) {
+	public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {
+		ItemStack item = player.getHeldItem(hand);
 		if (hand != EnumHand.MAIN_HAND) return new ActionResult<ItemStack>(EnumActionResult.PASS, item);
-		BlockGuiHandler.openItemGui(player, world, 0, -1, 0);
+		BlockGuiHandler.openItemGui(player, hand);
 		return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, item);
 	}
 
 	@Override
-	public Container getContainer(World world, EntityPlayer player, int x, int y, int z) {
+	public Container getContainer(ItemStack item, EntityPlayer player, World world, BlockPos pos, int slot) {
 		return new TileContainer(new GuiData(), player);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public GuiContainer getGui(World world, EntityPlayer player, int x, int y, int z) {
+	public GuiContainer getGui(ItemStack item, EntityPlayer player, World world, BlockPos pos, int slot) {
 		return new GuiItemSensor(new TileContainer(new GuiData(), player));
 	}
 
 	@Override
-	public void onPlayerCommand(ItemStack item, EntityPlayer player, PacketBuffer data) {
+	public void onPacketFromClient(PacketBuffer data, EntityPlayer sender, ItemStack item, int slot) throws IOException {
 		if (!item.hasTagCompound()) item.setTagCompound(new NBTTagCompound());
 		item.getTagCompound().setByte("mode", data.readByte());
 	}
@@ -103,7 +106,7 @@ public class ItemItemSensor extends ItemBlockSensor implements IGuiItem, IItemIn
 	@Override
 	public ItemStack[] loadInventory(ItemStack inv, EntityPlayer player) {
 		ItemStack[] items = new ItemStack[1];
-		if (inv.hasTagCompound() && inv.getTagCompound().hasKey("type", 10)) items[0] = ItemStack.loadItemStackFromNBT(inv.getTagCompound().getCompoundTag("type"));
+		if (inv.hasTagCompound() && inv.getTagCompound().hasKey("type", 10)) items[0] = new ItemStack(inv.getTagCompound().getCompoundTag("type"));
 		return items;
 	}
 
@@ -128,20 +131,20 @@ public class ItemItemSensor extends ItemBlockSensor implements IGuiItem, IItemIn
 			ItemType type = filter == null ? null : new ItemType((mode & 2) != 0, (mode & 4) != 0, (mode & 8) != 0, filter);
 			for (EntityItem e : world.getEntitiesWithinAABB(EntityItem.class, new AxisAlignedBB(pos))) {
 				item = e.getEntityItem();
-				if (type == null || (inv ^ type.matches(item))) n += item.stackSize;
+				if (type == null || (inv ^ type.matches(item))) n += item.getCount();
 			}
 			IBlockState state = world.getBlockState(pos);
 			for (ItemStack it : state.getBlock().getDrops(world, pos, state, 0))
-				if (type == null || (inv ^ type.matches(it))) n += it.stackSize;
+				if (type == null || (inv ^ type.matches(it))) n += it.getCount();
 		} else if (filter == null) {
 			for (int i = 0; i < acc.getSlots(); i++)
 				if ((item = acc.getStackInSlot(i)) == null ^ inv)
-					n += inv ? item.stackSize : 1;
+					n += inv ? item.getCount() : 1;
 		} else {
 			ItemType type = new ItemType((mode & 2) != 0, (mode & 4) != 0, (mode & 8) != 0, filter);
 			for (int i = 0; i < acc.getSlots(); i++) 
 				if ((item = acc.getStackInSlot(i)) != null && (type.matches(item) ^ inv))
-					n += item.stackSize;
+					n += item.getCount();
 		}
 		return n;
 	}

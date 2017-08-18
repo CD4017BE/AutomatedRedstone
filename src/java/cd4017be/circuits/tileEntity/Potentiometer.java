@@ -3,7 +3,6 @@ package cd4017be.circuits.tileEntity;
 import java.io.IOException;
 
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -13,17 +12,25 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import cd4017be.api.circuits.IDirectionalRedstone;
-import cd4017be.lib.ModTileEntity;
+import cd4017be.lib.BlockGuiHandler;
+import cd4017be.lib.BlockGuiHandler.ClientPacketReceiver;
+import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
+import cd4017be.lib.block.BaseTileEntity;
+import cd4017be.lib.block.AdvancedBlock.IInteractiveTile;
+import cd4017be.lib.block.AdvancedBlock.IRedstoneTile;
 
-public class Potentiometer extends ModTileEntity implements IDirectionalRedstone, IGuiData {
+public class Potentiometer extends BaseTileEntity implements IInteractiveTile, IRedstoneTile, IDirectionalRedstone, IGuiData, ClientPacketReceiver {
 
 	public int min = 0, max = 15, cur = 0;
 
 	@Override
 	public boolean onActivated(EntityPlayer player, EnumHand hand, ItemStack item, EnumFacing s, float X, float Y, float Z) {
-		if (s.ordinal() != getOrientation()) return super.onActivated(player, hand, item, s, X, Y, Z);
-		if (worldObj.isRemote) return true;
+		if (s != getOrientation().front) {
+			BlockGuiHandler.openBlockGui(player, world, pos);
+			return true;
+		}
+		if (world.isRemote) return true;
 		boolean abs;
 		switch(s) {
 		case NORTH: abs = X >= 0.5F; break;
@@ -44,19 +51,30 @@ public class Potentiometer extends ModTileEntity implements IDirectionalRedstone
 		else if (state > max) state = max;
 		if (state != cur) {
 			cur = state;
-			worldObj.notifyNeighborsOfStateChange(pos, Blocks.REDSTONE_TORCH);
+			world.notifyNeighborsOfStateChange(pos, Blocks.REDSTONE_TORCH, false);
 			markUpdate();
 		}
 		return true;
 	}
 
 	@Override
-	public int redstoneLevel(int s, boolean str) {
-		return str ? 0 : cur;
+	public void onClicked(EntityPlayer player) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
-	public void onPlayerCommand(PacketBuffer data, EntityPlayerMP player) throws IOException {
+	public int redstoneLevel(EnumFacing side, boolean strong) {
+		return strong ? 0 : cur;
+	}
+
+	@Override
+	public boolean connectRedstone(EnumFacing side) {
+		return true;
+	}
+
+	@Override
+	public void onPacketFromClient(PacketBuffer data, EntityPlayer sender) throws IOException {
 		byte cmd = data.readByte();
 		switch(cmd) {
 		case 0: min = data.readInt(); break;
@@ -69,10 +87,10 @@ public class Potentiometer extends ModTileEntity implements IDirectionalRedstone
 		}
 		if (cur > max) {
 			cur = max;
-			worldObj.notifyNeighborsOfStateChange(pos, Blocks.REDSTONE_TORCH);
+			world.notifyNeighborsOfStateChange(pos, Blocks.REDSTONE_TORCH, false);
 		} else if (cur < min) {
 			cur = min;
-			worldObj.notifyNeighborsOfStateChange(pos, Blocks.REDSTONE_TORCH);
+			world.notifyNeighborsOfStateChange(pos, Blocks.REDSTONE_TORCH, false);
 		}
 		markUpdate();
 	}
@@ -113,6 +131,39 @@ public class Potentiometer extends ModTileEntity implements IDirectionalRedstone
 	@Override
 	public byte getRSDirection(EnumFacing s) {
 		return 2;
+	}
+
+	@Override
+	public void initContainer(DataContainer container) {
+	}
+
+	@Override
+	public boolean canPlayerAccessUI(EntityPlayer player) {
+		return !player.isDead;
+	}
+
+	@Override
+	public int[] getSyncVariables() {
+		return null;
+	}
+
+	@Override
+	public void setSyncVariable(int i, int v) {
+	}
+
+	@Override
+	public boolean detectAndSendChanges(DataContainer container, PacketBuffer dos) {
+		return false;
+	}
+
+	@Override
+	public void updateClientChanges(DataContainer container, PacketBuffer dis) {
+	}
+
+	@Override
+	public String getName() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

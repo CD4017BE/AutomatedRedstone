@@ -1,32 +1,31 @@
 package cd4017be.circuits.block;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.properties.PropertyInteger;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.NonNullList;
 import cd4017be.circuits.tileEntity.Circuit;
-import cd4017be.lib.TileBlock;
+import cd4017be.lib.block.AdvancedBlock;
 
-public class BlockCircuit extends TileBlock {
+public class BlockCircuit extends AdvancedBlock {
 
 	public static final PropertyInteger prop = PropertyInteger.create("type", 0, Circuit.ClockSpeed.length - 1);
 
-	public BlockCircuit(String id, Material m, SoundType sound) {
-		super(id, m, sound, 0x50);
+	public BlockCircuit(String id, Material m, SoundType sound, Class<? extends TileEntity> tile) {
+		super(id, m, sound, 0x50, tile);
 		setDefaultState(getBlockState().getBaseState().withProperty(prop, 0));
 	}
 
 	@Override
-	public void getSubBlocks(Item par1, CreativeTabs par2CreativeTabs, List<ItemStack> list) {
+	public void getSubBlocks(Item item, CreativeTabs tab, NonNullList<ItemStack> list) {
 		for (int i = 0; i < Circuit.ClockSpeed.length; i++)
-			list.add(new ItemStack(this, 1, i));
+			list.add(new ItemStack(item, 1, i));
 	}
 
 	@Override
@@ -39,11 +38,9 @@ public class BlockCircuit extends TileBlock {
 		return state.getValue(prop);
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Override
-	protected void addProperties(ArrayList<IProperty> main) {
-		main.add(prop);
-		super.addProperties(main);
+	protected BlockStateContainer createBlockState() {
+		return new BlockStateContainer(this, prop);
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package cd4017be.circuits.tileEntity;
 
 import cd4017be.api.circuits.IDirectionalRedstone;
+import cd4017be.lib.util.Utils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
@@ -31,7 +32,7 @@ public class BasicRSPipe extends IntegerPipe {
 					continue;
 				}
 			}
-			if (!worldObj.getBlockState(pos.offset(s)).getMaterial().isReplaceable()) io |= type << (s.ordinal() * 2);
+			if (!world.getBlockState(pos.offset(s)).getMaterial().isReplaceable()) io |= type << (s.ordinal() * 2);
 		}
 		if (io != comp.rsIO) {
 			comp.network.setIO(comp, io);
@@ -41,22 +42,9 @@ public class BasicRSPipe extends IntegerPipe {
 
 	@Override
 	public boolean onActivated(EntityPlayer player, EnumHand hand, ItemStack item, EnumFacing dir, float X, float Y, float Z) {
-		if (!player.isSneaking() && cover == null && item != null && (cover = Cover.create(item)) != null) {
-			if (worldObj.isRemote) return true;
-			item.stackSize--;
-			if (item.stackSize <= 0) item = null;
-			player.setHeldItem(hand, item);
-			this.markUpdate();
-			return true;
-		} else if (item == null) {
-			if (worldObj.isRemote) return true;
-			if (player.isSneaking() && cover != null) {
-				this.dropStack(cover.item);
-				cover = null;
-				this.markUpdate();
-				return true;
-			}
-			dir = this.getClickedSide(X, Y, Z);
+		if (world.isRemote) return true;
+		if (item == null) {
+			dir = Utils.hitSide(X, Y, Z);
 			byte s = (byte)dir.getIndex();
 			if (player.isSneaking()) {
 				boolean con = !comp.canConnect(s);
@@ -76,19 +64,8 @@ public class BasicRSPipe extends IntegerPipe {
 	}
 
 	@Override
-	public int redstoneLevel(int s, boolean str) {
-		return !str && (comp.rsIO >> (s * 2) & 2) != 0 ? comp.convertSignal(comp.network.outputState) : 0;
-	}
-
-	@Override
-	public int textureForSide(byte s) {
-		if (s == -1) return getBlockMetadata();
-		int c = comp.rsIO >> (s * 2) & 3;
-		if (c != 0) return c;
-		if (!comp.canConnect(s)) return -1;
-		EnumFacing dir = EnumFacing.VALUES[s];
-		ICapabilityProvider te = getTileOnSide(dir);
-		return te != null && te.hasCapability(comp.getCap(), dir.getOpposite()) ? 0 : -1;
+	public int redstoneLevel(EnumFacing s, boolean str) {
+		return !str && (comp.rsIO >> (s.ordinal() * 2) & 2) != 0 ? comp.convertSignal(comp.network.outputState) : 0;
 	}
 
 }

@@ -81,7 +81,7 @@ public class GuiCircuit extends GuiMachine {
 
 	@Override
 	protected void setDisplVar(int id, Object obj, boolean send) {
-		PacketBuffer dos = tile.getPacketTargetData();
+		PacketBuffer dos = BlockGuiHandler.getPacketTargetData(tile.pos());
 		if (id == 0) dos.writeByte(1).writeByte(tile.mode);
 		else if (id == 1) dos.writeByte(3);
 		else if (id == 2 || id == 4) dos.writeByte(2).writeInt(tile.tickInt = Math.min(1200, tile.tickInt + (id == 2 ? 20 : 1)));

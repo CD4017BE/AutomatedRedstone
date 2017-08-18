@@ -2,7 +2,6 @@ package cd4017be.circuits;
 
 import cd4017be.api.recipes.RecipeScriptContext;
 import cd4017be.api.recipes.RecipeScriptContext.ConfigConstants;
-import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.script.ScriptFiles.Version;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.Instance;
@@ -37,7 +36,6 @@ public class RedstoneCircuits {
 
 	@Mod.EventHandler
 	public void load(FMLInitializationEvent event) {
-		BlockGuiHandler.registerMod(this);
 		proxy.registerRenderers();
 	}
 

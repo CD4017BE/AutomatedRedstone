@@ -1,17 +1,23 @@
 package cd4017be.circuits.tileEntity;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
 import cd4017be.api.circuits.IDirectionalRedstone;
 import cd4017be.api.circuits.IQuickRedstoneHandler;
-import cd4017be.lib.ModTileEntity;
+import cd4017be.lib.BlockGuiHandler.ClientPacketReceiver;
+import cd4017be.lib.TooltipInfo;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
+import cd4017be.lib.block.AdvancedBlock.INeighborAwareTile;
+import cd4017be.lib.block.AdvancedBlock.IRedstoneTile;
+import cd4017be.lib.block.AdvancedBlock.ITilePlaceHarvest;
+import cd4017be.lib.block.BaseTileEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -19,6 +25,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
@@ -26,7 +33,7 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
  *
  * @author CD4017BE
  */
-public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGuiData, ITickable, IQuickRedstoneHandler {
+public class Circuit extends BaseTileEntity implements INeighborAwareTile, IRedstoneTile, ITilePlaceHarvest, IDirectionalRedstone, IGuiData, ITickable, IQuickRedstoneHandler, ClientPacketReceiver {
 
 	public static final int[] ClockSpeed = {20, 5, 1};
 	public static final byte 
@@ -50,7 +57,7 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 
 	@Override
 	public String getName() {
-		return name.length() > 0 ? "\"" + name + "\"" : super.getName();
+		return name.length() > 0 ? "\"" + name + "\"" : TooltipInfo.getLocFormat("gui.cd4017be.circuit.name");
 	}
 
 	public String name = "";
@@ -107,16 +114,16 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 					if (t instanceof IQuickRedstoneHandler) te = (IQuickRedstoneHandler)t;
 				}
 				if (te != null) te.onRedstoneStateChange(side.getOpposite(), state, Circuit.this);
-				else worldObj.notifyBlockOfStateChange(pos.offset(side), blockType);
+				else world.neighborChanged(pos.offset(side), blockType, pos);
 			}
 			if ((dir & 4) != 0) {
-				state = worldObj.getRedstonePower(pos.offset(side), side);
+				state = world.getRedstonePower(pos.offset(side), side);
 				if (state != stateI) setIn(state);
 				dir &= 3;
 			}
 		}
 		void setIn(int state) {
-			long t = worldObj.getTotalWorldTime();
+			long t = world.getTotalWorldTime();
 			if (t != nextUpdate) {
 				stateI = state;
 				if (mode >= 2 && t > nextUpdate) {
@@ -129,8 +136,8 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 
 	@Override
 	public void update() {
-		if (worldObj.isRemote || mode == 0 || ram.length == 0) return;
-		long t = worldObj.getTotalWorldTime();
+		if (world.isRemote || mode == 0 || ram.length == 0) return;
+		long t = world.getTotalWorldTime();
 		if (t == nextUpdate) {
 			if (mode == 1) nextUpdate += tickInt;
 			else if (mode == 3) {nextUpdate++; mode = 7;}
@@ -315,7 +322,7 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 	}
 
 	@Override
-	public void onPlayerCommand(PacketBuffer data, EntityPlayerMP player) {
+	public void onPacketFromClient(PacketBuffer data, EntityPlayer sender) throws IOException {
 		byte cmd = data.readByte();
 		if (cmd == 0) {
 			IOcfg cfg = iocfg[data.readByte()];
@@ -339,7 +346,7 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 		} else if (cmd == 1) {
 			mode = (byte)(data.readByte() & 3);
 			if (mode == 1) {
-				long t = worldObj.getTotalWorldTime();
+				long t = world.getTotalWorldTime();
 				nextUpdate = t + (long)tickInt - t % (long)tickInt;
 			}
 		} else if (cmd == 2) {
@@ -348,7 +355,7 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 			if (tickInt < min) tickInt = min;
 			else if (tickInt > 1200) tickInt = 1200;
 			if (mode == 1) {
-				long t = worldObj.getTotalWorldTime();
+				long t = world.getTotalWorldTime();
 				nextUpdate = t + (long)tickInt - t % (long)tickInt;
 			}
 		} else if (cmd == 3) {
@@ -427,19 +434,17 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 	}
 
 	@Override
-	public void setWorldObj(World world) {
-		super.setWorldObj(world);
+	public void setWorld(World world) {
+		super.setWorld(world);
 		if (mode == 1) {
-			long t = worldObj.getTotalWorldTime();
+			long t = world.getTotalWorldTime();
 			nextUpdate = t + (long)tickInt - t % (long)tickInt;
 		}
 	}
 
 	@Override
 	public List<ItemStack> dropItem(IBlockState m, int fortune) {
-		ItemStack item = new ItemStack(this.getBlockType(), 1, this.getBlockMetadata());
-		item.setTagCompound(write(new NBTTagCompound()));
-		return Arrays.asList(item);
+		return makeDefaultDrops(write(new NBTTagCompound()));
 	}
 
 	@Override
@@ -448,10 +453,15 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 	}
 
 	@Override
-	public int redstoneLevel(int s, boolean str) {
-		if (str) return 0;
-		IOacc acc = ioacc[s];
+	public int redstoneLevel(EnumFacing side, boolean strong) {
+		if (strong) return 0;
+		IOacc acc = ioacc[side.ordinal()];
 		return acc != null ? acc.stateO : 0;
+	}
+
+	@Override
+	public boolean connectRedstone(EnumFacing side) {
+		return getRSDirection(side) != 0;
 	}
 
 	@Override
@@ -461,12 +471,16 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 	}
 
 	@Override
-	public void onNeighborBlockChange(Block b) {
+	public void neighborBlockChange(Block b, BlockPos src) {
 		for (IOacc acc : ioacc)
 			if (acc != null && (acc.dir & 1) != 0) {
-				int rs = worldObj.getRedstonePower(pos.offset(acc.side), acc.side);
+				int rs = world.getRedstonePower(pos.offset(acc.side), acc.side);
 				if (rs != acc.stateI) acc.setIn(rs);
 			}
+	}
+
+	@Override
+	public void neighborTileChange(BlockPos src) {
 	}
 
 	@Override
@@ -477,7 +491,7 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 
 	@Override
 	public void initContainer(DataContainer container) {
-		if (worldObj.isRemote) Arrays.fill(ram, 0, memoryOfs, (byte)0);
+		if (world.isRemote) Arrays.fill(ram, 0, memoryOfs, (byte)0);
 		else container.extraRef = new LastState();
 	}
 
@@ -539,6 +553,20 @@ public class Circuit extends ModTileEntity implements IDirectionalRedstone, IGui
 		byte mode;
 		final short[] iocfg = new short[6];
 		final byte[] ram = new byte[32];
+	}
+
+	@Override
+	public boolean canPlayerAccessUI(EntityPlayer player) {
+		return !player.isDead;
+	}
+
+	@Override
+	public int[] getSyncVariables() {
+		return null;
+	}
+
+	@Override
+	public void setSyncVariable(int i, int v) {
 	}
 
 }

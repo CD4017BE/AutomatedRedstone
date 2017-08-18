@@ -7,19 +7,21 @@ import java.io.IOException;
 import java.util.ArrayList;
 import com.mojang.authlib.GameProfile;
 
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.items.SlotItemHandler;
 import cd4017be.circuits.Objects;
-import cd4017be.lib.ModTileEntity;
+import cd4017be.lib.BlockGuiHandler.ClientPacketReceiver;
+import cd4017be.lib.TooltipInfo;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.Gui.TileContainer;
+import cd4017be.lib.block.BaseTileEntity;
 import cd4017be.lib.templates.LinkedInventory;
 
-public class CircuitDesigner extends ModTileEntity implements IGuiData {
+public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientPacketReceiver {
 
 	public ItemStack dataItem;
 	private GameProfile lastPlayer;
@@ -63,13 +65,13 @@ public class CircuitDesigner extends ModTileEntity implements IGuiData {
 	}
 
 	@Override
-	public void onPlayerCommand(PacketBuffer dis, EntityPlayerMP player) throws IOException {
+	public void onPacketFromClient(PacketBuffer dis, EntityPlayer sender) throws IOException {
 		byte cmd = dis.readByte();
 		switch(cmd) {
 		case 0:
 			data.clear();
 			data.writeBytes(dis);
-			lastPlayer = player.getGameProfile();
+			lastPlayer = sender.getGameProfile();
 			modify();
 			break;
 		case 1:
@@ -88,7 +90,7 @@ public class CircuitDesigner extends ModTileEntity implements IGuiData {
 			lastPlayer = null;
 			break;
 		case 3:
-			name = dis.readStringFromBuffer(16);
+			name = dis.readString(16);
 			break;
 		case 4: mode = false; break;
 		case 5: mode = true; break;
@@ -100,9 +102,9 @@ public class CircuitDesigner extends ModTileEntity implements IGuiData {
 	@Override
 	public void initContainer(DataContainer container) {
 		TileContainer cont = (TileContainer)container;
-		cont.addItemSlot(new SlotItemHandler(new LinkedInventory(1, (i) -> dataItem, (item, i) -> dataItem = item), 0, 194, 220));
+		cont.addItemSlot(new SlotItemHandler(new LinkedInventory(1, 1, (i) -> dataItem, (item, i) -> dataItem = item), 0, 194, 220));
 		cont.addPlayerInventory(8, 162);
-		if (worldObj.isRemote) {
+		if (world.isRemote) {
 			modified = 0;
 			if (outputs == null) outputs = new ArrayList<Module>(6);
 		} else {
@@ -147,7 +149,7 @@ public class CircuitDesigner extends ModTileEntity implements IGuiData {
 			fixCons();
 			modified = 0;
 		}
-		if ((chng & 2) != 0) name = dis.readStringFromBuffer(16);
+		if ((chng & 2) != 0) name = dis.readString(16);
 		if ((chng & 12) != 0) renderAll = (chng & 8) != 0;
 		if ((chng & 48) != 0) mode = (chng & 32) != 0;
 	}
@@ -415,6 +417,25 @@ public class CircuitDesigner extends ModTileEntity implements IGuiData {
 		String name;
 		boolean drawAll, output;
 		long edited;
+	}
+
+	@Override
+	public boolean canPlayerAccessUI(EntityPlayer player) {
+		return !player.isDead;
+	}
+
+	@Override
+	public int[] getSyncVariables() {
+		return null;
+	}
+
+	@Override
+	public void setSyncVariable(int i, int v) {
+	}
+
+	@Override
+	public String getName() {
+		return TooltipInfo.getLocFormat("gui.cd4017be.circuitDesigner.name");
 	}
 
 }

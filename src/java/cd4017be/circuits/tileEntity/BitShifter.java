@@ -1,8 +1,9 @@
 package cd4017be.circuits.tileEntity;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -10,15 +11,24 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
+
+import java.util.List;
+
 import cd4017be.api.circuits.IDirectionalRedstone;
 import cd4017be.api.circuits.IQuickRedstoneHandler;
 import cd4017be.lib.BlockItemRegistry;
-import cd4017be.lib.ModTileEntity;
 import cd4017be.lib.TickRegistry;
 import cd4017be.lib.TickRegistry.IUpdatable;
+import cd4017be.lib.block.AdvancedBlock.IInteractiveTile;
+import cd4017be.lib.block.AdvancedBlock.INeighborAwareTile;
+import cd4017be.lib.block.AdvancedBlock.IRedstoneTile;
+import cd4017be.lib.block.AdvancedBlock.ITilePlaceHarvest;
+import cd4017be.lib.block.BaseTileEntity;
+import cd4017be.lib.util.Utils;
 
-public class BitShifter extends ModTileEntity implements IDirectionalRedstone, IQuickRedstoneHandler, IUpdatable {
+public class BitShifter extends BaseTileEntity implements IInteractiveTile, INeighborAwareTile, ITilePlaceHarvest, IRedstoneTile, IDirectionalRedstone, IQuickRedstoneHandler, IUpdatable {
 
 	public byte ofsI = 0, ofsO = 0, size = 1;
 	public int state;
@@ -26,25 +36,26 @@ public class BitShifter extends ModTileEntity implements IDirectionalRedstone, I
 
 	@Override
 	public boolean onActivated(EntityPlayer player, EnumHand hand, ItemStack item, EnumFacing s, float X, float Y, float Z) {
-		if (worldObj.isRemote) return true;
+		if (world.isRemote) return true;
 		if (player.isSneaking()) {
 			if (item == null) {
 				if (size > 1) {
 					dropStack(BlockItemRegistry.stack("m.IORelay", size - 1));
 					size = 1;
-					onNeighborBlockChange(null);
+					neighborBlockChange(null, pos);
 					markUpdate();
 				} else return false;
 			} else return false;
 		} else if (item == null) {
+			EnumFacing dir = getOrientation().front;
 			int t = s.ordinal() >> 1;
 			float f;
-			switch(getOrientation()) {
-			case 0: f = Y; t = (4 - t) % 3; break;
-			case 1: f = 1F-Y; t = (4 - t) % 3; break;
-			case 2: f = Z; break;
-			case 3: f = 1F-Z; break;
-			case 4: f = X; t = (3 - t) % 3; break;
+			switch(dir) {
+			case DOWN: f = Y; t = (4 - t) % 3; break;
+			case UP: f = 1F-Y; t = (4 - t) % 3; break;
+			case NORTH: f = Z; break;
+			case SOUTH: f = 1F-Z; break;
+			case WEST: f = X; t = (3 - t) % 3; break;
 			default: f = 1F-X; t = (3 - t) % 3;
 			}
 			if (t == 1) return false;
@@ -54,37 +65,45 @@ public class BitShifter extends ModTileEntity implements IDirectionalRedstone, I
 			else if (p > n) p = n;
 			if (t == 2) {
 				ofsI = (byte)p;
-				onNeighborBlockChange(null);
+				neighborBlockChange(null, pos);
 			} else {
 				ofsO = (byte)p;
-				worldObj.notifyBlockOfStateChange(pos.offset(EnumFacing.VALUES[getOrientation()^1]), Blocks.REDSTONE_TORCH);
+				Utils.updateRedstoneOnSide(this, state << ofsO, dir.getOpposite());
 			}
 			markUpdate();
 		} else if (item.isItemEqual(BlockItemRegistry.stack("m.IORelay", 1))) {
 			int n = 32 - size;
-			if (item.stackSize > n) {
-				item.stackSize -= n;
+			if (item.getCount() > n) {
+				item.shrink(n);
 				size += n;
 			} else {
-				size += item.stackSize;
+				size += item.getCount();
 				item = null;
 			}
 			player.setHeldItem(hand, item);
-			onNeighborBlockChange(null);
+			neighborBlockChange(null, pos);
 			markUpdate();
 		}
 		return true;
 	}
 
 	@Override
-	public void onNeighborBlockChange(Block b) {
-		EnumFacing dir = EnumFacing.VALUES[getOrientation()];
-		setInput(worldObj.getRedstonePower(pos.offset(dir), dir), dir);
+	public void onClicked(EntityPlayer player) {
+	}
+
+	@Override
+	public void neighborBlockChange(Block b, BlockPos src) {
+		EnumFacing dir = getOrientation().front;
+		setInput(world.getRedstonePower(pos.offset(dir), dir), dir);
+	}
+
+	@Override
+	public void neighborTileChange(BlockPos src) {
 	}
 
 	@Override
 	public void onRedstoneStateChange(EnumFacing side, int value, TileEntity src) {
-		EnumFacing dir = EnumFacing.VALUES[getOrientation()];
+		EnumFacing dir = getOrientation().front;
 		if (side == dir) setInput(value, dir);
 	}
 
@@ -104,20 +123,25 @@ public class BitShifter extends ModTileEntity implements IDirectionalRedstone, I
 	}
 
 	@Override
-	public int redstoneLevel(int s, boolean str) {
-		return str || s != (getOrientation()^1) ? 0 : state << ofsO;
+	public int redstoneLevel(EnumFacing side, boolean strong) {
+		return strong || side != getOrientation().front.getOpposite() ? 0 : state << ofsO;
+	}
+
+	@Override
+	public boolean connectRedstone(EnumFacing side) {
+		return getRSDirection(side) != 0;
 	}
 
 	@Override
 	public byte getRSDirection(EnumFacing s) {
-		byte dir = getOrientation();
-		return (byte)(s.ordinal() == dir ? 1 : (s.ordinal()^1) == dir ? 2 : 0);
+		EnumFacing dir = getOrientation().front;
+		return (byte)(s == dir ? 1 : s.getOpposite() == dir ? 2 : 0);
 	}
 
 	@Override
 	public void process() {
 		update = false;
-		worldObj.notifyBlockOfStateChange(pos.offset(EnumFacing.VALUES[getOrientation()^1]), Blocks.REDSTONE_TORCH);
+		Utils.updateRedstoneOnSide(this, state << ofsO, getOrientation().front.getOpposite());
 	}
 
 	@Override
@@ -161,11 +185,14 @@ public class BitShifter extends ModTileEntity implements IDirectionalRedstone, I
 	}
 
 	@Override
-	public void breakBlock() {
-		if (size > 1) {
-			dropStack(BlockItemRegistry.stack("m.IORelay", size - 1));
-			size = 1;
-		}
+	public List<ItemStack> dropItem(IBlockState state, int fortune) {
+		List<ItemStack> list = makeDefaultDrops(null);
+		if (size > 1) list.add(BlockItemRegistry.stack("m.IORelay", size - 1));
+		return list;
+	}
+
+	@Override
+	public void onPlaced(EntityLivingBase entity, ItemStack item) {
 	}
 
 }

@@ -1,5 +1,6 @@
 package cd4017be.circuits.item;
 
+import java.io.IOException;
 import java.util.List;
 
 import net.minecraft.client.gui.inventory.GuiContainer;
@@ -22,10 +23,11 @@ import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.DefaultItem;
 import cd4017be.lib.IGuiItem;
 import cd4017be.lib.TooltipInfo;
+import cd4017be.lib.BlockGuiHandler.ClientItemPacketReceiver;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.ItemGuiData;
 
-public class ItemTimeSensor extends DefaultItem implements ISensor, IGuiItem {
+public class ItemTimeSensor extends DefaultItem implements ISensor, IGuiItem, ClientItemPacketReceiver {
 
 	public double RangeSQ = 400D;
 
@@ -40,14 +42,16 @@ public class ItemTimeSensor extends DefaultItem implements ISensor, IGuiItem {
 	}
 
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(ItemStack item, World world, EntityPlayer player, EnumHand hand) {
+	public ActionResult<ItemStack> onItemRightClick(World world, EntityPlayer player, EnumHand hand) {
+		ItemStack item = player.getHeldItem(hand);
 		if (hand != EnumHand.MAIN_HAND) return new ActionResult<ItemStack>(EnumActionResult.PASS, item);
-		BlockGuiHandler.openItemGui(player, world, 0, -1, 0);
+		BlockGuiHandler.openItemGui(player, hand);
 		return new ActionResult<ItemStack>(EnumActionResult.SUCCESS, item);
 	}
 
 	@Override
-	public EnumActionResult onItemUse(ItemStack stack, EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) {
+	public EnumActionResult onItemUse(EntityPlayer player, World world, BlockPos pos, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ) {
+		ItemStack stack = player.getHeldItem(hand);
 		if (!player.isSneaking()) return EnumActionResult.PASS;
 		NBTTagCompound nbt = stack.getTagCompound();
 		if (nbt == null) stack.setTagCompound(nbt = new NBTTagCompound());
@@ -83,24 +87,24 @@ public class ItemTimeSensor extends DefaultItem implements ISensor, IGuiItem {
 	}
 
 	@Override
-	public Container getContainer(World world, EntityPlayer player, int x, int y, int z) {
+	public Container getContainer(ItemStack item, EntityPlayer player, World world, BlockPos pos, int slot) {
 		return new DataContainer(new ItemGuiData(this), player);
 	}
 
 	@Override
 	@SideOnly(Side.CLIENT)
-	public GuiContainer getGui(World world, EntityPlayer player, int x, int y, int z) {
+	public GuiContainer getGui(ItemStack item, EntityPlayer player, World world, BlockPos pos, int slot) {
 		return new GuiTimeSensor(new DataContainer(new ItemGuiData(this), player));
 	}
 
 	@Override
-	public void onPlayerCommand(ItemStack item, EntityPlayer player, PacketBuffer data) {
+	public void onPacketFromClient(PacketBuffer data, EntityPlayer sender, ItemStack item, int slot) throws IOException {
 		if (!item.hasTagCompound()) item.setTagCompound(new NBTTagCompound());
 		byte cmd = data.readByte();
 		if (cmd == 0) {
 			byte src = data.readByte();
 			item.getTagCompound().setByte("src", src);
-			item.getTagCompound().setLong("ref", this.getTime(src, player.worldObj));
+			item.getTagCompound().setLong("ref", this.getTime(src, sender.world));
 		}
 		else if (cmd == 1) item.getTagCompound().setByte("mode", data.readByte());
 		else if (cmd == 2) item.getTagCompound().setLong("ref", data.readLong());

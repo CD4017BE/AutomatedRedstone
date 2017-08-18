@@ -3,23 +3,25 @@ package cd4017be.circuits.tileEntity;
 import java.io.IOException;
 
 import cd4017be.api.circuits.IDirectionalRedstone;
-import cd4017be.lib.ModTileEntity;
+import cd4017be.lib.BlockGuiHandler.ClientPacketReceiver;
+import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
+import cd4017be.lib.block.BaseTileEntity;
+import cd4017be.lib.block.AdvancedBlock.INeighborAwareTile;
 import net.minecraft.block.Block;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 
 /**
  *
  * @author CD4017BE
  */
-public class Display8bit extends ModTileEntity implements IDirectionalRedstone, IGuiData {
+public class Display8bit extends BaseTileEntity implements INeighborAwareTile, IDirectionalRedstone, IGuiData, ClientPacketReceiver {
 
 	public int state;
 	public short dspType = 0xf82;
@@ -28,16 +30,11 @@ public class Display8bit extends ModTileEntity implements IDirectionalRedstone, 
 	public int display = 0x03080808;
 
 	@Override
-	public void onPlaced(EntityLivingBase entity, ItemStack item) {
-		onNeighborBlockChange(null);
-	}
-
-	@Override
-	public void onNeighborBlockChange(Block b) {
-		if (worldObj.isRemote) return;
+	public void neighborBlockChange(Block b, BlockPos src) {
+		if (world.isRemote) return;
 		int nState = 0;
 		for (EnumFacing s : EnumFacing.VALUES)
-			nState |= worldObj.getRedstonePower(pos.offset(s), s);
+			nState |= world.getRedstonePower(pos.offset(s), s);
 		if (nState != state) {
 			state = nState;
 			this.formatState();
@@ -46,16 +43,20 @@ public class Display8bit extends ModTileEntity implements IDirectionalRedstone, 
 	}
 
 	@Override
-	public void onPlayerCommand(PacketBuffer data, EntityPlayerMP player) throws IOException {
+	public void neighborTileChange(BlockPos src) {
+	}
+
+	@Override
+	public void onPacketFromClient(PacketBuffer data, EntityPlayer sender) throws IOException {
 		byte cmd = data.readByte();
 		if (cmd == 0) {
 			dspType = data.readShort();
 			this.formatState();
 		} else if (cmd == 1) {
-			format = data.readStringFromBuffer(8);
+			format = data.readString(8);
 			this.formatState();
-		} else if (cmd == 2) text0 = data.readStringFromBuffer(16);
-		else if (cmd == 3) text1 = data.readStringFromBuffer(16);
+		} else if (cmd == 2) text0 = data.readString(16);
+		else if (cmd == 3) text1 = data.readString(16);
 		this.markUpdate();
 	}
 
@@ -150,6 +151,39 @@ public class Display8bit extends ModTileEntity implements IDirectionalRedstone, 
 	@Override
 	public byte getRSDirection(EnumFacing s) {
 		return 1;
+	}
+
+	@Override
+	public void initContainer(DataContainer container) {
+	}
+
+	@Override
+	public boolean canPlayerAccessUI(EntityPlayer player) {
+		return !player.isDead;
+	}
+
+	@Override
+	public int[] getSyncVariables() {
+		return null;
+	}
+
+	@Override
+	public void setSyncVariable(int i, int v) {
+	}
+
+	@Override
+	public boolean detectAndSendChanges(DataContainer container, PacketBuffer dos) {
+		return false;
+	}
+
+	@Override
+	public void updateClientChanges(DataContainer container, PacketBuffer dis) {
+	}
+
+	@Override
+	public String getName() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
