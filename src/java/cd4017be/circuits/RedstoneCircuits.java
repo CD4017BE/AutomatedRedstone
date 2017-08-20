@@ -13,10 +13,10 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
  *
  * @author CD4017BE
  */
-@Mod(modid="Circuits", useMetadata = true)
+@Mod(modid="circuits", useMetadata = true)
 public class RedstoneCircuits {
 
-	@Instance("Circuits")
+	@Instance("circuits")
 	public static RedstoneCircuits instance;
 
 	@SidedProxy(clientSide="cd4017be.circuits.ClientProxy", serverSide="cd4017be.circuits.CommonProxy")
