@@ -75,11 +75,11 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 			modify();
 			break;
 		case 1:
-			if (dataItem != null && dataItem.getItem() == Objects.circuitPlan) {
+			if (dataItem != null && dataItem.getItem() == Objects.circuit_plan) {
 				dataItem.setTagCompound(writeNBT(new NBTTagCompound()));
 			} break;
 		case 2:
-			if (dataItem != null && dataItem.getItem() == Objects.circuitPlan && dataItem.hasTagCompound()) {
+			if (dataItem != null && dataItem.getItem() == Objects.circuit_plan && dataItem.hasTagCompound()) {
 				readNBT(dataItem.getTagCompound());
 			} else {
 				data.clear();

@@ -17,12 +17,12 @@ public class CommonProxy {
 		BlockGuiHandler.registerContainer(assembler, TileContainer.class);
 		BlockGuiHandler.registerContainer(circuit, DataContainer.class);
 		BlockGuiHandler.registerContainer(potentiometer, DataContainer.class);
-		BlockGuiHandler.registerContainer(display8bit, DataContainer.class);
-		BlockGuiHandler.registerContainer(blockSensor, TileContainer.class);
+		BlockGuiHandler.registerContainer(display, DataContainer.class);
+		BlockGuiHandler.registerContainer(sensor_reader, TileContainer.class);
 		BlockGuiHandler.registerContainer(oszillograph, TileContainer.class);
 		BlockGuiHandler.registerContainer(designer, TileContainer.class);
-		BlockGuiHandler.registerContainer(fluidValve, DataContainer.class);
-		BlockGuiHandler.registerContainer(energyValve, DataContainer.class);
+		BlockGuiHandler.registerContainer(fluid_valve, DataContainer.class);
+		BlockGuiHandler.registerContainer(energy_valve, DataContainer.class);
 	}
 
 }

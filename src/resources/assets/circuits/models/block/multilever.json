@@ -3,7 +3,7 @@
     "textures": {
         "top": "circuits:blocks/multilever0",
 		"bot": "circuits:blocks/multilever1",
-		"front": "circuits:blocks/potentiometer2",
+		"front": "circuits:blocks/multilever2",
 		"back": "circuits:blocks/multilever3",
 		"side": "circuits:blocks/multilever3"
     }

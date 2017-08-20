@@ -1,0 +1,30 @@
+{
+    "variants": {
+		"normal": { "model": "circuits:rsp_32bit" },
+		"base": { "model": "circuits:rsp32n_core" },
+		"cn0": { "model": "circuits:rsp32n_con" },
+		"ce0": { "model": "circuits:rsp32n_con" , "y": 90 },
+		"cs0": { "model": "circuits:rsp32n_con" , "y": 180 },
+		"cw0": { "model": "circuits:rsp32n_con" , "y": 270 },
+		"cb0": { "model": "circuits:rsp32n_con" , "x": 90 },
+		"ct0": { "model": "circuits:rsp32n_con" , "x": 270 },
+		"cn1": { "model": "circuits:rsp32i_con" },
+		"ce1": { "model": "circuits:rsp32i_con" , "y": 90 },
+		"cs1": { "model": "circuits:rsp32i_con" , "y": 180 },
+		"cw1": { "model": "circuits:rsp32i_con" , "y": 270 },
+		"cb1": { "model": "circuits:rsp32i_con" , "x": 90 },
+		"ct1": { "model": "circuits:rsp32i_con" , "x": 270 },
+		"cn2": { "model": "circuits:rsp32o_con" },
+		"ce2": { "model": "circuits:rsp32o_con" , "y": 90 },
+		"cs2": { "model": "circuits:rsp32o_con" , "y": 180 },
+		"cw2": { "model": "circuits:rsp32o_con" , "y": 270 },
+		"cb2": { "model": "circuits:rsp32o_con" , "x": 90 },
+		"ct2": { "model": "circuits:rsp32o_con" , "x": 270 },
+		"cn3": { "model": "circuits:rsp32b_con" },
+		"ce3": { "model": "circuits:rsp32b_con" , "y": 90 },
+		"cs3": { "model": "circuits:rsp32b_con" , "y": 180 },
+		"cw3": { "model": "circuits:rsp32b_con" , "y": 270 },
+		"cb3": { "model": "circuits:rsp32b_con" , "x": 90 },
+		"ct3": { "model": "circuits:rsp32b_con" , "x": 270 }
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "variants": {
+        "orient=n": { "model": "circuits:multilever" },
+		"orient=e": { "model": "circuits:multilever" , "y": 90 },
+		"orient=s": { "model": "circuits:multilever" , "y": 180 },
+		"orient=w": { "model": "circuits:multilever" , "y": 270 },
+		"orient=bn": { "model": "circuits:multilever" , "x": 90 },
+		"orient=be": { "model": "circuits:multilever" , "x": 90 , "y": 90 },
+		"orient=bs": { "model": "circuits:multilever" , "x": 90 , "y": 180 },
+		"orient=bw": { "model": "circuits:multilever" , "x": 90 , "y": 270 },
+		"orient=tn": { "model": "circuits:multilever" , "x": 270 },
+		"orient=te": { "model": "circuits:multilever" , "x": 270 , "y": 90 },
+		"orient=ts": { "model": "circuits:multilever" , "x": 270 , "y": 180 },
+		"orient=tw": { "model": "circuits:multilever" , "x": 270 , "y": 270 }
+    }
+}

@@ -90,7 +90,7 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 
 	public void compile() {
 		ItemStack item = inventory.items[7];
-		if (item.getItem() != Objects.circuitPlan || !item.hasTagCompound()) {
+		if (item.getItem() != Objects.circuit_plan || !item.hasTagCompound()) {
 			for (int i = 0; i < 4; i++) N[i] = 0;
 			N[8] = -1;
 			code = null;
@@ -258,7 +258,7 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 		c.addItemSlot(new SlotItemType(inventory, 4, 8, 16, ItemHandlerHelper.copyStackWithSize(materials[1], 64)));
 		c.addItemSlot(new SlotItemType(inventory, 5, 8, 52, ItemHandlerHelper.copyStackWithSize(materials[2], 64)));
 		c.addItemSlot(new SlotItemType(inventory, 6, 26, 52, ItemHandlerHelper.copyStackWithSize(materials[3], 64)));
-		c.addItemSlot(new SlotItemType(inventory, 7, 116, 34, new ItemStack(Objects.circuitPlan, 1)));
+		c.addItemSlot(new SlotItemType(inventory, 7, 116, 34, new ItemStack(Objects.circuit_plan, 1)));
 		c.addPlayerInventory(8, 86);
 	}
 
@@ -278,7 +278,7 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 
 	public int insertAmount(int s, ItemStack insert) {
 		if ((s >= 3 && s < 7 && !insert.isItemEqual(materials[s - 3]))
-			|| (s == 7 && insert.getItem() != Objects.circuitPlan)
+			|| (s == 7 && insert.getItem() != Objects.circuit_plan)
 			|| (s == 0 && insert.getItem() != circuit)) return 0;
 		return Math.min(64, insert.getMaxStackSize());
 	}

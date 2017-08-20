@@ -3,6 +3,14 @@
         "orient=n": { "model": "circuits:oszillograph" },
 		"orient=e": { "model": "circuits:oszillograph" , "y": 90 },
 		"orient=s": { "model": "circuits:oszillograph" , "y": 180 },
-		"orient=w": { "model": "circuits:oszillograph" , "y": 270 }
+		"orient=w": { "model": "circuits:oszillograph" , "y": 270 },
+		"orient=bn": { "model": "circuits:oszillograph" , "x": 90 },
+		"orient=be": { "model": "circuits:oszillograph" , "x": 90 , "y": 90 },
+		"orient=bs": { "model": "circuits:oszillograph" , "x": 90 , "y": 180 },
+		"orient=bw": { "model": "circuits:oszillograph" , "x": 90 , "y": 270 },
+		"orient=tn": { "model": "circuits:oszillograph" , "x": 270 },
+		"orient=te": { "model": "circuits:oszillograph" , "x": 270 , "y": 90 },
+		"orient=ts": { "model": "circuits:oszillograph" , "x": 270 , "y": 180 },
+		"orient=tw": { "model": "circuits:oszillograph" , "x": 270 , "y": 270 }
     }
 }

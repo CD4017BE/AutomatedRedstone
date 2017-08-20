@@ -46,25 +46,25 @@ public class Objects {
 	public static OrientedBlock designer;
 	public static OrientedBlock assembler;
 	public static BlockCircuit circuit;
-	public static BlockPipe rsp8bit;
-	public static BlockPipe rsp1bit;
-	public static OrientedBlock lever8bit;
-	public static OrientedBlock display8bit;
-	public static OrientedBlock blockSensor;
+	public static BlockPipe rsp_32bit;
+	public static BlockPipe rsp_basic;
+	public static OrientedBlock multilever;
+	public static OrientedBlock display;
+	public static OrientedBlock sensor_reader;
 	public static OrientedBlock oszillograph;
 	public static OrientedBlock potentiometer;
-	public static OrientedBlock bitShifter;
-	public static OrientedBlock fluidValve;
-	public static OrientedBlock energyValve;
-	public static OrientedBlock wirelessCon;
-	public static BlockPipe invConnector;
+	public static OrientedBlock bit_shifter;
+	public static OrientedBlock fluid_valve;
+	public static OrientedBlock energy_valve;
+	public static OrientedBlock wireless_con;
+	public static BlockPipe inv_connector;
 
 	//Items
-	public static ItemProgramm circuitPlan;
-	public static ItemItemSensor itemSensor;
-	public static ItemFluidSensor fluidSensor;
-	public static ItemEnergySensor energySensor;
-	public static ItemTimeSensor timeSensor;
+	public static ItemProgramm circuit_plan;
+	public static ItemItemSensor item_sensor;
+	public static ItemFluidSensor fluid_sensor;
+	public static ItemEnergySensor energy_sensor;
+	public static ItemTimeSensor time_sensor;
 
 	/** creates and registers them all */
 	public static void init() {
@@ -75,38 +75,38 @@ public class Objects {
 		new DefaultItemBlock((designer = OrientedBlock.create("designer", Material.ROCK, SoundType.STONE, 0, CircuitDesigner.class, Orientation.HOR_AXIS)).setCreativeTab(tabCircuits));
 		new DefaultItemBlock((assembler = OrientedBlock.create("assembler", Material.ROCK, SoundType.STONE, 0, Assembler.class, Orientation.HOR_AXIS)).setCreativeTab(tabCircuits));
 		new ItemCircuit((circuit = new BlockCircuit("circuit", Material.ROCK, SoundType.STONE, Circuit.class)).setCreativeTab(tabCircuits));
-		new DefaultItemBlock((lever8bit = OrientedBlock.create("lever8bit", Material.ROCK, SoundType.STONE, 0, MultiLever.class, Orientation.XY_12_ROT)).setCreativeTab(tabCircuits));
+		new DefaultItemBlock((multilever = OrientedBlock.create("multilever", Material.ROCK, SoundType.STONE, 0, MultiLever.class, Orientation.XY_12_ROT)).setCreativeTab(tabCircuits));
 		new DefaultItemBlock((potentiometer = OrientedBlock.create("potentiometer", Material.ROCK, SoundType.STONE, 0, Potentiometer.class, Orientation.XY_12_ROT)).setCreativeTab(tabCircuits));
-		new DefaultItemBlock((display8bit = OrientedBlock.create("display8bit", Material.ROCK, SoundType.STONE, 0, Display8bit.class, Orientation.XY_12_ROT)).setCreativeTab(tabCircuits).setLightLevel(0.375F));
-		new DefaultItemBlock((blockSensor = OrientedBlock.create("blockSensor", Material.ROCK, SoundType.STONE, 0, BlockSensor.class, Orientation.ALL_AXIS).setBlockBounds(new AxisAlignedBB(0.125, 0.125, 0, 0.875, 0.875, 0.25))).setCreativeTab(tabCircuits));
+		new DefaultItemBlock((display = OrientedBlock.create("display", Material.ROCK, SoundType.STONE, 0, Display8bit.class, Orientation.XY_12_ROT)).setCreativeTab(tabCircuits).setLightLevel(0.375F));
+		new DefaultItemBlock((sensor_reader = OrientedBlock.create("sensor_reader", Material.ROCK, SoundType.STONE, 0, BlockSensor.class, Orientation.ALL_AXIS).setBlockBounds(new AxisAlignedBB(0.125, 0.125, 0, 0.875, 0.875, 0.25))).setCreativeTab(tabCircuits));
 		new DefaultItemBlock((oszillograph = OrientedBlock.create("oszillograph", Material.ROCK, SoundType.STONE, 0, Oszillograph.class, Orientation.XY_12_ROT)).setCreativeTab(tabCircuits).setLightLevel(0.375F));
-		new DefaultItemBlock((rsp8bit = BlockPipe.create("rsp8bit", Material.IRON, SoundType.METAL, IntegerPipe.class, 1).setSize(0.5)).setCreativeTab(tabCircuits));
-		new ItemRSPipe((rsp1bit = BlockPipe.create("rsp1bit", Material.IRON, SoundType.METAL, BasicRSPipe.class, 3).setSize(0.25)).setCreativeTab(tabCircuits));
-		new DefaultItemBlock((bitShifter = OrientedBlock.create("bitShifter", Material.IRON, SoundType.METAL, 0, BitShifter.class, Orientation.ALL_AXIS)).setBlockBounds(new AxisAlignedBB(0.25, 0.25, 0.0, 0.75, 0.75, 1.0)).setCreativeTab(tabCircuits));
-		new DefaultItemBlock((fluidValve = OrientedBlock.create("fluidValve", Material.IRON, SoundType.METAL, 0, FluidValve.class, Orientation.ALL_AXIS)).setCreativeTab(tabCircuits));
-		new DefaultItemBlock((energyValve = OrientedBlock.create("energyValve", Material.IRON, SoundType.METAL, 0, EnergyValve.class, Orientation.ALL_AXIS)).setCreativeTab(tabCircuits));
-		new DefaultItemBlock((invConnector = BlockPipe.create("invConnector", Material.GLASS, SoundType.GLASS, InvConnector.class, 1).setSize(0.375)).setCreativeTab(tabCircuits).setHardness(0.5F));
-		new ItemWirelessCon((wirelessCon = OrientedBlock.create("wirelessCon", Material.IRON, SoundType.METAL, 0, WirelessConnector.class, Orientation.ALL_AXIS)).setBlockBounds(new AxisAlignedBB(0.25, 0.25, 0.0, 0.75, 0.75, 0.875)).setCreativeTab(tabCircuits));
+		new DefaultItemBlock((rsp_32bit = BlockPipe.create("rsp_32bit", Material.IRON, SoundType.METAL, IntegerPipe.class, 1).setSize(0.5)).setCreativeTab(tabCircuits));
+		new ItemRSPipe((rsp_basic = BlockPipe.create("rsp_basic", Material.IRON, SoundType.METAL, BasicRSPipe.class, 3).setSize(0.25)).setCreativeTab(tabCircuits));
+		new DefaultItemBlock((bit_shifter = OrientedBlock.create("bit_shifter", Material.IRON, SoundType.METAL, 0, BitShifter.class, Orientation.ALL_AXIS)).setBlockBounds(new AxisAlignedBB(0.25, 0.25, 0.0, 0.75, 0.75, 1.0)).setCreativeTab(tabCircuits));
+		new DefaultItemBlock((fluid_valve = OrientedBlock.create("fluid_valve", Material.IRON, SoundType.METAL, 0, FluidValve.class, Orientation.ALL_AXIS)).setCreativeTab(tabCircuits));
+		new DefaultItemBlock((energy_valve = OrientedBlock.create("energy_valve", Material.IRON, SoundType.METAL, 0, EnergyValve.class, Orientation.ALL_AXIS)).setCreativeTab(tabCircuits));
+		new DefaultItemBlock((inv_connector = BlockPipe.create("inv_connector", Material.GLASS, SoundType.GLASS, InvConnector.class, 1).setSize(0.375)).setCreativeTab(tabCircuits).setHardness(0.5F));
+		new ItemWirelessCon((wireless_con = OrientedBlock.create("wireless_con", Material.IRON, SoundType.METAL, 0, WirelessConnector.class, Orientation.ALL_AXIS)).setBlockBounds(new AxisAlignedBB(0.25, 0.25, 0.0, 0.75, 0.75, 0.875)).setCreativeTab(tabCircuits));
 		
-		(circuitPlan = new ItemProgramm("circuitPlan")).setCreativeTab(tabCircuits);
-		(itemSensor = new ItemItemSensor("itemSensor")).setCreativeTab(tabCircuits);
-		(fluidSensor = new ItemFluidSensor("fluidSensor")).setCreativeTab(tabCircuits);
-		(energySensor = new ItemEnergySensor("energySensor")).setCreativeTab(tabCircuits);
-		(timeSensor = new ItemTimeSensor("timeSensor")).setCreativeTab(tabCircuits);
+		(circuit_plan = new ItemProgramm("circuit_plan")).setCreativeTab(tabCircuits);
+		(item_sensor = new ItemItemSensor("item_sensor")).setCreativeTab(tabCircuits);
+		(fluid_sensor = new ItemFluidSensor("fluid_sensor")).setCreativeTab(tabCircuits);
+		(energy_sensor = new ItemEnergySensor("energy_sensor")).setCreativeTab(tabCircuits);
+		(time_sensor = new ItemTimeSensor("time_sensor")).setCreativeTab(tabCircuits);
 		
 		tabCircuits.item = new ItemStack(circuit);
 	}
 
 	public static void initConstants(ConfigConstants c) {
 		c.getVect("circuit_ticks", Circuit.ClockSpeed);
-		itemSensor.RangeSQ = c.getNumber("itemSensor_rangeSQ", 20);
-		itemSensor.RangeSQ *= itemSensor.RangeSQ;
-		fluidSensor.RangeSQ = c.getNumber("fluidSensor_rangeSQ", 20);
-		fluidSensor.RangeSQ *= fluidSensor.RangeSQ;
-		energySensor.RangeSQ = c.getNumber("energySensor_rangeSQ", 20);
-		energySensor.RangeSQ *= energySensor.RangeSQ;
-		timeSensor.RangeSQ = c.getNumber("timeSensor_rangeSQ", 20);
-		timeSensor.RangeSQ *= timeSensor.RangeSQ;
+		item_sensor.RangeSQ = c.getNumber("itemSensor_rangeSQ", 20);
+		item_sensor.RangeSQ *= item_sensor.RangeSQ;
+		fluid_sensor.RangeSQ = c.getNumber("fluidSensor_rangeSQ", 20);
+		fluid_sensor.RangeSQ *= fluid_sensor.RangeSQ;
+		energy_sensor.RangeSQ = c.getNumber("energySensor_rangeSQ", 20);
+		energy_sensor.RangeSQ *= energy_sensor.RangeSQ;
+		time_sensor.RangeSQ = c.getNumber("timeSensor_rangeSQ", 20);
+		time_sensor.RangeSQ *= time_sensor.RangeSQ;
 		Assembler.materials[0] = BlockItemRegistry.stack("m.IORelay", 1);
 		Assembler.materials[1] = BlockItemRegistry.stack("m.RAMPlate", 1);
 		Assembler.materials[2] = BlockItemRegistry.stack("m.LogicPrc", 1);

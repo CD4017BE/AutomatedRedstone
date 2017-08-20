@@ -3,6 +3,14 @@
         "orient=n": { "model": "circuits:potentiometer" },
 		"orient=e": { "model": "circuits:potentiometer" , "y": 90 },
 		"orient=s": { "model": "circuits:potentiometer" , "y": 180 },
-		"orient=w": { "model": "circuits:potentiometer" , "y": 270 }
+		"orient=w": { "model": "circuits:potentiometer" , "y": 270 },
+		"orient=bn": { "model": "circuits:potentiometer" , "x": 90 },
+		"orient=be": { "model": "circuits:potentiometer" , "x": 90 , "y": 90 },
+		"orient=bs": { "model": "circuits:potentiometer" , "x": 90 , "y": 180 },
+		"orient=bw": { "model": "circuits:potentiometer" , "x": 90 , "y": 270 },
+		"orient=tn": { "model": "circuits:potentiometer" , "x": 270 },
+		"orient=te": { "model": "circuits:potentiometer" , "x": 270 , "y": 90 },
+		"orient=ts": { "model": "circuits:potentiometer" , "x": 270 , "y": 180 },
+		"orient=tw": { "model": "circuits:potentiometer" , "x": 270 , "y": 270 }
     }
 }

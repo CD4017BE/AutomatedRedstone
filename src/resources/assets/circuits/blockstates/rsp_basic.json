@@ -1,0 +1,28 @@
+{
+    "variants": {
+		"type=0": { "model": "circuits:rsp_basic" },
+		"type=1": { "model": "circuits:rsp_basic" },
+		"type=2": { "model": "circuits:rsp_basic" },
+		"base0": { "model": "circuits:rsp1n_core"},
+		"base1": { "model": "circuits:rsp1i_core"},
+		"base2": { "model": "circuits:rsp1o_core"},
+		"cn0": { "model": "circuits:rsp1n_con" },
+		"ce0": { "model": "circuits:rsp1n_con" , "y": 90 },
+		"cs0": { "model": "circuits:rsp1n_con" , "y": 180 },
+		"cw0": { "model": "circuits:rsp1n_con" , "y": 270 },
+		"cb0": { "model": "circuits:rsp1n_con" , "x": 90 },
+		"ct0": { "model": "circuits:rsp1n_con" , "x": 270 },
+		"cn1": { "model": "circuits:rsp1i_con" },
+		"ce1": { "model": "circuits:rsp1i_con" , "y": 90 },
+		"cs1": { "model": "circuits:rsp1i_con" , "y": 180 },
+		"cw1": { "model": "circuits:rsp1i_con" , "y": 270 },
+		"cb1": { "model": "circuits:rsp1i_con" , "x": 90 },
+		"ct1": { "model": "circuits:rsp1i_con" , "x": 270 },
+		"cn2": { "model": "circuits:rsp1o_con" },
+		"ce2": { "model": "circuits:rsp1o_con" , "y": 90 },
+		"cs2": { "model": "circuits:rsp1o_con" , "y": 180 },
+		"cw2": { "model": "circuits:rsp1o_con" , "y": 270 },
+		"cb2": { "model": "circuits:rsp1o_con" , "x": 90 },
+		"ct2": { "model": "circuits:rsp1o_con" , "x": 270 }
+    }
+}

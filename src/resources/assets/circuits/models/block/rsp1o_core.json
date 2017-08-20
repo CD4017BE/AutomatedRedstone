@@ -1,0 +1,6 @@
+{
+	"parent": "circuits:block/pipe4core",
+    "textures": {
+        "tex": "circuits:blocks/rsp1o"
+    }
+}

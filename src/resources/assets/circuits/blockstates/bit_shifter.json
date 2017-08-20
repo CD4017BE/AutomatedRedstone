@@ -1,0 +1,10 @@
+{
+	"variants": {
+		"orient=n": { "model": "circuits:bit_shifter" },
+		"orient=e": { "model": "circuits:bit_shifter" , "y": 90 },
+		"orient=s": { "model": "circuits:bit_shifter" , "y": 180 },
+		"orient=w": { "model": "circuits:bit_shifter" , "y": 270 },
+		"orient=bn": { "model": "circuits:bit_shifter" , "x": 90 },
+		"orient=tn": { "model": "circuits:bit_shifter" , "x": 270 }
+	}
+}

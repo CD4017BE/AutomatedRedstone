@@ -1,8 +1,0 @@
-{
-    "variants": {
-        "orient=n": { "model": "circuits:lever8bit" },
-		"orient=e": { "model": "circuits:lever8bit" , "y": 90 },
-		"orient=s": { "model": "circuits:lever8bit" , "y": 180 },
-		"orient=w": { "model": "circuits:lever8bit" , "y": 270 }
-    }
-}

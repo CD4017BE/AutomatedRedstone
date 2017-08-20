@@ -1,0 +1,6 @@
+{
+	"parent": "circuits:block/pipe8con",
+    "textures": {
+        "tex": "circuits:blocks/rsp32i"
+    }
+}

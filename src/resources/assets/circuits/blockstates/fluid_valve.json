@@ -1,0 +1,10 @@
+{
+	"variants": {
+		"orient=n": { "model": "circuits:fluid_valve" },
+		"orient=e": { "model": "circuits:fluid_valve" , "y": 90 },
+		"orient=s": { "model": "circuits:fluid_valve" , "y": 180 },
+		"orient=w": { "model": "circuits:fluid_valve" , "y": 270 },
+		"orient=bn": { "model": "circuits:fluid_valve" , "x": 90 },
+		"orient=tn": { "model": "circuits:fluid_valve" , "x": 270 }
+	}
+}

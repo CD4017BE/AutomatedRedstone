@@ -1,8 +1,0 @@
-{
-    "variants": {
-        "orient=n": { "model": "circuits:programmer" },
-		"orient=e": { "model": "circuits:programmer" , "y": 90 },
-		"orient=s": { "model": "circuits:programmer" , "y": 180 },
-		"orient=w": { "model": "circuits:programmer" , "y": 270 }
-    }
-}

@@ -3,7 +3,7 @@
     "textures": {
         "top": "circuits:blocks/display0",
 		"bot": "circuits:blocks/display1",
-		"front": "circuits:blocks/oszi2",
+		"front": "circuits:blocks/display2",
 		"back": "circuits:blocks/display3",
 		"side": "circuits:blocks/display3"
     }

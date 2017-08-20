@@ -1,0 +1,24 @@
+{
+    "variants": {
+		"normal": { "model": "circuits:inv_connector" },
+		"base": { "model": "circuits:invcon_b_core"},
+		"cn0": { "model": "circuits:invcon_b_con" },
+		"ce0": { "model": "circuits:invcon_b_con" , "y": 90 },
+		"cs0": { "model": "circuits:invcon_b_con" , "y": 180 },
+		"cw0": { "model": "circuits:invcon_b_con" , "y": 270 },
+		"cb0": { "model": "circuits:invcon_b_con" , "x": 90 },
+		"ct0": { "model": "circuits:invcon_b_con" , "x": 270 },
+		"cn1": { "model": "circuits:invcon_c_con" },
+		"ce1": { "model": "circuits:invcon_c_con" , "y": 90 },
+		"cs1": { "model": "circuits:invcon_c_con" , "y": 180 },
+		"cw1": { "model": "circuits:invcon_c_con" , "y": 270 },
+		"cb1": { "model": "circuits:invcon_c_con" , "x": 90 },
+		"ct1": { "model": "circuits:invcon_c_con" , "x": 270 },
+		"cn2": { "model": "circuits:invcon_l_con" },
+		"ce2": { "model": "circuits:invcon_l_con" , "y": 90 },
+		"cs2": { "model": "circuits:invcon_l_con" , "y": 180 },
+		"cw2": { "model": "circuits:invcon_l_con" , "y": 270 },
+		"cb2": { "model": "circuits:invcon_l_con" , "x": 90 },
+		"ct2": { "model": "circuits:invcon_l_con" , "x": 270 }
+	}
+}

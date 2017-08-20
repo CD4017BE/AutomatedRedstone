@@ -1,0 +1,10 @@
+{
+    "variants": {
+        "orient=n": { "model": "circuits:sensor_reader" },
+		"orient=e": { "model": "circuits:sensor_reader" , "y": 90 },
+		"orient=s": { "model": "circuits:sensor_reader" , "y": 180 },
+		"orient=w": { "model": "circuits:sensor_reader" , "y": 270 },
+		"orient=bn": { "model": "circuits:sensor_reader" , "x": 90 },
+		"orient=tn": { "model": "circuits:sensor_reader" , "x": 270 }
+    }
+}
