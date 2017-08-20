@@ -1,6 +1,6 @@
 {
     "parent": "item/generated",
     "textures": {
-        "layer0": "circuits:items/RAMPlate"
+        "layer0": "circuits:items/logic_prc"
     }
 }

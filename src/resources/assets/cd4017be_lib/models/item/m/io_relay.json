@@ -1,6 +1,6 @@
 {
     "parent": "item/generated",
     "textures": {
-        "layer0": "circuits:items/LogicPrc"
+        "layer0": "circuits:items/io_relay"
     }
 }

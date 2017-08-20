@@ -1,4 +1,4 @@
-VERSION = 310;
+VERSION = 403;
 {
 	circuit_ticks = [20, 5, 1]#; !min operation delay in ticks for each tier of circuit casing
 	Loc range = 20; !maximum range for sensor modules in blocks
@@ -10,48 +10,47 @@ VERSION = 310;
 }
 
 PRE_INIT() {
-	add("item", 1, "emptySensor");
-	add("item", 200, "IORelay");
-	add("item", 201, "RAMPlate");
-	add("item", 202, "LogicPrc");
-	add("item", 203, "CalcPrc");
+	add("item", 1, "empty_sensor");
+	add("item", 200, "io_relay");
+	add("item", 201, "ram_plate");
+	add("item", 202, "logic_prc");
+	add("item", 203, "calc_prc");
 }
 
 INIT() {
 	Loc WILDCARD = 32767;
 	Loc slab = it("minecraft:stone_slab");
 	Loc nbt = "#IO,#Cap,#Gate,#Calc,#data,#name,#io,#ofs";!<- DON'T EDIT (bad things would happen)
-	add("shapeless", it("item.circuitPlan"), it("item.circuitPlan"));
-	add("shaped", it("item.circuitPlan"), "0/1/2", "dyeBlack", it("minecraft:paper"), it("minecraft:glass_pane"));
-	add("shaped", it("tile.designer"), "010/232", "dustRedstone", it("item.circuitPlan"), slab, it("minecraft:crafting_table"));
-	add("shaped", it("tile.programmer"), "232/010", it("minecraft:wooden_slab", 1, WILDCARD), it("minecraft:crafting_table"), "dustRedstone", it("minecraft:writable_book"));
+	add("shapeless", it("item.circuit_plan"), it("item.circuit_plan"));
+	add("shaped", it("item.circuit_plan"), "0/1/2", "dyeBlack", it("minecraft:paper"), it("minecraft:glass_pane"));
+	add("shaped", it("tile.designer"), "010/232", "dustRedstone", it("item.circuit_plan"), slab, it("minecraft:crafting_table"));
 	add("shaped", it("tile.assembler"), "010/232/010", "dustRedstone", it("minecraft:piston"), it("minecraft:chest"), it("minecraft:crafting_table"));
 	add("shaped", it("tile.circuit"), "000/010/000", slab, "ingotIron");
 	add("shapedNBT", nbt, it("tile.circuit", 1, 1), "0/1", it("tile.circuit"), "ingotGold");
 	add("shapedNBT", nbt, it("tile.circuit", 1, 2), " 1 /202/ 1 ", it("tile.circuit", 1, 1), "gemQuartz", it("minecraft:dye", 1, 4));
 	add("shaped", it("tile.potentiometer"), "01/02/01", it("minecraft:coal", 1, WILDCARD), slab, it("minecraft:redstone_torch"));
-	add("shaped", it("tile.lever8bit"), "000/010/000", it("minecraft:lever"), slab);
-	add("shaped", it("tile.display8bit"), "000/121/000", "dustGlowstone", slab, "gemQuartz");
-	add("shaped", it("tile.rsp8bit", 2), "000/010/000", it("rsp1bitN"), "nuggetGold");
+	add("shaped", it("tile.multilever"), "000/010/000", it("minecraft:lever"), slab);
+	add("shaped", it("tile.display"), "000/121/000", "dustGlowstone", slab, "gemQuartz");
+	add("shaped", it("tile.rsp_32bit", 2), "000/010/000", it("rsp1bitN"), "nuggetGold");
 	add("shaped", it("rsp1bitN", 12), "000/111/000", it("minecraft:iron_bars"), "dustRedstone");
 	if(hasit("RstMetall")) {add("shaped", it("rsp1bitN", 8), "000", it("RstMetall"));}
 	add("shaped", it("rsp1bitI", 2), "001", it("rsp1bitN"), "dustRedstone");
 	add("shaped", it("rsp1bitO", 2), "001", it("rsp1bitN"), it("minecraft:redstone_torch"));
-	add("shaped", it("tile.bitShifter"), "0/1", it("m.IORelay"), it("tile.rsp8bit"));
-	add("shaped", it("tile.blockSensor"), " 3 /010/ 2 ", slab, "gemQuartz", it("tile.rsp8bit"), it("minecraft:chest"));
-	add("shaped", it("tile.oszillograph"), "222/010", it("m.CalcPrc"), it("tile.display8bit"), it("minecraft:glass_pane"));
-	add("shaped", it("tile.invConnector", 12), "000/121/000", "gemQuartz", "blockGlass", it("minecraft:ender_eye"));
-	add("shaped", it("tile.fluidValve"), "010/232/040", slab, it("minecraft:comparator"), it("minecraft:bucket"), it("minecraft:piston"), it("tile.rsp8bit"));
-	add("shaped", it("tile.energyValve"), "010/232/040", slab, it("minecraft:comparator"), "ingotGold", "blockRedstone", it("tile.rsp8bit"));
-	add("shaped", it("m.emptySensor", 4), " 0 /010/232", "nuggetGold", it("minecraft:paper"), "ingotIron", it("minecraft:comparator"));
-	add("shaped", it("tile.wirelessCon"), "010/2 2/3 3", it("minecraft:obsidian"), it("minecraft:ender_eye"), "gemQuartz", it("tile.rsp8bit"));
-	add("shaped", it("tile.wirelessCon"), "00", it("tile.wirelessCon", 1, 1));
-	add("shapeless", it("item.itemSensor"), it("m.emptySensor"), it("minecraft:chest"));
-	add("shapeless", it("item.fluidSensor"), it("m.emptySensor"), it("minecraft:bucket"));
-	add("shapeless", it("item.timeSensor"), it("m.emptySensor"), it("minecraft:clock"));
-	add("shapeless", it("item.energySensor"), it("m.emptySensor"), it("minecraft:piston"));
-	add("shaped", it("m.IORelay", 16), "021", it("rsp1bitI"), it("rsp1bitO"), it("minecraft:lever"));
-	add("shaped", it("m.RAMPlate", 4), " 1 /000", slab, it("tile.rsp8bit"));
-	add("shaped", it("m.LogicPrc", 8), "010/121/010", "dustRedstone", it("minecraft:redstone_torch"), "ingotIron");
-	add("shaped", it("m.CalcPrc", 2), "010/010/222", it("m.LogicPrc"), "gemQuartz", "nuggetGold");
+	add("shaped", it("tile.bit_shifter"), "0/1", it("m.io_relay"), it("tile.rsp_32bit"));
+	add("shaped", it("tile.sensor_reader"), " 3 /010/ 2 ", slab, "gemQuartz", it("tile.rsp_32bit"), it("minecraft:chest"));
+	add("shaped", it("tile.oszillograph"), "222/010", it("m.calc_prc"), it("tile.display"), it("minecraft:glass_pane"));
+	add("shaped", it("tile.inv_connector", 12), "000/121/000", "gemQuartz", "blockGlass", it("minecraft:ender_eye"));
+	add("shaped", it("tile.fluid_valve"), "010/232/040", slab, it("minecraft:comparator"), it("minecraft:bucket"), it("minecraft:piston"), it("tile.rsp_32bit"));
+	add("shaped", it("tile.energy_valve"), "010/232/040", slab, it("minecraft:comparator"), "ingotGold", "blockRedstone", it("tile.rsp_32bit"));
+	add("shaped", it("m.empty_sensor", 4), " 0 /010/232", "nuggetGold", it("minecraft:paper"), "ingotIron", it("minecraft:comparator"));
+	add("shaped", it("tile.wireless_con"), "010/2 2/3 3", it("minecraft:obsidian"), it("minecraft:ender_eye"), "gemQuartz", it("tile.rsp_32bit"));
+	add("shaped", it("tile.wireless_con"), "00", it("tile.wireless_con", 1, 1));
+	add("shapeless", it("item.item_sensor"), it("m.empty_sensor"), it("minecraft:chest"));
+	add("shapeless", it("item.fluid_sensor"), it("m.empty_sensor"), it("minecraft:bucket"));
+	add("shapeless", it("item.time_sensor"), it("m.empty_sensor"), it("minecraft:clock"));
+	add("shapeless", it("item.energy_sensor"), it("m.empty_sensor"), it("minecraft:piston"));
+	add("shaped", it("m.io_relay", 16), "021", it("rsp1bitI"), it("rsp1bitO"), it("minecraft:lever"));
+	add("shaped", it("m.ram_plate", 4), " 1 /000", slab, it("tile.rsp_32bit"));
+	add("shaped", it("m.logic_prc", 8), "010/121/010", "dustRedstone", it("minecraft:redstone_torch"), "ingotIron");
+	add("shaped", it("m.calc_prc", 2), "010/010/222", it("m.logic_prc"), "gemQuartz", "nuggetGold");
 }

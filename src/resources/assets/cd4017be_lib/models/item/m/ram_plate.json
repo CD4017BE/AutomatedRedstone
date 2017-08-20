@@ -1,6 +1,6 @@
 {
     "parent": "item/generated",
     "textures": {
-        "layer0": "circuits:items/IORelay"
+        "layer0": "circuits:items/ram_plate"
     }
 }
