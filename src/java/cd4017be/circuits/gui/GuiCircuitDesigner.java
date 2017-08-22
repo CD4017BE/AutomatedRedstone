@@ -33,13 +33,13 @@ import cd4017be.lib.Gui.TileContainer;
 public class GuiCircuitDesigner extends GuiMachine {
 
 	private static final float ScrollSize = 24F;
-	private static final ResourceLocation COMP_TEX =  new ResourceLocation("circuits", "textures/gui/circuitOperators.png");
+	private static final ResourceLocation COMP_TEX =  new ResourceLocation("circuits", "textures/gui/circuit_operators.png");
 	private final CircuitDesigner tile;
 	private int scroll;
 
 	public GuiCircuitDesigner(CircuitDesigner tile, EntityPlayer player) {
 		super(new TileContainer(tile, player));
-		this.MAIN_TEX = new ResourceLocation("circuits", "textures/gui/circuitDesigner.png");
+		this.MAIN_TEX = new ResourceLocation("circuits", "textures/gui/circuit_designer.png");
 		this.tile = tile;
 	}
 

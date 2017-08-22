@@ -17,7 +17,7 @@ public class GuiTimeSensor extends GuiMachine {
 	
 	public GuiTimeSensor(DataContainer cont) {
 		super(cont);
-		this.MAIN_TEX = new ResourceLocation("circuits", "textures/gui/fluidSensor.png");
+		this.MAIN_TEX = new ResourceLocation("circuits", "textures/gui/fluid_sensor.png");
 		this.bgTexY = 150;
 		this.inv = cont.player.inventory;
 	}
@@ -106,7 +106,7 @@ public class GuiTimeSensor extends GuiMachine {
 	@Override
 	protected void setDisplVar(int id, Object obj, boolean send) {
 		NBTTagCompound nbt = this.getTag();
-		PacketBuffer dos = BlockGuiHandler.getPacketTargetData(((DataContainer)inventorySlots).data.pos());
+		PacketBuffer dos = BlockGuiHandler.getPacketForItem(inv.currentItem);
 		switch(id) {
 		case 0: dos.writeByte(1).writeByte((nbt.getByte("mode") + ((Integer)obj == 0 ? 1 : 3)) % 4); break;
 		case 1: dos.writeByte(0).writeByte((nbt.getByte("src") + ((Integer)obj == 0 ? 1 : 2)) % 3); break;

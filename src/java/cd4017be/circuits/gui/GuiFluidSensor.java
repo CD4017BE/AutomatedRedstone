@@ -18,7 +18,7 @@ public class GuiFluidSensor extends GuiMachine {
 
 	public GuiFluidSensor(TileContainer cont) {
 		super(cont);
-		this.MAIN_TEX = new ResourceLocation("circuits", "textures/gui/fluidSensor.png");
+		this.MAIN_TEX = new ResourceLocation("circuits", "textures/gui/fluid_sensor.png");
 		this.inv = cont.player.inventory;
 	}
 
@@ -33,7 +33,7 @@ public class GuiFluidSensor extends GuiMachine {
 	@Override
 	protected void mouseClicked(int x, int y, int b) throws IOException {
 		if (this.isPointInRegion(62, 16, 16, 16, x, y)) {
-			PacketBuffer dos = BlockGuiHandler.getPacketTargetData(((TileContainer)inventorySlots).data.pos());
+			PacketBuffer dos = BlockGuiHandler.getPacketForItem(inv.currentItem);
 			FluidStack fluid = FluidUtil.getFluidContained(inv.getItemStack());
 			dos.writeByte(1);
 			dos.writeString(fluid != null ? fluid.getFluid().getName() : "");
@@ -49,7 +49,7 @@ public class GuiFluidSensor extends GuiMachine {
 
 	@Override
 	protected void setDisplVar(int id, Object obj, boolean send) {
-		PacketBuffer dos = BlockGuiHandler.getPacketTargetData(((TileContainer)inventorySlots).data.pos());
+		PacketBuffer dos = BlockGuiHandler.getPacketForItem(inv.currentItem);
 		dos.writeByte(0);
 		BlockGuiHandler.sendPacketToServer(dos);
 	}

@@ -107,6 +107,7 @@ public class ItemItemSensor extends ItemBlockSensor implements IGuiItem, IItemIn
 	public ItemStack[] loadInventory(ItemStack inv, EntityPlayer player) {
 		ItemStack[] items = new ItemStack[1];
 		if (inv.hasTagCompound() && inv.getTagCompound().hasKey("type", 10)) items[0] = new ItemStack(inv.getTagCompound().getCompoundTag("type"));
+		else items[0] = ItemStack.EMPTY;
 		return items;
 	}
 
