@@ -71,7 +71,7 @@ public class IntegerPipe extends PassiveMultiblockTile<IntegerComp, SharedIntege
 
 	@Override
 	public boolean onActivated(EntityPlayer player, EnumHand hand, ItemStack item, EnumFacing dir, float X, float Y, float Z) {
-		if (item == null) {
+		if (item.isEmpty()) {
 			if (world.isRemote) return true;
 			dir = Utils.hitSide(X, Y, Z);
 			byte s = (byte)dir.getIndex();

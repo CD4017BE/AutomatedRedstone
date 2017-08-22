@@ -170,7 +170,7 @@ public class WirelessConnector extends BaseTileEntity implements INeighborAwareT
 
 	@Override
 	public boolean onActivated(EntityPlayer player, EnumHand hand, ItemStack item, EnumFacing s, float X, float Y, float Z) {
-		if (world.isRemote || !player.isSneaking() || item != null) return true;
+		if (world.isRemote || !player.isSneaking() || !item.isEmpty()) return true;
 		checkLink(true);
 		String msg;
 		if (linkTile != null && linkTile.linkTile == this) {

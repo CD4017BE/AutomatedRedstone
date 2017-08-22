@@ -50,7 +50,7 @@ public class ItemItemSensor extends ItemBlockSensor implements IGuiItem, IItemIn
 			ItemStack stack = this.loadInventory(item, player)[0];
 			if (states.length >= 6) {
 				String s;
-				if (stack == null) s = states[mode & 1];
+				if (stack.isEmpty()) s = states[mode & 1];
 				else {
 					s = (mode & 1) != 0 ? states[2] : "";
 					s += stack.getDisplayName();
@@ -113,7 +113,7 @@ public class ItemItemSensor extends ItemBlockSensor implements IGuiItem, IItemIn
 	@Override
 	public void saveInventory(ItemStack inv, EntityPlayer player, ItemStack[] items) {
 		if (!inv.hasTagCompound()) inv.setTagCompound(new NBTTagCompound());
-		if (items[0] == null) inv.getTagCompound().removeTag("type");
+		if (items[0].isEmpty()) inv.getTagCompound().removeTag("type");
 		else inv.getTagCompound().setTag("type", items[0].writeToNBT(new NBTTagCompound()));
 	}
 
@@ -124,11 +124,12 @@ public class ItemItemSensor extends ItemBlockSensor implements IGuiItem, IItemIn
 		IItemHandler acc = te != null ? te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, side) : null;
 		ItemStack filter = loadInventory(sensor, null)[0];
 		boolean inv = (mode & 1) != 0;
+		boolean empty = filter.isEmpty();
 		ItemStack item;
 		int n = 0;
 		if (acc == null) {
-			if (filter == null && !inv) return 0F;
-			ItemType type = filter == null ? null : new ItemType((mode & 2) != 0, (mode & 4) != 0, (mode & 8) != 0, filter);
+			if (empty && !inv) return 0F;
+			ItemType type = empty ? null : new ItemType((mode & 2) != 0, (mode & 4) != 0, (mode & 8) != 0, filter);
 			for (EntityItem e : world.getEntitiesWithinAABB(EntityItem.class, new AxisAlignedBB(pos))) {
 				item = e.getEntityItem();
 				if (type == null || (inv ^ type.matches(item))) n += item.getCount();
@@ -136,15 +137,17 @@ public class ItemItemSensor extends ItemBlockSensor implements IGuiItem, IItemIn
 			IBlockState state = world.getBlockState(pos);
 			for (ItemStack it : state.getBlock().getDrops(world, pos, state, 0))
 				if (type == null || (inv ^ type.matches(it))) n += it.getCount();
-		} else if (filter == null) {
+		} else if (empty) {
+			int m;
 			for (int i = 0; i < acc.getSlots(); i++)
-				if ((item = acc.getStackInSlot(i)) == null ^ inv)
-					n += inv ? item.getCount() : 1;
+				if ((m = acc.getStackInSlot(i).getCount()) == 0 ^ inv)
+					n += inv ? m : 1;
 		} else {
 			ItemType type = new ItemType((mode & 2) != 0, (mode & 4) != 0, (mode & 8) != 0, filter);
+			int m;
 			for (int i = 0; i < acc.getSlots(); i++) 
-				if ((item = acc.getStackInSlot(i)) != null && (type.matches(item) ^ inv))
-					n += item.getCount();
+				if ((m = (item = acc.getStackInSlot(i)).getCount()) != 0 && (type.matches(item) ^ inv))
+					n += m;
 		}
 		return n;
 	}

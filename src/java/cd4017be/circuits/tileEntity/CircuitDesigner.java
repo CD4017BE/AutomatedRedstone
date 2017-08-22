@@ -23,7 +23,7 @@ import cd4017be.lib.templates.LinkedInventory;
 
 public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientPacketReceiver {
 
-	public ItemStack dataItem;
+	public ItemStack dataItem = ItemStack.EMPTY;
 	private GameProfile lastPlayer;
 	public Module module0 = null, moduleL = null, selMod = null;
 	public ArrayList<Module> outputs;
@@ -75,11 +75,11 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 			modify();
 			break;
 		case 1:
-			if (dataItem != null && dataItem.getItem() == Objects.circuit_plan) {
+			if (dataItem.getItem() == Objects.circuit_plan) {
 				dataItem.setTagCompound(writeNBT(new NBTTagCompound()));
 			} break;
 		case 2:
-			if (dataItem != null && dataItem.getItem() == Objects.circuit_plan && dataItem.hasTagCompound()) {
+			if (dataItem.getItem() == Objects.circuit_plan && dataItem.hasTagCompound()) {
 				readNBT(dataItem.getTagCompound());
 			} else {
 				data.clear();

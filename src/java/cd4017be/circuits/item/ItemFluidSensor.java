@@ -108,7 +108,7 @@ public class ItemFluidSensor extends ItemBlockSensor implements IGuiItem, Client
 		@Override
 		public FluidStack getTank(int i) {
 			ItemStack item = player.mainInventory.get(player.currentItem);
-			Fluid fluid = item != null ? getFluid(item) : null;
+			Fluid fluid = getFluid(item);
 			return fluid != null ? new FluidStack(fluid, 0) : null;
 		}
 

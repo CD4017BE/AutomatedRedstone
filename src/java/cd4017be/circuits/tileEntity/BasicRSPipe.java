@@ -43,7 +43,7 @@ public class BasicRSPipe extends IntegerPipe {
 	@Override
 	public boolean onActivated(EntityPlayer player, EnumHand hand, ItemStack item, EnumFacing dir, float X, float Y, float Z) {
 		if (world.isRemote) return true;
-		if (item == null) {
+		if (item.isEmpty()) {
 			dir = Utils.hitSide(X, Y, Z);
 			byte s = (byte)dir.getIndex();
 			if (player.isSneaking()) {

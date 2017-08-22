@@ -87,12 +87,12 @@ public class InvConnector extends BaseTileEntity implements INeighborAwareTile, 
 
 	@Override
 	public boolean onActivated(EntityPlayer player, EnumHand hand, ItemStack item, EnumFacing s, float X, float Y, float Z) {
-		if (player.isSneaking() && item == null) {
+		if (player.isSneaking() && item.isEmpty()) {
 			if (world.isRemote) return true;
 			if (linkObj == null) player.sendMessage(new TextComponentString("Not Linked!"));
 			else player.sendMessage(new TextComponentString(String.format("Linked to %s @ %s", world.getBlockState(linkPos).getBlock().getLocalizedName(), linkPos.toString())));
 			return true;
-		} else if (item == null) {
+		} else if (item.isEmpty()) {
 			if (!world.isRemote) this.connect();
 			return true;
 		} else return false;

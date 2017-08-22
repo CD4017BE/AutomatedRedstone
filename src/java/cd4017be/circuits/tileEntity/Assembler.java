@@ -68,10 +68,10 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 				int n = N[i], m = N[i + 4];
 				if (m > n) {
 					stack = inventory.insertItem(3 + i, materials[i].copy(), false);
-					if (stack == null) N[i + 4] = --m;
+					if (stack.getCount() == 0) N[i + 4] = --m;
 				} else if (m < n) {
 					stack = inventory.extractItem(3 + i, 1, false);
-					if (stack != null) N[i + 4] = ++m;
+					if (stack.getCount() == 0) N[i + 4] = ++m;
 				}
 				done &= m == n;
 			}

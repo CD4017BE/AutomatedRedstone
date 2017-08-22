@@ -44,7 +44,7 @@ public class GuiFluidSensor extends GuiMachine {
 	@Override
 	protected Object getDisplVar(int id) {
 		ItemStack item = inv.mainInventory.get(inv.currentItem);
-		return item != null && item.hasTagCompound() && item.getTagCompound().getBoolean("inv") ? 1 : 0;
+		return item.hasTagCompound() && item.getTagCompound().getBoolean("inv") ? 1 : 0;
 	}
 
 	@Override

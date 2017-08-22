@@ -38,7 +38,7 @@ public class BitShifter extends BaseTileEntity implements IInteractiveTile, INei
 	public boolean onActivated(EntityPlayer player, EnumHand hand, ItemStack item, EnumFacing s, float X, float Y, float Z) {
 		if (world.isRemote) return true;
 		if (player.isSneaking()) {
-			if (item == null) {
+			if (item.isEmpty()) {
 				if (size > 1) {
 					dropStack(BlockItemRegistry.stack("m.IORelay", size - 1));
 					size = 1;
@@ -46,7 +46,7 @@ public class BitShifter extends BaseTileEntity implements IInteractiveTile, INei
 					markUpdate();
 				} else return false;
 			} else return false;
-		} else if (item == null) {
+		} else if (item.isEmpty()) {
 			EnumFacing dir = getOrientation().front;
 			int t = s.ordinal() >> 1;
 			float f;
@@ -78,7 +78,7 @@ public class BitShifter extends BaseTileEntity implements IInteractiveTile, INei
 				size += n;
 			} else {
 				size += item.getCount();
-				item = null;
+				item = ItemStack.EMPTY;
 			}
 			player.setHeldItem(hand, item);
 			neighborBlockChange(null, pos);
