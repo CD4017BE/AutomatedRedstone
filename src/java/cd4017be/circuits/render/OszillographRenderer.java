@@ -24,7 +24,7 @@ public class OszillographRenderer extends TileEntitySpecialRenderer<Oszillograph
 	private static final int QuadSize = defaultQuad.length;
 	public static final int[] colors = {0x0000ff, 0x00ff00, 0xff0000, 0xb400b4},
 			textColors = {0xff0000, 0x00ff00, 0x0000ff, 0xb400b4};
-	private static final ResourceLocation texture = new ResourceLocation("circuits", "textures/blocks/osziLine.png");
+	private static final ResourceLocation texture = new ResourceLocation("circuits", "textures/blocks/oszi_line.png");
 
 	@Override
 	public void renderTileEntityAt(Oszillograph te, double x, double y, double z, float partialTicks, int destroyStage) {
@@ -36,7 +36,7 @@ public class OszillographRenderer extends TileEntitySpecialRenderer<Oszillograph
 		GlStateManager.disableLighting();
 		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240.0F, 240.0F);
 		Util.moveAndOrientToBlock(x, y, z, te.getOrientation());
-		GL11.glScalef(0.9375F, 0.9375F, 1F);
+		GL11.glScalef(-0.9375F, 0.9375F, -1F);
 		bindTexture(texture);
 		VertexBuffer buff = Tessellator.getInstance().getBuffer();
 		buff.begin(GL11.GL_QUAD_STRIP, DefaultVertexFormats.POSITION_TEX_COLOR);

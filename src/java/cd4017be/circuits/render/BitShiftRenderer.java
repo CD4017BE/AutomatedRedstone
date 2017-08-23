@@ -4,6 +4,7 @@ import org.lwjgl.opengl.GL11;
 
 import cd4017be.circuits.tileEntity.BitShifter;
 import cd4017be.lib.render.Util;
+import cd4017be.lib.util.Orientation;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
@@ -14,13 +15,13 @@ import net.minecraft.util.ResourceLocation;
 public class BitShiftRenderer extends TileEntitySpecialRenderer<BitShifter> {
 
 	private static final float ZLevel = 0.265625F;
-	private static final ResourceLocation texture = new ResourceLocation("circuits", "textures/blocks/bitSlider.png");
+	private static final ResourceLocation texture = new ResourceLocation("circuits", "textures/blocks/bit_slider.png");
 
 	@Override
 	public void renderTileEntityAt(BitShifter te, double x, double y, double z, float partialTicks, int destroyStage) {
 		GlStateManager.pushMatrix();
 		Util.moveAndOrientToBlock(x, y, z, te.getOrientation());
-		Util.rotateTo(4);
+		Util.rotateTo(Orientation.E);
 		bindTexture(texture);
 		float w = (float)te.size / 32F;
 		int[] sliderIn = Util.texturedRect((float)te.ofsI / 32F - 0.5F, -0.125F, ZLevel, w, 0.25F, 0, 0, w, 1),
@@ -29,15 +30,15 @@ public class BitShiftRenderer extends TileEntitySpecialRenderer<BitShifter> {
 		buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 		buff.addVertexData(sliderIn);
 		Tessellator.getInstance().draw();
-		Util.rotateTo(0);
+		Util.rotateTo(Orientation.Bn);
 		buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 		buff.addVertexData(sliderOut);
 		Tessellator.getInstance().draw();
-		Util.rotateTo(0);
+		Util.rotateTo(Orientation.Bn);
 		buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 		buff.addVertexData(sliderIn);
 		Tessellator.getInstance().draw();
-		Util.rotateTo(0);
+		Util.rotateTo(Orientation.Bn);
 		buff.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 		buff.addVertexData(sliderOut);
 		Tessellator.getInstance().draw();

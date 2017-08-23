@@ -41,7 +41,7 @@ public class BitShifter extends BaseTileEntity implements IInteractiveTile, INei
 		if (player.isSneaking()) {
 			if (item.isEmpty()) {
 				if (size > 1) {
-					ItemFluidUtil.dropStack(BlockItemRegistry.stack("m.IORelay", size - 1), world, pos);
+					ItemFluidUtil.dropStack(BlockItemRegistry.stack("m.io_relay", size - 1), world, pos);
 					size = 1;
 					neighborBlockChange(null, pos);
 					markUpdate();
@@ -72,7 +72,7 @@ public class BitShifter extends BaseTileEntity implements IInteractiveTile, INei
 				Utils.updateRedstoneOnSide(this, state << ofsO, dir.getOpposite());
 			}
 			markUpdate();
-		} else if (item.isItemEqual(BlockItemRegistry.stack("m.IORelay", 1))) {
+		} else if (item.isItemEqual(BlockItemRegistry.stack("m.io_relay", 1))) {
 			int n = 32 - size;
 			if (item.getCount() > n) {
 				item.shrink(n);

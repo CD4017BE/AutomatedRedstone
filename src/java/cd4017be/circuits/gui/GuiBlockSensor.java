@@ -22,17 +22,14 @@ public class GuiBlockSensor extends GuiMachine {
 	@Override
 	public void initGui() {
 		this.xSize = 176;
-		this.ySize = 222;
+		this.ySize = 132;
 		this.tabsY = 15 - 63;
 		super.initGui();
-		guiComps.add(new TextField(0, 69, 16, 63, 8, 11).color(0xff40c0c0, 0xffff4040).setTooltip("sensor.mult"));
-		guiComps.add(new TextField(1, 69, 24, 63, 8, 11).color(0xff40c0c0, 0xffff4040).setTooltip("sensor.add"));
-		guiComps.add(new Button(2, 7, 105, 18, 5, -1));//+1s
-		guiComps.add(new Button(3, 7, 118, 18, 5, -1));//-1s
-		guiComps.add(new Button(4, 25, 105, 18, 5, -1));//+1t
-		guiComps.add(new Button(5, 25, 118, 18, 5, -1));//-1t
-		guiComps.add(new Text<>(6, 8, 110, 34, 8, "tickInt").center());
-		guiComps.add(new Text<>(7, 7, 88, 36, 8, "sensor.timer").center());
+		guiComps.add(new TextField(0, 87, 16, 63, 8, 11).color(0xff40c0c0, 0xffff4040).setTooltip("sensor.mult"));
+		guiComps.add(new TextField(1, 87, 24, 63, 8, 11).color(0xff40c0c0, 0xffff4040).setTooltip("sensor.add"));
+		guiComps.add(new NumberSel(2, 7, 15, 36, 18, "", 1, 1200, 20).setup(8, 0xff404040, 2, true).around());
+		guiComps.add(new Text<Float>(3, 8, 20, 34, 8, "sensor.tick").center().setTooltip("sensor.timer"));
+		guiComps.add(new Tooltip<Integer>(4, 152, 16, 16, 16, "sensor.out"));
 	}
 
 	@Override
@@ -40,7 +37,9 @@ public class GuiBlockSensor extends GuiMachine {
 		switch(id) {
 		case 0: return Float.toString(tile.mult);
 		case 1: return Float.toString(tile.ofs);
-		case 6: return (float)tile.tickInt / 20F;
+		case 2: return tile.tickInt;
+		case 3: return (float)tile.tickInt / 20F;
+		case 4: return tile.output;
 		default: return null;
 		}
 	}
@@ -48,13 +47,16 @@ public class GuiBlockSensor extends GuiMachine {
 	@Override
 	protected void setDisplVar(int id, Object obj, boolean send) {
 		PacketBuffer dos = BlockGuiHandler.getPacketTargetData(tile.pos());
-		if (id < 2) try {
-			dos.writeByte(id);
-			dos.writeFloat(Float.parseFloat((String)obj));
-		} catch(NumberFormatException e){return;}
-		else if (id == 2 || id == 4) dos.writeByte(2).writeInt(tile.tickInt = Math.min(1200, tile.tickInt + (id == 2 ? 20 : 1)));
-		else if (id == 3 || id == 5) dos.writeByte(2).writeInt(tile.tickInt = Math.max(1, tile.tickInt - (id == 3 ? 20 : 1)));
-		else return;
+		switch(id) {
+		case 0:	case 1:
+			try {
+				dos.writeByte(id);
+				dos.writeFloat(Float.parseFloat((String)obj));
+			} catch(NumberFormatException e){return;}
+			break;
+		case 2: dos.writeByte(2).writeShort(tile.tickInt = (Integer)obj); break;
+		default: return;
+		}
 		if (send) BlockGuiHandler.sendPacketToServer(dos);
 	}
 

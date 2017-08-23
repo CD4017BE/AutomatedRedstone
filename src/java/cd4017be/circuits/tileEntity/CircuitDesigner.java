@@ -34,12 +34,14 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
+		dataItem = new ItemStack(nbt.getCompoundTag("item"));
 		readNBT(nbt);
 	}
 
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 		writeNBT(nbt);
+		nbt.setTag("item", dataItem.writeToNBT(new NBTTagCompound()));
 		return super.writeToNBT(nbt);
 	}
 

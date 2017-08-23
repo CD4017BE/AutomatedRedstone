@@ -29,7 +29,7 @@ public class BlockSensor extends BaseTileEntity implements ITilePlaceHarvest, IR
 	public int tickInt = 20;
 	private ItemStack sensor = ItemStack.EMPTY;
 	public float mult = 1, ofs = 0;
-	private int output;
+	public int output;
 
 	@Override
 	public void update() {
@@ -94,13 +94,13 @@ public class BlockSensor extends BaseTileEntity implements ITilePlaceHarvest, IR
 	@Override
 	public void initContainer(DataContainer container) {
 		TileContainer cont = (TileContainer)container;
-		cont.addItemSlot(new SlotItemHandler(new LinkedInventory(1, 1, (i) -> sensor, (item, i) -> sensor = item), 0, 44, 16));
-		cont.addPlayerInventory(8, 140);
+		cont.addItemSlot(new SlotItemHandler(new LinkedInventory(1, 1, (i) -> sensor, (item, i) -> sensor = item), 0, 62, 16));
+		cont.addPlayerInventory(8, 50);
 	}
 
 	@Override
 	public int[] getSyncVariables() {
-		return new int[]{Float.floatToIntBits(mult), Float.floatToIntBits(ofs), tickInt};
+		return new int[]{Float.floatToIntBits(mult), Float.floatToIntBits(ofs), tickInt, output};
 	}
 
 	@Override
@@ -109,6 +109,7 @@ public class BlockSensor extends BaseTileEntity implements ITilePlaceHarvest, IR
 		case 0: mult = Float.intBitsToFloat(v); break;
 		case 1: ofs = Float.intBitsToFloat(v); break;
 		case 2: tickInt = v; break;
+		case 3: output = v; break;
 		}
 	}
 

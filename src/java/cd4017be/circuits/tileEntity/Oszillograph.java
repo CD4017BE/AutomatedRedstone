@@ -16,6 +16,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -29,14 +30,14 @@ import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.Gui.TileContainer;
 import cd4017be.lib.block.AdvancedBlock.ITilePlaceHarvest;
 import cd4017be.lib.block.BaseTileEntity;
-import cd4017be.lib.templates.LinkedInventory;
+import cd4017be.lib.templates.BasicInventory;
 import cd4017be.lib.util.Utils;
 
 public class Oszillograph extends BaseTileEntity implements ITilePlaceHarvest, ITickable, IGuiData, IDirectionalRedstone, ClientPacketReceiver {
 
 	private static final float[] DefTransf = {1, 0, 1, 0, 1, 0, 1, 0};
 	public static final int Size = 60;
-	public final ItemStack[] inventory = new ItemStack[4];
+	public final BasicInventory inventory = new BasicInventory(4);
 	public final int[][] points = new int[4][];
 	public final float[] transf = Arrays.copyOf(DefTransf, 8);
 	/** bits[0-63 4*(1+3+5+5+1+1)]: channel*(on + dir + bitOfs + bitSize + signed + emptyBit) */
@@ -54,7 +55,7 @@ public class Oszillograph extends BaseTileEntity implements ITilePlaceHarvest, I
 		idx %= 60;
 		for (int i = 0; i < points.length; i++) {
 			if (points[i] == null) continue;
-			ItemStack item = inventory[i];
+			ItemStack item = inventory.getStackInSlot(i);
 			double nstate;
 			if (!item.isEmpty() && item.getItem() instanceof ISensor) {
 				nstate = ((ISensor)item.getItem()).measure(item, world, pos);
@@ -89,7 +90,7 @@ public class Oszillograph extends BaseTileEntity implements ITilePlaceHarvest, I
 		if (m == 1) {
 			EnumFacing side = EnumFacing.VALUES[s % 6];
 			x = world.getRedstonePower(pos.offset(side), side);
-		} else if (!(item = inventory[s % 4]).isEmpty() && item.getItem() instanceof ISensor) {
+		} else if (!(item = inventory.getStackInSlot(s % 4)).isEmpty() && item.getItem() instanceof ISensor) {
 			x = ((ISensor)item.getItem()).measure(item, world, pos);
 		} else x = 0;
 		return (mode & 0x20) != 0 ? x < triggerLevel : x > triggerLevel;
@@ -135,6 +136,7 @@ public class Oszillograph extends BaseTileEntity implements ITilePlaceHarvest, I
 			points[i] = nbt.getIntArray("py" + i);
 			if (points[i].length != Size) points[i] = null;
 		}
+		inventory.read(nbt.getTagList("items", Constants.NBT.TAG_COMPOUND));
 		super.readFromNBT(nbt);
 		if (FMLCommonHandler.instance().getSide() == Side.CLIENT && (world != null ? world.isRemote : FMLCommonHandler.instance().getEffectiveSide() == Side.CLIENT))
 			setupGraph();
@@ -155,23 +157,15 @@ public class Oszillograph extends BaseTileEntity implements ITilePlaceHarvest, I
 			if (points[i] != null)
 				nbt.setIntArray("py" + i, points[i]);
 		}
+		nbt.setTag("items", inventory.write());
 		return super.writeToNBT(nbt);
-	}
-
-	private ItemStack getItem(int slot) {
-		return inventory[slot];
-	}
-
-	private void setItem(ItemStack item, int slot) {
-		inventory[slot] = item;
 	}
 
 	@Override
 	public void initContainer(DataContainer container) {
 		TileContainer cont = (TileContainer)container;
-		LinkedInventory inv = new LinkedInventory(inventory.length, 1, this::getItem, this::setItem);
 		for (int i = 0; i < 4; i++)
-			cont.addItemSlot(new SlotItemHandler(inv, i, 80, 16 + i * 18));
+			cont.addItemSlot(new SlotItemHandler(inventory, i, 80, 16 + i * 18));
 		cont.addPlayerInventory(8, 122);
 	}
 
@@ -255,7 +249,7 @@ public class Oszillograph extends BaseTileEntity implements ITilePlaceHarvest, I
 	@Override
 	public List<ItemStack> dropItem(IBlockState state, int fortune) {
 		List<ItemStack> list = makeDefaultDrops(null);
-		for (ItemStack item : inventory)
+		for (ItemStack item : inventory.items)
 			if (!item.isEmpty()) list.add(item);
 		return list;
 	}

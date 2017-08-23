@@ -11,12 +11,14 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.Vec3d;
 import cd4017be.api.circuits.IDirectionalRedstone;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.BlockGuiHandler.ClientPacketReceiver;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.block.BaseTileEntity;
+import cd4017be.lib.util.Orientation;
 import cd4017be.lib.block.AdvancedBlock.IInteractiveTile;
 import cd4017be.lib.block.AdvancedBlock.IRedstoneTile;
 
@@ -26,25 +28,20 @@ public class Potentiometer extends BaseTileEntity implements IInteractiveTile, I
 
 	@Override
 	public boolean onActivated(EntityPlayer player, EnumHand hand, ItemStack item, EnumFacing s, float X, float Y, float Z) {
-		if (s != getOrientation().front) {
+		Orientation o = getOrientation();
+		if (s != o.front) {
 			BlockGuiHandler.openBlockGui(player, world, pos);
 			return true;
 		}
 		if (world.isRemote) return true;
-		boolean abs;
-		switch(s) {
-		case NORTH: abs = X >= 0.5F; break;
-		case SOUTH: abs = X < 0.5F; break;
-		case WEST: abs = Z < 0.5F; break;
-		case EAST: abs = Z >= 0.5F; break;
-		default: return false;
-		}
+		Vec3d vec = o.reverse().rotate(new Vec3d(X - 0.5, Y - 0.5, Z - 0.5));
+		boolean abs = vec.xCoord > 0;
 		int state;
 		if (abs) {
-			Y -= 3.5F/32F; Y *= 32F/25F; //normalize to [0,1]
+			Y = (float)vec.yCoord + 0.5F - 3.5F/32F; Y *= 32F/25F; //normalize to [0,1]
 			state = Math.round((float)min + ((float)max - (float)min) * Y); //set to interpolated absolute
 		} else {
-			Y -= 0.5F; Y *= 2F; //normalize to [-1,1]
+			Y = (float)vec.yCoord; Y *= 2F; //normalize to [-1,1]
 			state = cur + (Y > 0 ? (int)Math.pow((double)max - (double)min, Y) : -(int)Math.pow((double)max - (double)min, -Y)); //offset by logarithmic scaled
 		}
 		if (state < min) state = min;

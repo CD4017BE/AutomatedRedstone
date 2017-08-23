@@ -172,7 +172,9 @@ gui.cd4017be.display.mode=Number type for converting\nsignal into digits.
 gui.cd4017be.display.format=Display format:\n'0123456789ABCDEF.:-%' displayed as they are\n'#' displays next digit of signal\n'$' skips one digit without displaying\nN+'S' skips N digits (N = '1'...'9')\n'+' formats number signed and displays its sign\n'_' displays placeholder digit\nAnything else displays empty space.
 gui.cd4017be.sensor.mult=Signal multiplier
 gui.cd4017be.sensor.add=Signal offset
-gui.cd4017be.sensor.timer=Update\nInterv.
+gui.cd4017be.sensor.timer=Measurement Interval
+gui.cd4017be.sensor.tick=§1%.2fs
+gui.cd4017be.sensor.out=Current output signal:\n§4%d
 gui.cd4017be.valve.tick=§1%.2fs
 gui.cd4017be.valve.timer=Time Interval (T) for\nmeasurement/transfer
 gui.cd4017be.fluidvalve.mode0=Limit fluid flow

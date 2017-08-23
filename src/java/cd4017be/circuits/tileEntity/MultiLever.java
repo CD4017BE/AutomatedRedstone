@@ -3,6 +3,7 @@ package cd4017be.circuits.tileEntity;
 import cd4017be.api.circuits.IDirectionalRedstone;
 import cd4017be.lib.block.AdvancedBlock.IInteractiveTile;
 import cd4017be.lib.block.AdvancedBlock.IRedstoneTile;
+import cd4017be.lib.util.Orientation;
 import cd4017be.lib.util.TooltipUtil;
 import cd4017be.lib.block.BaseTileEntity;
 import net.minecraft.entity.player.EntityPlayer;
@@ -13,6 +14,7 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.TextComponentString;
 
 /**
@@ -27,18 +29,17 @@ public class MultiLever extends BaseTileEntity implements IRedstoneTile, IIntera
 	@Override
 	public boolean onActivated(EntityPlayer player, EnumHand hand, ItemStack item, EnumFacing s, float X, float Y, float Z) {
 		if (world.isRemote) return true;
-		else if (player.isSneaking()) {
+		Orientation o = getOrientation();
+		if (player.isSneaking()) {
 			offset++;
 			offset &= 3;
 			world.notifyNeighborsOfStateChange(pos, Blocks.REDSTONE_TORCH, false);
 			player.sendMessage(new TextComponentString(TooltipUtil.format("tile.cd4017be.lever8bit.click" + offset)));
 			return true;
-		} else if (s == getOrientation().front) {
-			int i = Y < 0.5F ? 4 : 0;
-			if (s == EnumFacing.SOUTH) i |= (int)Math.floor(X * 4F);
-			else if (s == EnumFacing.NORTH) i |= (int)Math.floor((1F - X) * 4F);
-			else if (s == EnumFacing.WEST) i |= (int)Math.floor(Z * 4F);
-			else if (s == EnumFacing.EAST) i |= (int)Math.floor((1F - Z) * 4F);
+		} else if (s == o.front) {
+			Vec3d vec = o.reverse().rotate(new Vec3d(X - 0.5, Y - 0.5, Z - 0.5));
+			int i = vec.yCoord < 0 ? 4 : 0;
+			i |= (int)Math.floor(-vec.xCoord * 4F + 2F);
 			state ^= 1 << i;
 			world.notifyNeighborsOfStateChange(pos, Blocks.REDSTONE_TORCH, false);
 			this.markUpdate();

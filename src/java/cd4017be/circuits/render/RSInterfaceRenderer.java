@@ -27,7 +27,7 @@ public class RSInterfaceRenderer extends TileEntitySpecialRenderer<BaseTileEntit
 	private final RenderManager manager = Minecraft.getMinecraft().getRenderManager();
 
 	private void renderStateBinary(byte state, int tex, int h) {
-		manager.renderEngine.bindTexture(new ResourceLocation("circuits", "textures/blocks/displayOvl.png"));
+		manager.renderEngine.bindTexture(new ResourceLocation("circuits", "textures/blocks/display_ovl.png"));
 		VertexBuffer t = Tessellator.getInstance().getBuffer();
 		t.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 		for (int i = 0; i < 8; i++)
@@ -36,7 +36,7 @@ public class RSInterfaceRenderer extends TileEntitySpecialRenderer<BaseTileEntit
 	}
 
 	private void renderState(int state) {
-		manager.renderEngine.bindTexture(new ResourceLocation("circuits", "textures/blocks/displayOvl.png"));
+		manager.renderEngine.bindTexture(new ResourceLocation("circuits", "textures/blocks/display_ovl.png"));
 		VertexBuffer t = Tessellator.getInstance().getBuffer();
 		t.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 		int n = state >> 24;
