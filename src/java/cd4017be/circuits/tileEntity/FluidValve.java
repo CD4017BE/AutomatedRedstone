@@ -151,23 +151,12 @@ public class FluidValve extends BaseTileEntity implements INeighborAwareTile, IR
 	}
 
 	@Override
-	public boolean canPlayerAccessUI(EntityPlayer player) {
-		return !player.isDead;
-	}
-
-	@Override
 	public boolean detectAndSendChanges(DataContainer container, PacketBuffer dos) {
 		return false;
 	}
 
 	@Override
 	public void updateClientChanges(DataContainer container, PacketBuffer dis) {
-	}
-
-	@Override
-	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }

@@ -22,11 +22,11 @@ import net.minecraftforge.common.capabilities.Capability;
 import cd4017be.circuits.Objects;
 import cd4017be.lib.TickRegistry;
 import cd4017be.lib.TickRegistry.IUpdatable;
-import cd4017be.lib.TooltipInfo;
 import cd4017be.lib.block.AdvancedBlock.IInteractiveTile;
 import cd4017be.lib.block.AdvancedBlock.INeighborAwareTile;
 import cd4017be.lib.block.AdvancedBlock.ITilePlaceHarvest;
 import cd4017be.lib.block.BaseTileEntity;
+import cd4017be.lib.util.TooltipUtil;
 import cd4017be.lib.util.Utils;
 
 public class WirelessConnector extends BaseTileEntity implements INeighborAwareTile, IInteractiveTile, ITilePlaceHarvest, IUpdatable {
@@ -157,13 +157,13 @@ public class WirelessConnector extends BaseTileEntity implements INeighborAwareT
 			drop.setTagCompound(nbt);
 			EntityItem eitem = new EntityItem(world, entity.posX, entity.posY, entity.posZ, drop);
 			world.spawnEntity(eitem);
-			msg = TooltipInfo.format("msg.cd4017be.wireless0");
+			msg = TooltipUtil.format("msg.cd4017be.wireless0");
 		} else if (item.hasTagCompound()) {
 			NBTTagCompound nbt = item.getTagCompound();
 			linkPos = new BlockPos(nbt.getInteger("lx"), nbt.getInteger("ly"), nbt.getInteger("lz"));
 			linkDim = nbt.getInteger("ld");
 			checkLink(true);
-			msg = TooltipInfo.format(linkTile != null ? "msg.cd4017be.wireless1" : "msg.cd4017be.wireless2", linkDim, linkPos.getX(), linkPos.getY(), linkPos.getZ());
+			msg = TooltipUtil.format(linkTile != null ? "msg.cd4017be.wireless1" : "msg.cd4017be.wireless2", linkDim, linkPos.getX(), linkPos.getY(), linkPos.getZ());
 		} else return;
 		if (entity instanceof EntityPlayer) ((EntityPlayer)entity).sendMessage(new TextComponentString(msg));
 	}
@@ -179,8 +179,8 @@ public class WirelessConnector extends BaseTileEntity implements INeighborAwareT
 			world.setBlockToAir(getPos());
 			EntityItem eitem = new EntityItem(world, player.posX, player.posY, player.posZ, item);
 			world.spawnEntity(eitem);
-			msg = TooltipInfo.format("msg.cd4017be.wireless4");
-		} else msg = TooltipInfo.format("msg.cd4017be.wireless5");
+			msg = TooltipUtil.format("msg.cd4017be.wireless4");
+		} else msg = TooltipUtil.format("msg.cd4017be.wireless5");
 		player.sendMessage(new TextComponentString(msg));
 		return true;
 	}

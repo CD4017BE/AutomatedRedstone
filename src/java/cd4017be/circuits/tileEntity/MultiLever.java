@@ -1,9 +1,9 @@
 package cd4017be.circuits.tileEntity;
 
 import cd4017be.api.circuits.IDirectionalRedstone;
-import cd4017be.lib.TooltipInfo;
 import cd4017be.lib.block.AdvancedBlock.IInteractiveTile;
 import cd4017be.lib.block.AdvancedBlock.IRedstoneTile;
+import cd4017be.lib.util.TooltipUtil;
 import cd4017be.lib.block.BaseTileEntity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -31,7 +31,7 @@ public class MultiLever extends BaseTileEntity implements IRedstoneTile, IIntera
 			offset++;
 			offset &= 3;
 			world.notifyNeighborsOfStateChange(pos, Blocks.REDSTONE_TORCH, false);
-			player.sendMessage(new TextComponentString(TooltipInfo.format("tile.cd4017be.lever8bit.click" + offset)));
+			player.sendMessage(new TextComponentString(TooltipUtil.format("tile.cd4017be.lever8bit.click" + offset)));
 			return true;
 		} else if (s == getOrientation().front) {
 			int i = Y < 0.5F ? 4 : 0;

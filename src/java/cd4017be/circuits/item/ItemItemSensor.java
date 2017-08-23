@@ -17,7 +17,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -34,6 +33,7 @@ import cd4017be.lib.Gui.SlotHolo;
 import cd4017be.lib.Gui.TileContainer;
 import cd4017be.lib.templates.InventoryItem;
 import cd4017be.lib.templates.InventoryItem.IItemInventory;
+import cd4017be.lib.util.TooltipUtil;
 import cd4017be.lib.util.Utils.ItemType;
 
 public class ItemItemSensor extends ItemBlockSensor implements IGuiItem, IItemInventory, ClientItemPacketReceiver {
@@ -45,7 +45,7 @@ public class ItemItemSensor extends ItemBlockSensor implements IGuiItem, IItemIn
 	@Override
 	public void addInformation(ItemStack item, EntityPlayer player, List<String> list, boolean b) {
 		if (item.hasTagCompound()) {
-			String[] states = I18n.translateToLocal("gui.cd4017be.itemSensor.tip").split(",");
+			String[] states = TooltipUtil.translate("gui.cd4017be.itemSensor.tip").split(",");
 			byte mode = item.getTagCompound().getByte("mode");
 			ItemStack stack = this.loadInventory(item, player)[0];
 			if (states.length >= 6) {

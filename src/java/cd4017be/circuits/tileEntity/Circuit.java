@@ -7,12 +7,12 @@ import java.util.List;
 import cd4017be.api.circuits.IDirectionalRedstone;
 import cd4017be.api.circuits.IQuickRedstoneHandler;
 import cd4017be.lib.BlockGuiHandler.ClientPacketReceiver;
-import cd4017be.lib.TooltipInfo;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.block.AdvancedBlock.INeighborAwareTile;
 import cd4017be.lib.block.AdvancedBlock.IRedstoneTile;
 import cd4017be.lib.block.AdvancedBlock.ITilePlaceHarvest;
+import cd4017be.lib.util.TooltipUtil;
 import cd4017be.lib.block.BaseTileEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -57,7 +57,7 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 
 	@Override
 	public String getName() {
-		return name.length() > 0 ? "\"" + name + "\"" : TooltipInfo.getLocFormat("gui.cd4017be.circuit.name");
+		return name.length() > 0 ? "\"" + name + "\"" : TooltipUtil.translate("gui.cd4017be.circuit.name");
 	}
 
 	public String name = "";
@@ -150,7 +150,7 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 			} catch (Exception e) {
 				e.printStackTrace();
 				ram = new byte[0];
-				name = "§cERROR: invalid code!§8";
+				name = "ï¿½cERROR: invalid code!ï¿½8";
 			}
 		}
 	}
@@ -553,11 +553,6 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 		byte mode;
 		final short[] iocfg = new short[6];
 		final byte[] ram = new byte[32];
-	}
-
-	@Override
-	public boolean canPlayerAccessUI(EntityPlayer player) {
-		return !player.isDead;
 	}
 
 	@Override

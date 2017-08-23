@@ -26,6 +26,7 @@ import cd4017be.lib.block.AdvancedBlock.INeighborAwareTile;
 import cd4017be.lib.block.AdvancedBlock.IRedstoneTile;
 import cd4017be.lib.block.AdvancedBlock.ITilePlaceHarvest;
 import cd4017be.lib.block.BaseTileEntity;
+import cd4017be.lib.util.ItemFluidUtil;
 import cd4017be.lib.util.Utils;
 
 public class BitShifter extends BaseTileEntity implements IInteractiveTile, INeighborAwareTile, ITilePlaceHarvest, IRedstoneTile, IDirectionalRedstone, IQuickRedstoneHandler, IUpdatable {
@@ -40,7 +41,7 @@ public class BitShifter extends BaseTileEntity implements IInteractiveTile, INei
 		if (player.isSneaking()) {
 			if (item.isEmpty()) {
 				if (size > 1) {
-					dropStack(BlockItemRegistry.stack("m.IORelay", size - 1));
+					ItemFluidUtil.dropStack(BlockItemRegistry.stack("m.IORelay", size - 1), world, pos);
 					size = 1;
 					neighborBlockChange(null, pos);
 					markUpdate();

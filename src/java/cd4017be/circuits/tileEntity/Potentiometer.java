@@ -58,9 +58,7 @@ public class Potentiometer extends BaseTileEntity implements IInteractiveTile, I
 	}
 
 	@Override
-	public void onClicked(EntityPlayer player) {
-		// TODO Auto-generated method stub
-		
+	public void onClicked(EntityPlayer player) {		
 	}
 
 	@Override
@@ -138,11 +136,6 @@ public class Potentiometer extends BaseTileEntity implements IInteractiveTile, I
 	}
 
 	@Override
-	public boolean canPlayerAccessUI(EntityPlayer player) {
-		return !player.isDead;
-	}
-
-	@Override
 	public int[] getSyncVariables() {
 		return null;
 	}
@@ -158,12 +151,6 @@ public class Potentiometer extends BaseTileEntity implements IInteractiveTile, I
 
 	@Override
 	public void updateClientChanges(DataContainer container, PacketBuffer dis) {
-	}
-
-	@Override
-	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }

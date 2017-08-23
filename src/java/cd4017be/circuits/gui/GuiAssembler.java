@@ -2,8 +2,8 @@ package cd4017be.circuits.gui;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
-import cd4017be.circuits.tileEntity.Assembler;
 import cd4017be.lib.Gui.DataContainer;
+import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.Gui.GuiMachine;
 import cd4017be.lib.Gui.TileContainer;
 
@@ -13,7 +13,7 @@ import cd4017be.lib.Gui.TileContainer;
  */
 public class GuiAssembler extends GuiMachine {
 
-	public GuiAssembler(Assembler tileEntity, EntityPlayer player) {
+	public GuiAssembler(IGuiData tileEntity, EntityPlayer player) {
 		super(new TileContainer(tileEntity, player));
 		this.MAIN_TEX = new ResourceLocation("circuits:textures/gui/assembler.png");
 	}

@@ -26,7 +26,8 @@ import cd4017be.circuits.tileEntity.CircuitDesigner.Con;
 import cd4017be.circuits.tileEntity.CircuitDesigner.Module;
 import cd4017be.circuits.tileEntity.CircuitDesigner.ModuleType;
 import cd4017be.lib.BlockGuiHandler;
-import cd4017be.lib.TooltipInfo;
+import cd4017be.lib.Gui.DataContainer.IGuiData;
+import cd4017be.lib.util.TooltipUtil;
 import cd4017be.lib.Gui.GuiMachine;
 import cd4017be.lib.Gui.TileContainer;
 
@@ -37,10 +38,10 @@ public class GuiCircuitDesigner extends GuiMachine {
 	private final CircuitDesigner tile;
 	private int scroll;
 
-	public GuiCircuitDesigner(CircuitDesigner tile, EntityPlayer player) {
+	public GuiCircuitDesigner(IGuiData tile, EntityPlayer player) {
 		super(new TileContainer(tile, player));
 		this.MAIN_TEX = new ResourceLocation("circuits", "textures/gui/circuit_designer.png");
-		this.tile = tile;
+		this.tile = (CircuitDesigner) tile;
 	}
 
 	@Override
@@ -69,7 +70,7 @@ public class GuiCircuitDesigner extends GuiMachine {
 		guiComps.add(new Button(28, 212, 220, 16, 16, -1).setTooltip("designer.load"));
 		guiComps.add(new Button(29, 194, 202, 16, 16, 0).texture(240, 176).setTooltip("designer.mode#"));
 		guiComps.add(new WorkPane(30, 25, 16, 8));
-		guiComps.add(new GuiComp(31, 7, 6, 7, 8).setTooltip("designer.info"));
+		guiComps.add(new GuiComp<>(31, 7, 6, 7, 8).setTooltip("designer.info"));
 	}
 
 	@Override
@@ -221,7 +222,7 @@ public class GuiCircuitDesigner extends GuiMachine {
 	}
 
 	private void saveAsFile() {
-		if (tile.name.isEmpty()) sendChat(TooltipInfo.format("gui.cd4017be.designer.noname"));
+		if (tile.name.isEmpty()) sendChat(TooltipUtil.format("gui.cd4017be.designer.noname"));
 		File file = new File(Minecraft.getMinecraft().mcDataDir, "circuitSchematics/" + tile.name + ".dat");
 		try {
 			ByteBuf data = tile.serialize();
@@ -230,7 +231,7 @@ public class GuiCircuitDesigner extends GuiMachine {
 			FileOutputStream fos = new FileOutputStream(file);
 			data.readBytes(fos, data.writerIndex());
 			fos.close();
-			sendChat(TooltipInfo.format("gui.cd4017be.designer.saved", file));
+			sendChat(TooltipUtil.format("gui.cd4017be.designer.saved", file));
 		} catch (Exception e) {
 			sendChat(e.toString());
 		}
@@ -247,9 +248,9 @@ public class GuiCircuitDesigner extends GuiMachine {
 			fis.close();
 			tile.deserialize(data);
 			tile.modified++;
-			sendChat(TooltipInfo.format("gui.cd4017be.designer.loaded", file));
+			sendChat(TooltipUtil.format("gui.cd4017be.designer.loaded", file));
 		} catch(FileNotFoundException e) {
-			sendChat(TooltipInfo.format("gui.cd4017be.designer.notFound", file));
+			sendChat(TooltipUtil.format("gui.cd4017be.designer.notFound", file));
 		} catch(Exception e) {
 			sendChat(e.toString());
 		}

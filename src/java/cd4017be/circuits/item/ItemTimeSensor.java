@@ -22,10 +22,10 @@ import cd4017be.circuits.gui.GuiTimeSensor;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.DefaultItem;
 import cd4017be.lib.IGuiItem;
-import cd4017be.lib.TooltipInfo;
 import cd4017be.lib.BlockGuiHandler.ClientItemPacketReceiver;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.ItemGuiData;
+import cd4017be.lib.util.TooltipUtil;
 
 public class ItemTimeSensor extends DefaultItem implements ISensor, IGuiItem, ClientItemPacketReceiver {
 
@@ -37,7 +37,7 @@ public class ItemTimeSensor extends DefaultItem implements ISensor, IGuiItem, Cl
 
 	@Override
 	public void addInformation(ItemStack item, EntityPlayer player, List<String> list, boolean b) {
-		if (item.hasTagCompound()) list.add(TooltipInfo.formatLink(BlockPos.fromLong(item.getTagCompound().getLong("link")), EnumFacing.getFront(item.getTagCompound().getByte("side"))));
+		if (item.hasTagCompound()) list.add(TooltipUtil.formatLink(BlockPos.fromLong(item.getTagCompound().getLong("link")), EnumFacing.getFront(item.getTagCompound().getByte("side"))));
 		super.addInformation(item, player, list, b);
 	}
 

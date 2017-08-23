@@ -5,6 +5,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import cd4017be.circuits.tileEntity.BlockSensor;
 import cd4017be.lib.BlockGuiHandler;
+import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.Gui.GuiMachine;
 import cd4017be.lib.Gui.TileContainer;
 
@@ -12,9 +13,9 @@ public class GuiBlockSensor extends GuiMachine {
 
 	private final BlockSensor tile;
 
-	public GuiBlockSensor(BlockSensor tile, EntityPlayer player) {
+	public GuiBlockSensor(IGuiData tile, EntityPlayer player) {
 		super(new TileContainer(tile, player));
-		this.tile = tile;
+		this.tile = (BlockSensor) tile;
 		this.MAIN_TEX = new ResourceLocation("circuits", "textures/gui/sensor.png");
 	}
 
@@ -30,8 +31,8 @@ public class GuiBlockSensor extends GuiMachine {
 		guiComps.add(new Button(3, 7, 118, 18, 5, -1));//-1s
 		guiComps.add(new Button(4, 25, 105, 18, 5, -1));//+1t
 		guiComps.add(new Button(5, 25, 118, 18, 5, -1));//-1t
-		guiComps.add(new Text(6, 8, 110, 34, 8, "tickInt").center());
-		guiComps.add(new Text(7, 7, 88, 36, 8, "sensor.timer").center());
+		guiComps.add(new Text<>(6, 8, 110, 34, 8, "tickInt").center());
+		guiComps.add(new Text<>(7, 7, 88, 36, 8, "sensor.timer").center());
 	}
 
 	@Override

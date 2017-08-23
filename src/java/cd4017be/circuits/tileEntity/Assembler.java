@@ -9,7 +9,6 @@ import java.util.HashMap;
 
 import org.apache.logging.log4j.Level;
 
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
@@ -293,11 +292,6 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 	}
 
 	@Override
-	public boolean canPlayerAccessUI(EntityPlayer player) {
-		return false;
-	}
-
-	@Override
 	public void setSyncVariable(int i, int v) {
 	}
 
@@ -308,12 +302,6 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 
 	@Override
 	public void updateClientChanges(DataContainer container, PacketBuffer dis) {
-	}
-
-	@Override
-	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 }

@@ -15,7 +15,6 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -35,6 +34,7 @@ import cd4017be.lib.Gui.ItemGuiData;
 import cd4017be.lib.Gui.TileContainer;
 import cd4017be.lib.Gui.TileContainer.TankSlot;
 import cd4017be.lib.templates.ITankContainer;
+import cd4017be.lib.util.TooltipUtil;
 
 public class ItemFluidSensor extends ItemBlockSensor implements IGuiItem, ClientItemPacketReceiver {
 
@@ -53,7 +53,7 @@ public class ItemFluidSensor extends ItemBlockSensor implements IGuiItem, Client
 	@Override
 	public void addInformation(ItemStack item, EntityPlayer player, List<String> list, boolean b) {
 		if (item.hasTagCompound()) {
-			String[] states = I18n.translateToLocal("gui.cd4017be.fluidSensor.tip").split(",");
+			String[] states = TooltipUtil.translate("gui.cd4017be.fluidSensor.tip").split(",");
 			boolean inv = item.getTagCompound().getBoolean("inv");
 			Fluid fluid = this.getFluid(item);
 			if (states.length >= 3) {

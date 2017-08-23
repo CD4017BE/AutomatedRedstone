@@ -6,16 +6,17 @@ import net.minecraft.util.ResourceLocation;
 import cd4017be.circuits.tileEntity.EnergyValve;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.Gui.DataContainer;
+import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.Gui.GuiMachine;
-import cd4017be.lib.util.Utils;
+import cd4017be.lib.util.TooltipUtil;
 
 public class GuiEnergyValve extends GuiMachine {
 
 	private final EnergyValve tile;
 
-	public GuiEnergyValve(EnergyValve tile, EntityPlayer player) {
+	public GuiEnergyValve(IGuiData tile, EntityPlayer player) {
 		super(new DataContainer(tile, player));
-		this.tile = tile;
+		this.tile = (EnergyValve) tile;
 		this.MAIN_TEX = new ResourceLocation("circuits", "textures/gui/valve.png");
 	}
 
@@ -35,7 +36,7 @@ public class GuiEnergyValve extends GuiMachine {
 			dos.writeByte(1);
 			BlockGuiHandler.sendPacketToServer(dos);
 		}).texture(158, 0).setTooltip("energyvalve.mode#"));
-		guiComps.add(new Text<String>(3, 80, 16, 68, 16, "energyvalve.flow", ()-> Utils.formatNumber(tile.state, 4, 0)));
+		guiComps.add(new Text<String>(3, 80, 16, 68, 16, "energyvalve.flow", ()-> TooltipUtil.formatNumber(tile.state, 4, 0)));
 	}
 
 }

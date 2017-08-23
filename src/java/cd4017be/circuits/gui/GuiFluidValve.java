@@ -6,16 +6,17 @@ import net.minecraft.util.ResourceLocation;
 import cd4017be.circuits.tileEntity.FluidValve;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.Gui.DataContainer;
+import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.Gui.GuiMachine;
-import cd4017be.lib.util.Utils;
+import cd4017be.lib.util.TooltipUtil;
 
 public class GuiFluidValve extends GuiMachine {
 
 	private final FluidValve tile;
 
-	public GuiFluidValve(FluidValve tile, EntityPlayer player) {
+	public GuiFluidValve(IGuiData tile, EntityPlayer player) {
 		super(new DataContainer(tile, player));
-		this.tile = tile;
+		this.tile = (FluidValve) tile;
 		this.MAIN_TEX = new ResourceLocation("circuits", "textures/gui/valve.png");
 	}
 
@@ -35,7 +36,7 @@ public class GuiFluidValve extends GuiMachine {
 			dos.writeByte(1);
 			BlockGuiHandler.sendPacketToServer(dos);
 		}).texture(158, 0).setTooltip("fluidvalve.mode#"));
-		guiComps.add(new Text<String>(3, 80, 16, 68, 16, "fluidvalve.flow", ()-> Utils.formatNumber((double)tile.state / 1000.0, 4, 0)));
+		guiComps.add(new Text<String>(3, 80, 16, 68, 16, "fluidvalve.flow", ()-> TooltipUtil.formatNumber((double)tile.state / 1000.0, 4, 0)));
 	}
 
 }

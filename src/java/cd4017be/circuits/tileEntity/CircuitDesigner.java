@@ -14,7 +14,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.items.SlotItemHandler;
 import cd4017be.circuits.Objects;
 import cd4017be.lib.BlockGuiHandler.ClientPacketReceiver;
-import cd4017be.lib.TooltipInfo;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.Gui.TileContainer;
@@ -420,22 +419,12 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 	}
 
 	@Override
-	public boolean canPlayerAccessUI(EntityPlayer player) {
-		return !player.isDead;
-	}
-
-	@Override
 	public int[] getSyncVariables() {
 		return null;
 	}
 
 	@Override
 	public void setSyncVariable(int i, int v) {
-	}
-
-	@Override
-	public String getName() {
-		return TooltipInfo.getLocFormat("gui.cd4017be.circuitDesigner.name");
 	}
 
 }

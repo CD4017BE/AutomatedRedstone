@@ -7,18 +7,18 @@ import net.minecraft.util.ResourceLocation;
 import cd4017be.circuits.render.OszillographRenderer;
 import cd4017be.circuits.tileEntity.Oszillograph;
 import cd4017be.lib.BlockGuiHandler;
+import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.Gui.GuiMachine;
 import cd4017be.lib.Gui.TileContainer;
-import cd4017be.lib.templates.AutomatedTile;
 import cd4017be.lib.util.Utils;
 
 public class GuiOszillograph extends GuiMachine {
 
 	private final Oszillograph tile;
 
-	public GuiOszillograph(Oszillograph tile, EntityPlayer player) {
+	public GuiOszillograph(IGuiData tile, EntityPlayer player) {
 		super(new TileContainer(tile, player));
-		this.tile = tile;
+		this.tile = (Oszillograph) tile;
 		this.MAIN_TEX = new ResourceLocation("circuits", "textures/gui/oszillograph.png");
 	}
 
@@ -42,7 +42,7 @@ public class GuiOszillograph extends GuiMachine {
 		guiComps.add(new Button(33, 7, 100, 18, 5, -1));//-1s
 		guiComps.add(new Button(34, 25, 87, 18, 5, -1));//+1t
 		guiComps.add(new Button(35, 25, 100, 18, 5, -1));//-1t
-		guiComps.add(new Text(36, 7, 92, 36, 8, "oszi.int").center().setTooltip("oszi.time"));
+		guiComps.add(new Text<>(36, 7, 92, 36, 8, "oszi.int").center().setTooltip("oszi.time"));
 		guiComps.add(new Button(37, 44, 91, 16, 9, 0).texture(208, 0).setTooltip("oszi.trigger#"));
 		guiComps.add(new Button(38, 62, 91, 16, 9, 1).texture(176, 0).setTooltip("oszi.src"));
 		guiComps.add(new Button(39, 80, 91, 16, 9, 0).texture(192, 72).setTooltip("oszi.comp#"));
@@ -74,33 +74,33 @@ public class GuiOszillograph extends GuiMachine {
 	protected void setDisplVar(int id, Object obj, boolean send) {
 		PacketBuffer dos = BlockGuiHandler.getPacketTargetData(tile.pos());
 		if (id < 8) try {
-			dos.writeByte(AutomatedTile.CmdOffset + id);
+			dos.writeByte(id);
 			dos.writeFloat(Float.parseFloat((String)obj));
 		} catch(NumberFormatException e){return;}
-		else if (id < 12) dos.writeByte(AutomatedTile.CmdOffset + 15).writeLong(tile.cfg = Utils.cycleState(tile.cfg, (id - 8) * 16 + 1, 7, 6, (Integer)obj == 0));
-		else if (id < 16) dos.writeByte(AutomatedTile.CmdOffset + 15).writeLong(tile.cfg ^= 1L << (id - 12) * 16);
-		else if (id < 20) {dos.writeByte(AutomatedTile.CmdOffset + id - 6); dos.writeString((String)obj);}
+		else if (id < 12) dos.writeByte(15).writeLong(tile.cfg = Utils.cycleState(tile.cfg, (id - 8) * 16 + 1, 7, 6, (Integer)obj == 0));
+		else if (id < 16) dos.writeByte(15).writeLong(tile.cfg ^= 1L << (id - 12) * 16);
+		else if (id < 20) {dos.writeByte(id - 6); dos.writeString((String)obj);}
 		else if (id < 24) try {
-			dos.writeByte(AutomatedTile.CmdOffset + 15).writeLong(tile.cfg = Utils.setState(tile.cfg, (id - 20) * 16 + 4, 31, Integer.parseInt((String)obj)));
+			dos.writeByte(15).writeLong(tile.cfg = Utils.setState(tile.cfg, (id - 20) * 16 + 4, 31, Integer.parseInt((String)obj)));
 		} catch(NumberFormatException e){return;}
 		else if (id < 28) try {
-			dos.writeByte(AutomatedTile.CmdOffset + 15).writeLong(tile.cfg = Utils.setState(tile.cfg, (id - 24) * 16 + 9, 31, Integer.parseInt((String)obj) - 1));
+			dos.writeByte(15).writeLong(tile.cfg = Utils.setState(tile.cfg, (id - 24) * 16 + 9, 31, Integer.parseInt((String)obj) - 1));
 		} catch(NumberFormatException e){return;}
 		else if (id < 32) 
-			dos.writeByte(AutomatedTile.CmdOffset + 15).writeLong(tile.cfg ^= 0x4000L << (id - 28) * 16);
+			dos.writeByte(15).writeLong(tile.cfg ^= 0x4000L << (id - 28) * 16);
 		else switch(id) {
-		case 32: case 34: dos.writeByte(AutomatedTile.CmdOffset + 8).writeInt(tile.tickInt = Math.min(1200, tile.tickInt + (id == 32 ? 20 : 1))); break;
-		case 33: case 35: dos.writeByte(AutomatedTile.CmdOffset + 8).writeInt(tile.tickInt = Math.max(1, tile.tickInt - (id == 33 ? 20 : 1))); break;
-		case 37: dos.writeByte(AutomatedTile.CmdOffset + 9).writeInt(tile.mode = Utils.cycleState(tile.mode, 0, 3, 4, (Integer)obj == 0)); break;
+		case 32: case 34: dos.writeByte(8).writeInt(tile.tickInt = Math.min(1200, tile.tickInt + (id == 32 ? 20 : 1))); break;
+		case 33: case 35: dos.writeByte(8).writeInt(tile.tickInt = Math.max(1, tile.tickInt - (id == 33 ? 20 : 1))); break;
+		case 37: dos.writeByte(9).writeInt(tile.mode = Utils.cycleState(tile.mode, 0, 3, 4, (Integer)obj == 0)); break;
 		case 38: 
 			int m = tile.mode & 3;
 			m = m == 1 ? 6 : m == 2 ? 4 : 0;
 			if (m == 0) return;
-			dos.writeByte(AutomatedTile.CmdOffset + 9).writeInt(tile.mode = Utils.cycleState(tile.mode, 2, 7, m, (Integer)obj == 0));
+			dos.writeByte(9).writeInt(tile.mode = Utils.cycleState(tile.mode, 2, 7, m, (Integer)obj == 0));
 			break;
-		case 39: dos.writeByte(AutomatedTile.CmdOffset + 9).writeInt(tile.mode ^= 0x20); break;
+		case 39: dos.writeByte(9).writeInt(tile.mode ^= 0x20); break;
 		case 40: try {
-			dos.writeByte(AutomatedTile.CmdOffset + 14);
+			dos.writeByte(14);
 			dos.writeFloat(Float.parseFloat((String)obj));
 			break;
 		} catch(NumberFormatException e){return;}

@@ -6,15 +6,16 @@ import net.minecraft.util.ResourceLocation;
 import cd4017be.circuits.tileEntity.Display8bit;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.Gui.DataContainer;
+import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.Gui.GuiMachine;
 
 public class GuiDisplay8bit extends GuiMachine {
 
 	private final Display8bit tile;
 
-	public GuiDisplay8bit(Display8bit tileEntity, EntityPlayer player) {
+	public GuiDisplay8bit(IGuiData tileEntity, EntityPlayer player) {
 		super(new DataContainer(tileEntity, player));
-		this.tile = tileEntity;
+		this.tile = (Display8bit) tileEntity;
 		this.MAIN_TEX = new ResourceLocation("circuits", "textures/gui/circuit.png");
 		this.bgTexY = 100;
 	}

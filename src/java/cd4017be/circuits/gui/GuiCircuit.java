@@ -10,6 +10,7 @@ import cd4017be.circuits.tileEntity.Circuit;
 import cd4017be.circuits.tileEntity.Circuit.IOcfg;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.Gui.DataContainer;
+import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.Gui.GuiMachine;
 
 /**
@@ -20,9 +21,9 @@ public class GuiCircuit extends GuiMachine {
 
 	private final Circuit tile;
 
-	public GuiCircuit(Circuit tileEntity, EntityPlayer player) {
+	public GuiCircuit(IGuiData tileEntity, EntityPlayer player) {
 		super(new DataContainer(tileEntity, player));
-		this.tile = tileEntity;
+		this.tile = (Circuit) tileEntity;
 		this.MAIN_TEX = new ResourceLocation("circuits", "textures/gui/circuit.png");
 	}
 
@@ -44,7 +45,7 @@ public class GuiCircuit extends GuiMachine {
 		guiComps.add(new Button(3, 65, 28, 18, 5, -1));//-1s
 		guiComps.add(new Button(4, 83, 15, 18, 5, -1));//+1t
 		guiComps.add(new Button(5, 83, 28, 18, 5, -1));//-1t
-		guiComps.add(new GuiComp(6, 66, 20, 34, 8).setTooltip("circuit.timer"));//timer
+		guiComps.add(new GuiComp<>(6, 66, 20, 34, 8).setTooltip("circuit.timer"));//timer
 		for (int i = 0; i < tile.iocfg.length; i++) {
 			int j = 7 + i * 5;
 			final IOcfg cfg = tile.iocfg[i];

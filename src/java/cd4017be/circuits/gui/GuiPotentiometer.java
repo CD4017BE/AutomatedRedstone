@@ -6,15 +6,16 @@ import net.minecraft.util.ResourceLocation;
 import cd4017be.circuits.tileEntity.Potentiometer;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.Gui.DataContainer;
+import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.Gui.GuiMachine;
 
 public class GuiPotentiometer extends GuiMachine {
 
 	private final Potentiometer tile;
 
-	public GuiPotentiometer(Potentiometer tileEntity, EntityPlayer player) {
+	public GuiPotentiometer(IGuiData tileEntity, EntityPlayer player) {
 		super(new DataContainer(tileEntity, player));
-		this.tile = tileEntity;
+		this.tile = (Potentiometer) tileEntity;
 		this.MAIN_TEX = new ResourceLocation("circuits", "textures/gui/circuit.png");
 		this.bgTexY = 160;
 	}
