@@ -1,5 +1,6 @@
 package cd4017be.circuits.gui;
 
+import java.util.ArrayList;
 import java.util.function.Supplier;
 
 import net.minecraft.entity.player.EntityPlayer;
@@ -41,13 +42,17 @@ public class GuiCircuit extends GuiMachine {
 				}
 			).texture(166, 0).setTooltip("circuit.on#"));//on/off
 		guiComps.add(new Button(1, 7, 15, 33, 9, -1).setTooltip("circuit.reset"));//reset
-		guiComps.add(new Button(2, 65, 15, 18, 5, -1));//+1s
-		guiComps.add(new Button(3, 65, 28, 18, 5, -1));//-1s
-		guiComps.add(new Button(4, 83, 15, 18, 5, -1));//+1t
-		guiComps.add(new Button(5, 83, 28, 18, 5, -1));//-1t
-		guiComps.add(new GuiComp<>(6, 66, 20, 34, 8).setTooltip("circuit.timer"));//timer
+		guiComps.add(new NumberSel(2, 65, 15, 36, 18, "", tile.getMinInterval(), 1200, 20,
+				()-> tile.tickInt,
+				(i)-> {
+					tile.tickInt = i;
+					setDisplVar(2, null, true);
+				}
+			).setup(8, 0xff404040, 2, true).around());
+		guiComps.add(new Text<Float>(3, 66, 20, 34, 8, "circuit.tick", ()-> (float)tile.tickInt / 20F).center().setTooltip("circuit.timer"));
+		guiComps.add(new Memory(4, 7, 24, 32, 64));
 		for (int i = 0; i < tile.iocfg.length; i++) {
-			int j = 7 + i * 5;
+			int j = 5 + i * 5;
 			final IOcfg cfg = tile.iocfg[i];
 			guiComps.add(new IOPort(j, 43, 35 + i * 9, 58, 9, 108, 54, ()-> cfg));
 			guiComps.add(new Tooltip<String>(j + 1, 45, 35 + i * 9, 20, 9, cfg.dir ? "circuit.dirO" : "circuit.dirI", ()-> cfg.label));
@@ -58,8 +63,9 @@ public class GuiCircuit extends GuiMachine {
 						setDisplVar(j, cfg, true);
 					}
 				).texture(108, 0));
-			int l = 32 - cfg.size;
-			guiComps.add(new Slider(j + 3, 68 + cfg.size / 2, 37 + i * 9, l, 108, 74, cfg.size, 5, true,
+			int s = cfg.size();
+			int l = 32 - s;
+			guiComps.add(new Slider(j + 3, 68 + s / 2, 37 + i * 9, l, 108, 74, s, 5, true,
 					()-> (float)cfg.ofs / (float)l,
 					(obj)-> cfg.ofs = (byte)(obj * (float)l),
 					(obj)-> {
@@ -72,23 +78,13 @@ public class GuiCircuit extends GuiMachine {
 	}
 
 	@Override
-	protected void drawGuiContainerBackgroundLayer(float t, int mx, int my) {
-		super.drawGuiContainerBackgroundLayer(t, mx, my);
-		mc.renderEngine.bindTexture(MAIN_TEX);
-		for (int i = 0; i < tile.memoryOfs; i++)
-			this.drawTexturedModalRect(guiLeft + 7, guiTop + 25 + 2 * i, 223, tile.ram[i], 33, 1);
-		this.drawStringCentered(String.format("%.2f", (float)tile.tickInt / 20F).concat("s"), this.guiLeft + 83, this.guiTop + 20, 0x404040);
-	}
-
-	@Override
 	protected void setDisplVar(int id, Object obj, boolean send) {
 		PacketBuffer dos = BlockGuiHandler.getPacketTargetData(tile.pos());
 		if (id == 0) dos.writeByte(1).writeByte(tile.mode);
 		else if (id == 1) dos.writeByte(3);
-		else if (id == 2 || id == 4) dos.writeByte(2).writeInt(tile.tickInt = Math.min(1200, tile.tickInt + (id == 2 ? 20 : 1)));
-		else if (id == 3 || id == 5) dos.writeByte(2).writeInt(tile.tickInt = Math.max(Circuit.ClockSpeed[tile.getBlockMetadata() % Circuit.ClockSpeed.length], tile.tickInt - (id == 3 ? 20 : 1)));
+		else if (id == 2) dos.writeByte(2).writeInt(tile.tickInt);
 		else {
-			int p = (id - 7) / 5;
+			int p = (id - 5) / 5;
 			IOcfg cfg = (IOcfg)obj;
 			dos.writeByte(0).writeByte(p).writeByte(cfg.side).writeByte(cfg.ofs);
 		}
@@ -106,14 +102,66 @@ public class GuiCircuit extends GuiMachine {
 		public void drawOverlay(int mx, int my) {
 			mc.renderEngine.bindTexture(MAIN_TEX);
 			IOcfg cfg = get.get();
-			int l = Math.min((cfg.addr & 0xff) + cfg.size, tile.ram.length * 8), j, k;
-			for (int i = cfg.addr & 0xff; i < l; i++) 
-				drawTexturedModalRect(guiLeft + 7 + (j = i & 7) * 4, guiTop + 25 + (k = i >> 3) * 2, 219, tile.ram[k] >> j & 1, 5, 1);
+			int s = cfg.addr & 0x3f;
+			int l = Math.min(s + (cfg.addr >> 6 & 3) + 1, tile.ram.length);
+			for (int i = s; i < l; i++) {
+				int val = tile.ram[i] & 0xff;
+				drawTexturedModalRect(guiLeft + 7 + (i & 7) * 4, guiTop + 24 + (i >> 3) * 8, 192 + (val & 15) * 4, 128 + (val >> 4) * 8, 4, 8);
+			}
 		}
 		@Override
 		public void draw() {
 			drawTexturedModalRect(px, py, tx, ty + (get.get().dir ? h : 0), w, h);
 		}
+	}
+
+	class Memory extends GuiComp<Object> {
+
+		public Memory(int id, int px, int py, int w, int h) {
+			super(id, px, py, w, h);
+		}
+
+		@Override
+		public void draw() {
+			mc.renderEngine.bindTexture(MAIN_TEX);
+			for (int i = 0; i < tile.startIdx; i++) {
+				int val = tile.ram[i] & 0xff;
+				drawTexturedModalRect(px + (i & 7) * 4, py + (i >> 3) * 8, 192 + (val & 15) * 4, (val >> 4) * 8, 4, 8);
+			}
+		}
+
+		@Override
+		public void drawOverlay(int mx, int my) {
+			int i = (mx - px) / 4 + (my - py) / 8 * 8;
+			int l = tile.startIdx;
+			if (i >= 0) {
+				ArrayList<String> list = new ArrayList<String>(4);
+				if (i < l)list.add(String.format("8: %02x %d", tile.ram[i] & 0xff, tile.getNum(i)));
+				if (i + 1 < l)list.add(String.format("16: %d", tile.getNum(i | 0x40)));
+				if (i + 2 < l)list.add(String.format("24: %d", tile.getNum(i | 0x80)));
+				if (i + 3 < l)list.add(String.format("32: %d", tile.getNum(i | 0xc0)));
+				drawHoveringText(list, mx, my);
+			}
+		}
+
+		@Override
+		public boolean mouseIn(int x, int y, int b, int d) {
+			int i = (x - px) / 4 + (y - py) / 8 * 8;
+			if (i < 0 || i >= tile.startIdx) return false;
+			byte val;
+			if (d == 0) {
+				if (b == 0) val = -1;
+				else if (b == 1) val = 0;
+				else return false;
+			} else if (d == 3) {
+				val = (byte)(tile.ram[i] + b * (isShiftKeyDown() ? 16 : 1));
+			} else return false;
+			PacketBuffer data = BlockGuiHandler.getPacketTargetData(tile.pos());
+			data.writeByte(4).writeByte(i).writeByte(val);
+			BlockGuiHandler.sendPacketToServer(data);
+			return true;
+		}
+
 	}
 
 }

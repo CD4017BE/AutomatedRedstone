@@ -4,9 +4,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import org.apache.logging.log4j.Level;
 
 import net.minecraft.inventory.ClickType;
@@ -96,111 +93,78 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 			return;
 		}
 		NBTTagCompound nbt = item.getTagCompound();
-		int size = 0, logic = 0, calc = 0, io = 0, n;
+		int size = 0, logic = 0, calc = 0, io = 0, maxAddr = 0;
 		NBTTagList list = new NBTTagList();
-		HashMap<Integer, Constant> constants = new HashMap<Integer, Constant>();
-		ByteBuf out = Unpooled.buffer(), cst = Unpooled.buffer();
+		ByteBuf out = Unpooled.buffer();
 		ByteBuffer data = ByteBuffer.wrap(nbt.getByteArray("data"));
+		ByteBuffer cst = ByteBuffer.allocate(64);
 		try {
-			int p = 0;
-			for (n = data.get() & 0xff; n > 0; n--) {
+			int p = 0, skip = 0;
+			for (int n = data.get() & 0xff; n > 0; n--) {
 				int t = data.get();
-				if (t < 0) {
-					int l = (data.get() - 1 & 0xf);
-					out.writeByte(Circuit.C_NULL | l);
-					p += l + 1;
-					continue;
-				} else if (t < 6) {
-					t = (t << 4) + Circuit.C_OR; 
-					int l = data.get() & 0xf;
-					out.writeByte(t|l);
-					for (int i = 0; i < l; i++) {
-						int a = data.get() & 0xff;
-						if (a / 8 >= size) size = a / 8 + 1;
-						out.writeByte(a);
-					}
-					p++; logic++;
-				} else if (t == 17) {
-					NBTTagCompound tag = new NBTTagCompound();
-					tag.setBoolean("d", false);
-					tag.setByte("p", (byte)p);
-					int l = data.get() & 0x3f;
-					tag.setByte("s", (byte)l);
+				if (t == -1) {
+					int l = data.get() & 0xff;
 					p += l;
-					io += l;
-					out.writeByte(Circuit.C_IN | (l >= 8 ? l / 8 - 1 : 0));
+					skip += l;
+					continue;
+				}
+				ModuleType mt = ModuleType.values()[t & 0x3f];
+				int sz = (t >> 6 & 3) + 1;
+				if (mt == ModuleType.OUT) {
+					NBTTagCompound tag = new NBTTagCompound();
+					tag.setBoolean("d", true);
+					byte addr = data.get();
+					if (addrSize(addr, mt, 0) >= size) {N[8] = 1; return;}
+					tag.setByte("p", addr);
 					byte[] str = new byte[data.get()];
 					data.get(str);
 					tag.setString("n", new String(str));
 					list.appendTag(tag);
+					io += (addr >> 6 & 3) * 4 + 8;
+					p = 64; skip = 0;
 					continue;
-				} else {
-					int q = out.writerIndex(), r = 0;
-					out.writeByte(r);
-					if (t < 10) {
-						r = t - 6 + Circuit.C_COMP;
-						p++; calc++;
-					} else {
-						int s = data.get() / 8 - 1 & 3;
-						r = (t - 10) * 16 + Circuit.C_CNT | s;
-						p += s * 8 + 8; calc += s + (t == 11 ? 1 : t < 14 ? 2 : 3);
-					}
-					ModuleType tp = ModuleType.values()[t];
-					for (int i = 0; i < tp.defCon; i++)
-						if (!tp.conType(i)) {
-							int a = data.get() & 0xff;
-							if (a / 8 >= size) size = a / 8 + 1;
-							out.writeByte(a);
-						} else {
-							int ct = data.get();
-							if (ct < 0) {
-								int x = data.getInt();
-								Constant c = constants.get(x);
-								if (c == null) {
-									int k, s = cst.writerIndex();
-									if (x < -8388608 || x >= 8388608) {cst.writeByte(x).writeByte(x >> 8).writeByte(x >> 16).writeByte(x >> 24); k = 0xc0;}
-									else if (x < -32768 || x >= 32768) {cst.writeByte(x).writeByte(x >> 8).writeByte(x >> 16); k = 0x80;}
-									else if (x < -128 || x >= 128) {cst.writeByte(x).writeByte(x >> 8); k = 0x40;}
-									else {cst.writeByte(x); k = 0;}
-									constants.put(x, c = new Constant(k, s));
-								}
-								c.ref.add(out.writerIndex());
-								out.writeByte(0);
-								r |= 16 >> (tp.defCon - i);
-							} else {
-								r |= (ct & 4) << (i + 2 - tp.defCon);
-								ct &= 3;
-								int x = (data.get() & 0xff) / 8;
-								if (x + ct >= size) size = x + ct + 1;
-								out.writeByte(x | ct << 6);
-							}
-						}
-					out.setByte(q, r);
 				}
-				data.position(data.get() + data.position());//skip labels
-			}
-			p += 7;
-			if (p / 8 > size) size = p / 8;
-			if (size > 32) {N[8] = 1; return;}
-			if (size + cst.writerIndex() > 64) {N[8] = 2; return;}
-			for (Constant c : constants.values()) {
-				int k = c.idx + size | c.type;
-				for (int i : c.ref)
-					out.setByte(i, k);
-			}
-			n = data.get();
-			if (n + list.tagCount() > 6) {N[8] = 3; return;}
-			for (int i = 0; i < n; i++) {
-				NBTTagCompound tag = new NBTTagCompound();
-				tag.setBoolean("d", true);
-				tag.setByte("p", data.get());
-				int l = data.get() & 0x3f;
-				tag.setByte("s", (byte)l);
-				io += l;
-				byte[] str = new byte[data.get()];
-				data.get(str);
-				tag.setString("n", new String(str));
-				list.appendTag(tag);
+				if (p >= 64) {N[8] = 3; return;}
+				if (mt == ModuleType.CST) {
+					skip += sz;
+					byte[] str = new byte[data.get()];
+					data.get(str);
+					int c = Integer.parseInt(new String(str));
+					while(sz > 0) {
+						cst.put(p++, (byte)c);
+						c >>= 8;
+						sz--;
+					}
+				} else {
+					while (skip > 0) {
+						int l = Math.min(skip, 4);
+						out.writeByte((byte)((l - 1) << 6));
+						skip -= l;
+					}
+					out.writeByte(t);
+					if (mt == ModuleType.IN) {
+						NBTTagCompound tag = new NBTTagCompound();
+						tag.setBoolean("d", false);
+						tag.setByte("p", (byte)(p & 0x3f | t & 0xc0));
+						io += sz * 4 + 4;
+						byte[] str = new byte[data.get()];
+						data.get(str);
+						tag.setString("n", new String(str));
+						list.appendTag(tag);
+						p += sz;
+					} else {
+						byte[] buf = new byte[mt.varInAm ? sz : mt.cons()];
+						data.get(buf);
+						out.writeBytes(buf);
+						for (int i = 0; i < buf.length; i++)
+							maxAddr = Math.max(maxAddr, addrSize(buf[i], mt, i));
+						logic += logicCost(mt, sz);
+						calc += calcCost(mt, sz);
+						data.position(data.get() + data.position());//skip labels
+						p += mt.isNum ? sz : 1;
+					}
+				}
+				size = p;
 			}
 			if (data.position() != data.limit()) throw new IllegalStateException(String.format("Only read %d of %d bytes!", data.position(), data.limit()));
 		} catch (Exception e) {
@@ -210,8 +174,8 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 			N[8] = 4;
 			return;
 		}
-		int ofs = size;
-		size += cst.writerIndex();
+		if (maxAddr >= size) {N[8] = 1; return;}
+		if (list.tagCount() > 6) {N[8] = 2; return;}
 		N[8] = 0;
 		String name = nbt.getString("name");
 		code = nbt = new NBTTagCompound();
@@ -219,19 +183,40 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 		nbt.setByte(tagNames[1], (byte)(N[1] = size));
 		nbt.setByte(tagNames[2], (byte)(N[2] = logic));
 		nbt.setByte(tagNames[3], (byte)(N[3] = calc));
-		byte[] b = new byte[out.writerIndex() + size];
+		byte[] b = new byte[size + out.writerIndex()];
+		cst.get(b, 0, size);
 		out.readBytes(b, size, out.writerIndex());
-		cst.readBytes(b, ofs, cst.writerIndex());
 		nbt.setByteArray("data", b);
 		nbt.setTag("io", list);
-		nbt.setByte("ofs", (byte)ofs);
 		nbt.setString("name", name);
 	}
 
-	private static class Constant {
-		Constant(int t, int i) {type = t; idx = i;}
-		final int type, idx;
-		final ArrayList<Integer> ref = new ArrayList<Integer>();
+	private int addrSize(byte val, ModuleType mt, int i) {
+		return (val & 0x3f) + (mt.conType(i) < 4 ? (val >> 6 & 3) : 0);
+	}
+
+	public static int logicCost(ModuleType t, int sz) {
+		switch(t) {
+		case OR: case NOR: case AND: case NAND: case XOR: case XNOR: return (sz + 1) / 2;
+		case NOT: return 1;
+		case LS: case NLS: case EQ: case NEQ: return 2;
+		case SWT: case MIN: case MAX: return (sz + 1) / 2 + 1;
+		case CNT1: return 1;
+		case CNT2: return 2;
+		default: return 0;
+		}
+	}
+
+	public static int calcCost(ModuleType t, int sz) {
+		switch(t) {
+		case NEG: case ABS: case CNT1: case MIN: case MAX: return (sz + 1) / 2;
+		case ADD: case SUB: return sz;
+		case MUL: case DIV: case MOD: return 1 + sz;
+		case CNT2: return sz;
+		case RNG: return sz + 2;
+		case SQRT: return 2 * sz + 6;
+		default: return 0;
+		}
 	}
 
 	@Override

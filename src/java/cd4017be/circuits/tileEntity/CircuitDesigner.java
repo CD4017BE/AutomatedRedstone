@@ -4,13 +4,16 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Arrays;
+
 import com.mojang.authlib.GameProfile;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.SlotItemHandler;
 import cd4017be.circuits.Objects;
 import cd4017be.lib.BlockGuiHandler.ClientPacketReceiver;
@@ -24,12 +27,16 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 
 	public ItemStack dataItem = ItemStack.EMPTY;
 	private GameProfile lastPlayer;
-	public Module module0 = null, moduleL = null, selMod = null;
-	public ArrayList<Module> outputs;
+	public final Module[] modules = new Module[70];
+	public int selMod = -1, lastPos = 0;
 	public long modified = 1;
-	public boolean renderAll, mode;
-	ByteBuf data = Unpooled.buffer();
+	public boolean renderAll;
+	private final ByteBuf data = Unpooled.buffer();
 	public String name = "";
+
+	public CircuitDesigner() {
+		data.writeByte(0); //fix IO-error when loading on client the first time
+	}
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
@@ -51,7 +58,7 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 		data.resetReaderIndex();
 		nbt.setByteArray("data", b);
 		nbt.setString("name", name);
-		nbt.setByte("mode", (byte)((mode ? 1 : 0) | (renderAll ? 2 : 0)));
+		nbt.setBoolean("mode", renderAll);
 		return nbt;
 	}
 
@@ -60,9 +67,7 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 		byte[] b = nbt.getByteArray("data");
 		data.writeBytes(b);
 		name = nbt.getString("name");
-		byte m = nbt.getByte("mode");
-		mode = (m & 1) != 0;
-		renderAll = (m & 2) != 0;
+		renderAll = nbt.getBoolean("mode");
 	}
 
 	@Override
@@ -93,8 +98,6 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 		case 3:
 			name = dis.readString(16);
 			break;
-		case 4: mode = false; break;
-		case 5: mode = true; break;
 		case 6: renderAll = false; break;
 		case 7: renderAll = true; break;
 		}
@@ -103,11 +106,10 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 	@Override
 	public void initContainer(DataContainer container) {
 		TileContainer cont = (TileContainer)container;
-		cont.addItemSlot(new SlotItemHandler(new LinkedInventory(1, 1, (i) -> dataItem, (item, i) -> dataItem = item), 0, 194, 220));
-		cont.addPlayerInventory(8, 162);
+		cont.addItemSlot(new SlotItemHandler(new LinkedInventory(1, 1, (i) -> dataItem, (item, i) -> dataItem = item), 0, 202, 232));
+		cont.addPlayerInventory(8, 174);
 		if (world.isRemote) {
 			modified = 0;
-			if (outputs == null) outputs = new ArrayList<Module>(6);
 		} else {
 			cont.extraRef = new LastState();
 			if (lastPlayer != null && lastPlayer.equals(container.player.getGameProfile())) lastPlayer = null;
@@ -133,10 +135,6 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 			chng |= renderAll ? 8 : 4;
 			ls.drawAll = renderAll;
 		}
-		if (mode != ls.output) {
-			chng |= mode ? 32 : 16;
-			ls.output = mode;
-		}
 		if (chng == 0) return false;
 		dos.setByte(p, chng);
 		return true; 
@@ -152,7 +150,6 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 		}
 		if ((chng & 2) != 0) name = dis.readString(16);
 		if ((chng & 12) != 0) renderAll = (chng & 8) != 0;
-		if ((chng & 48) != 0) mode = (chng & 32) != 0;
 	}
 
 	public ByteBuf serialize() {
@@ -160,111 +157,66 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 		int n = 0, p = dos.writerIndex();
 		dos.writeByte(n);
 		int pnp = 0;
-		for (Module m = module0; m != null; m = m.next) {
-			if (m.pos > pnp) {
-				dos.writeByte(-1);
-				dos.writeByte(m.pos - pnp);
+		for (Module m : modules)
+			if (m != null) {
+				if (m.pos > pnp) {
+					dos.writeByte(-1);
+					dos.writeByte(m.pos - pnp);
+					n++;
+				}
+				int t = m.type.ordinal();
+				if (m.type.isNum) t |= (m.size - 1) << 6;
+				else if (m.type.varInAm) t |= (m.cons() - 1) << 6;
+				dos.writeByte(t);
+				for (Con c : m.cons)
+					if (c != null)
+						dos.writeByte(c.getAddr() & 0x3f | (c.type & 3) << 6);
+				byte[] b = m.label.getBytes();
+				dos.writeByte(b.length);
+				dos.writeBytes(b);
+				pnp = m.pos + m.size;
 				n++;
 			}
-			int t = m.type.ordinal();
-			dos.writeByte(t);
-			if (t < 6) {
-				int l = 0, q = dos.writerIndex();
-				dos.writeByte(l);
-				for (Con c : m.cons)
-					if (c != null) {
-						dos.writeByte(c.getAddr());
-						l++;
-					}
-				dos.setByte(q, l);
-			} else {
-				if (t >= 10) dos.writeByte(m.size);
-				for (int i = 0; i < m.cons.length; i++) {
-					Con c = m.cons[i];
-					if (!m.type.conType(i)) {
-						dos.writeByte(c == null ? m.pos : c.getAddr());
-					} else if (c == null || c.type == 1) {
-						dos.writeByte(-1);
-						dos.writeInt(c == null ? 0 : c.size);
-					} else {
-						dos.writeByte(c.size / 8 - 1 | (c.type == 3 ? 4 : 0));
-						dos.writeByte(c.getAddr());
-					}
-				}
-			}
-			byte[] b = m.label.getBytes();
-			dos.writeByte(b.length);
-			dos.writeBytes(b);
-			pnp = m.nextPos;
-			n++;
-		}
 		dos.setByte(p, n);
-		dos.writeByte(outputs.size());
-		for (Module m : outputs) {
-			dos.writeByte(m.pos);
-			dos.writeByte(m.size);
-			byte[] b = m.label.getBytes();
-			dos.writeByte(b.length);
-			dos.writeBytes(b);
-		}
 		return dos;
 	}
 
 	public void deserialize(ByteBuf dis) {
-		module0 = null; moduleL = null; selMod = null;
-		outputs.clear();
-		Module k = null;
+		Arrays.fill(modules, null);
 		int p = 0;
 		for (int n = dis.readByte() & 0xff; n > 0; n--) {
 			int t = dis.readByte();
-			if (t < 0 || t > 17) p += dis.readByte() & 0xff;
+			if (t == -1) p += dis.readByte() & 0xff;
 			else {
-				Module m = new Module(ModuleType.values()[t]);
-				if (t < 6) {
-					int l = dis.readByte();
-					for (int i = 0; i < l; i++) {
-						m.cons[i] = new Con(null, dis.readByte() & 0xff, 1, (byte)0);
+				Module m = new Module(ModuleType.values()[t & 0x3f]);
+				int sz = (t >> 6 & 3) + 1;
+				if (m.type.isNum) m.size = sz;
+				else if (m.type.varInAm)
+					for (int i = sz; i < m.cons.length; i++)
+						m.cons[i] = null;
+				for (Con c : m.cons)
+					if (c != null) {
+						byte b = dis.readByte();
+						c.addr = b & 0x3f;
+						c.type = (byte)(c.type & 4 | b >> 6 & 3);
 					}
-				} else {
-					if (t >= 10) m.size = dis.readByte();
-					for (int i = 0; i < m.cons.length; i++)
-						if (!m.type.conType(i)) {
-							m.cons[i] = new Con(null, dis.readByte() & 0xff, 1, (byte)0);
-						} else {
-							int ct = dis.readByte();
-							if (ct < 0) m.cons[i] = new Con(null, -1, dis.readInt(), (byte)1);
-							else m.cons[i] = new Con(null, dis.readByte() & 0xff, 8 + 8 * (ct & 3), (byte)(2 + (ct >> 2)));
-						}
-				}
-				m.setPos(p);
-				p = m.nextPos;
-				byte[] b = new byte[dis.readByte()];
+				byte[] b = new byte[dis.readByte() & 0xff];
 				dis.readBytes(b);
 				m.label = new String(b);
-				if (k == null) module0 = moduleL = m;
-				else k.insert(m);
-				k = m;
+				m.setPos(p);
+				p += m.size;
 			}
-		}
-		for (int n = dis.readByte() & 0x7; n > 0; n--) {
-			int pos = dis.readByte() & 0xff;
-			Module m = new Module(ModuleType.IN);
-			m.size = dis.readByte();
-			m.setPos(pos);
-			byte[] b = new byte[dis.readByte()];
-			dis.readBytes(b);
-			m.label = new String(b);
-			outputs.add(m);
 		}
 	}
 
 	public void fixCons() {
-		for (Module m = module0; m != null; m = m.next)
-			for (Con c : m.cons)
-				if (c != null && c.type != 1) {
-					c.mod = find(m, c.addr, false);
-					if (c.mod != null) c.addr -= c.mod.pos;
-				}
+		for (Module m : modules)
+			if (m != null)
+				for (Con c : m.cons)
+					if (c != null) {
+						int addr = c.getAddr();
+						c.setAddr(find(addr), addr);
+					}
 	}
 
 	public void modify() {
@@ -272,115 +224,91 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 	}
 
 	public void add(ModuleType t) {
-		if (mode) {
-			if (outputs.size() >= 6) return;
-			int p = selMod == null ? 0 : selMod.nextPos;
-			selMod = new Module(t);
-			selMod.setPos(p);
-			outputs.add(selMod);
+		if (t == ModuleType.OUT) {
+			for (int i = 64; i < modules.length; i++) {
+				if (modules[i] != null) continue;
+				Module m = new Module(t);
+				m.setPos(selMod = i);
+				modified++;
+				break;
+			}
 		} else {
-			Module tgt = selMod == null ? moduleL : selMod;
-			selMod = new Module(t);
-			if (tgt == null) module0 = moduleL = selMod;
-			else tgt.insert(selMod);
+			if (selMod < 0)
+				for (selMod = 63; selMod >= 0 && modules[selMod] == null; selMod--);
+			selMod++;
+			Module m = new Module(t);
+			m.setPos(selMod);
+			modified++;
 		}
-		modified++;
 	}
 
-	public void move(Module m, int pos) {
-		if (mode) {
+	public void move(int cur, int pos) {
+		Module m = modules[cur];
+		if (m != null) {
 			m.setPos(pos);
-		} else {
-			Module m1 = find(m, pos, true);
-			if (m1 != m) {
-				remove(m);
-				m.setPos(pos);
-				if (m1 != null) m1.insert(m);
-				else insertPre(m);
-			} else m.setPos(pos);
-		}
-		modified++;
-	}
-
-	void insertPre(Module m) {
-		if (module0 == null) module0 = moduleL = m;
-		else {
-			module0.prev = m;
-			m.next = module0;
-			module0 = m;
-			if (m.nextPos > m.next.pos)  m.next.setPos(m.nextPos);
+			modified++;
 		}
 	}
 
-	public Module find(Module m, int mp, boolean closest) {
-		if (m == null) return null;
-		if (mp >= m.nextPos) {
-			for (m = m.next; m != null; m = m.next) {
-				if (m.pos > mp) return closest ? m.prev : null;
-				else if (m.nextPos > mp) return m;
-			}
-			return closest ? moduleL : null;
-		} else if (mp < m.pos){
-			for (m = m.prev; m != null; m = m.prev) {
-				if (m.nextPos <= mp) return closest ? m : null;
-				else if (m.pos <= mp) return m;
-			}
-			return null;
-		} else return m;
-	}
-
-	public void remove(Module m) {
-		if (mode) {
-			outputs.remove(m);
-		} else {
-			if (m.prev != null) m.prev.next = m.next;
-			else module0 = m.next;
-			if (m.next != null) m.next.prev = m.prev;
-			else moduleL = m.prev;
-			m.prev = null;
-			m.next = null;
+	public Module find(int mp) {
+		if (mp >= modules.length) return null;
+		for (int l = mp - 3; mp >= l && mp >= 0; mp--) {
+			Module m = modules[mp];
+			if (m != null)
+				return m.size + mp > l + 3 ? m : null;
 		}
+		return null;
 	}
 
 	public static class Con {
-		public Con(Module m, int ad, int s, byte t) {mod = m; addr = ad; size = s; type = t;}
+		public Con(int ad, byte t) {addr = ad; type = t;}
 		public Module mod;
-		public int addr, size;
-		/** 0:bit 1:const 2:unsigned 3:signed  */
+		public int addr;
+		/** 0-3: 8-32 bit num, 4: 1 bit bin, 5: 8 bit bin */
 		public byte type;
 		public int getAddr() {return mod != null ? mod.pos + addr : addr;}
+		public void setAddr(Module m, int ad) {
+			mod = m;
+			addr = mod != null ? ad - mod.pos : ad;
+		}
 	}
 
 	public class Module {
 
 		public final Con[] cons;
 		public final ModuleType type;
-		public int pos, nextPos, size, selCon;
-		public Module next, prev;
+		public int pos, size, selCon;
 		public String label = "";
 
 		public Module(ModuleType type) {
 			this.type = type;
-			this.size = type.idxLoc > 0 ? 8 : 1;
-			this.cons = new Con[type.defCon];
-			for (int i = 0 ; i < type.defCon; i++)
-				if (type.conType(i))
-					cons[i] = new Con(null, -1, 0, (byte)1);
-			this.nextPos = size;
+			this.size = 1;
+			this.pos = -1;
+			this.cons = new Con[type.cons()];
+			for (int i = 0 ; i < cons.length; i++)
+				cons[i] = new Con(-1, type.conType(i));
+			if (type == ModuleType.CST) label = "0";
 		}
 
-		public void setPos(int pos) {
-			pos = (pos & 7) + size > 8 ? pos + 7 & 0xf8 : pos;
-			if (pos != this.pos || pos + size != nextPos) {
-				this.pos = pos;
-				this.nextPos = pos + size;
-				if (nextPos > 256 && prev != null) {
-					prev.next = null;
-					moduleL = prev;
-					next = null;
-					prev = null;
-				} else if (next != null && nextPos > next.pos) next.setPos(nextPos);
+		public int cons() {
+			if (type.varInAm) {
+				int n = 0;
+				for (Con c : cons)
+					if (c != null) n++;
+				return n;
+			} else return cons.length;
+		}
+	
+		public void setPos(int p) {
+			if (pos >= 0 && modules[pos] == this) modules[pos] = null;
+			Module m = find(p);
+			if (m != null && m.pos < p) p = m.pos + m.size;
+			if (type == ModuleType.OUT ? p < 64 || p + size > modules.length : p < 0 || p + size > 64) return;
+			for (int i = p + size - 1; i >= p; i--) {
+				m = modules[i];
+				if (m != null) m.setPos(p + size);
 			}
+			modules[pos = p] = this;
 		}
 
 		public void resize(int s) {
@@ -388,30 +316,51 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 			setPos(pos);
 		}
 
-		public void insert(Module m) {
-			m.next = next;
-			if (next != null) next.prev = m;
-			else moduleL = m;
-			next = m;
-			m.prev = this;
-			if (nextPos > m.pos) m.setPos(nextPos);
-			else if (m.next != null && m.nextPos > m.next.pos) m.next.setPos(m.nextPos);
+		public void addCon() {
+			for (int i = 0; i < cons.length; i++)
+				if (cons[i] == null) {
+					cons[i] = new Con(-1, type.conType(i));
+					break;
+				}
+		}
+
+		public void removeCon() {
+			for (int i = cons.length - 1; i > 0; i--)
+				if (cons[i] != null) {
+					cons[i] = null;
+					break;
+				}
 		}
 
 	}
 
 	public enum ModuleType {
-		OR(0,8), NOR(0,8), AND(0,8), NAND(0,8), XOR(0,8), XNOR(0,8),
-		LS(0,2) {@Override public boolean conType(int i) {return true;}},
-		NLS(0,2) {@Override public boolean conType(int i) {return true;}},
-		EQ(0,2) {@Override public boolean conType(int i) {return true;}},
-		NEQ(0,2) {@Override public boolean conType(int i) {return true;}},
-		COUNT(1,4) {@Override public boolean conType(int i) {return i >= 2;}},
-		SWITCH(5,3) {@Override public boolean conType(int i) {return i > 0;}},
-		ADD(8,2), SUB(8,2), MUL(8,2), DIV(8,2), MOD(8,2), IN(0, 0);
-		private ModuleType(int b, int n) {defCon = n; idxLoc = b;}
-		public final int defCon, idxLoc;
-		public boolean conType(int i) {return idxLoc > 0;}
+		CST(0,0,1), IN(0,0,1), OR(4,0,6), NOR(4,0,6), AND(4,0,6), NAND(4,0,6), XOR(4,0,6), XNOR(4,0,6),
+		BUF(0,1,1), NOT(1,0,2), LS(0,2,0), NLS(0,2,0), EQ(0,2,0), NEQ(0,2,0), NEG(0,1,1), ABS(0,1,1),
+		ADD(0,2,1), SUB(0,2,1), MUL(0,2,1), DIV(0,2,1), MOD(0,2,1), MIN(0,2,1), MAX(0,2,1),
+		SWT(1,2,1), CNT1(2,0,1), CNT2(2,2,1), RNG(0,1,1), SQRT(0,1,1), OUT(0,1,0);
+		private ModuleType(int bc, int nc, int type) {
+			binCon = bc;
+			numCon = nc;
+			isNum = (type & 1) != 0;
+			can8bit = (type & 2) != 0;
+			varInAm = (type & 4) != 0;
+		}
+		public final int binCon, numCon;
+		public final boolean varInAm, can8bit, isNum;
+		public int cons() {return binCon + numCon;}
+		public byte conType(int i) {return i >= binCon ? (byte)0 : 4;}
+		@SideOnly(Side.CLIENT)
+		public int conRenderPos(int i) {
+			if (this == OUT) return 2;
+			switch(cons()) {
+			case 1: return 6;
+			case 2: return 3 + i * 7;
+			case 3: return 2 + i * 4;
+			case 4: return 2 + i * 3;
+			default: return 0;
+			}
+		}
 	}
 
 	public static class LastState {
