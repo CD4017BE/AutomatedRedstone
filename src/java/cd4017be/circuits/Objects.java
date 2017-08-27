@@ -75,8 +75,8 @@ public class Objects {
 		new DefaultItemBlock((designer = OrientedBlock.create("designer", Material.ROCK, SoundType.STONE, 0, CircuitDesigner.class, Orientation.HOR_AXIS)).setCreativeTab(tabCircuits));
 		new DefaultItemBlock((assembler = OrientedBlock.create("assembler", Material.ROCK, SoundType.STONE, 0, Assembler.class, Orientation.HOR_AXIS)).setCreativeTab(tabCircuits));
 		new ItemCircuit((circuit = new BlockCircuit("circuit", Material.ROCK, SoundType.STONE, Circuit.class)).setCreativeTab(tabCircuits));
-		new DefaultItemBlock((multilever = OrientedBlock.create("multilever", Material.ROCK, SoundType.STONE, 0, MultiLever.class, Orientation.XY_12_ROT)).setCreativeTab(tabCircuits));
-		new DefaultItemBlock((potentiometer = OrientedBlock.create("potentiometer", Material.ROCK, SoundType.STONE, 0, Potentiometer.class, Orientation.XY_12_ROT)).setCreativeTab(tabCircuits));
+		new DefaultItemBlock((multilever = OrientedBlock.create("multilever", Material.ROCK, SoundType.STONE, 0, MultiLever.class, Orientation.HOR_AXIS)).setCreativeTab(tabCircuits));
+		new DefaultItemBlock((potentiometer = OrientedBlock.create("potentiometer", Material.ROCK, SoundType.STONE, 0, Potentiometer.class, Orientation.HOR_AXIS)).setCreativeTab(tabCircuits));
 		new DefaultItemBlock((display = OrientedBlock.create("display", Material.ROCK, SoundType.STONE, 0, Display8bit.class, Orientation.XY_12_ROT)).setCreativeTab(tabCircuits).setLightLevel(0.375F));
 		new DefaultItemBlock((sensor_reader = OrientedBlock.create("sensor_reader", Material.ROCK, SoundType.STONE, 3, BlockSensor.class, Orientation.ALL_AXIS).setBlockBounds(new AxisAlignedBB(0.125, 0.125, 0, 0.875, 0.875, 0.25))).setCreativeTab(tabCircuits));
 		new DefaultItemBlock((oszillograph = OrientedBlock.create("oszillograph", Material.ROCK, SoundType.STONE, 0, Oszillograph.class, Orientation.XY_12_ROT)).setCreativeTab(tabCircuits).setLightLevel(0.375F));

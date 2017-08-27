@@ -23,7 +23,7 @@ public class RedstoneCircuits {
 	public static CommonProxy proxy;
 
 	public RedstoneCircuits() {
-		RecipeScriptContext.scriptRegistry.add(new Version("automatedRedstone", 403, "/assets/circuits/config/recipes.rcp"));
+		RecipeScriptContext.scriptRegistry.add(new Version("automatedRedstone", 404, "/assets/circuits/config/recipes.rcp"));
 	}
 
 	@Mod.EventHandler
