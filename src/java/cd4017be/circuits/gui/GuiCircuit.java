@@ -75,6 +75,7 @@ public class GuiCircuit extends GuiMachine {
 				).scroll(1F/l));
 			guiComps.add(new Tooltip<Object[]>(j + 4, 67, 37 + i * 9, 32, 5, cfg.dir ? "circuit.ofsO" : "circuit.ofsI", ()-> new Object[]{cfg.ofs, 1 << cfg.ofs}));
 		}
+		guiComps.add(new InfoTab(guiComps.size(), 7, 6, 7, 8, "circuit.info"));
 	}
 
 	@Override

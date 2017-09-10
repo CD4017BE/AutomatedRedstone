@@ -66,7 +66,7 @@ public class GuiCircuitDesigner extends GuiMachine {
 		guiComps.add(new Slider(10, 228, 22, 116, 52, 144, 8, 12, false).scroll(ScrollSize).setTooltip("designer.scroll"));
 		guiComps.add(new ModuleList(11, 202, 16).setTooltip("designer.mod"));
 		guiComps.add(new WorkPane(12, 8, 16, 8));
-		guiComps.add(new GuiComp<>(13, 7, 6, 7, 8).setTooltip("designer.info"));
+		guiComps.add(new InfoTab(13, 7, 6, 7, 8, "designer.info"));
 	}
 
 	@Override

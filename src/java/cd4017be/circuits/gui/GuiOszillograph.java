@@ -34,7 +34,7 @@ public class GuiOszillograph extends GuiMachine {
 		}
 		for (int i = 0; i < 4; i++) guiComps.add(new Button(i + 8, 27, 24 + i * 18, 16, 9, 1).texture(176, 0).setTooltip("oszi.rsIn"));
 		for (int i = 0; i < 4; i++) guiComps.add(new Button(i + 12, 8, 24 + i * 18, 16, 9, 0).texture(192, i * 18).setTooltip("oszi.on"));
-		for (int i = 0; i < 4; i++) guiComps.add(new TextField(i + 16, 8, 16 + i * 18, 70, 7, 16).color(OszillographRenderer.textColors[i], 0xffffffff).setTooltip("oszi.info"));
+		for (int i = 0; i < 4; i++) guiComps.add(new TextField(i + 16, 8, 16 + i * 18, 70, 7, 16).color(OszillographRenderer.textColors[i], 0xffffffff).setTooltip("oszi.label"));
 		for (int i = 0; i < 4; i++) guiComps.add(new TextField(i + 20, 45, 25 + i * 18, 11, 7, 2).setTooltip("circuit.ext"));
 		for (int i = 0; i < 4; i++) guiComps.add(new TextField(i + 24, 58, 25 + i * 18, 11, 7, 2).setTooltip("circuit.size"));
 		for (int i = 0; i < 4; i++) guiComps.add(new Button(i + 28, 71, 24 + i * 18, 7, 9, 0).texture(208, 36).setTooltip("oszi.signed#"));
@@ -47,6 +47,7 @@ public class GuiOszillograph extends GuiMachine {
 		guiComps.add(new Button(38, 62, 91, 16, 9, 1).texture(176, 0).setTooltip("oszi.src"));
 		guiComps.add(new Button(39, 80, 91, 16, 9, 0).texture(192, 72).setTooltip("oszi.comp#"));
 		guiComps.add(new TextField(40, 98, 92, 63, 7, 11).color(0xff40c0c0, 0xffff4040).setTooltip("oszi.level"));
+		guiComps.add(new InfoTab(41, 7, 6, 7, 8, "oszi.info"));
 	}
 
 	@Override
