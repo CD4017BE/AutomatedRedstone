@@ -30,8 +30,8 @@ import cd4017be.lib.BlockItemRegistry;
 import cd4017be.lib.DefaultItemBlock;
 import cd4017be.lib.block.BlockPipe;
 import cd4017be.lib.block.OrientedBlock;
+import cd4017be.lib.property.PropertyOrientation;
 import cd4017be.lib.templates.TabMaterials;
-import cd4017be.lib.util.Orientation;
 
 public class Objects {
 
@@ -72,21 +72,21 @@ public class Objects {
 		
 		Capabilities.registerIntern(IntegerComp.class);
 		
-		new DefaultItemBlock((designer = OrientedBlock.create("designer", Material.ROCK, SoundType.STONE, 0, CircuitDesigner.class, Orientation.HOR_AXIS)).setCreativeTab(tabCircuits));
-		new DefaultItemBlock((assembler = OrientedBlock.create("assembler", Material.ROCK, SoundType.STONE, 0, Assembler.class, Orientation.HOR_AXIS)).setCreativeTab(tabCircuits));
+		new DefaultItemBlock((designer = OrientedBlock.create("designer", Material.ROCK, SoundType.STONE, 0, CircuitDesigner.class, PropertyOrientation.HOR_AXIS)).setCreativeTab(tabCircuits));
+		new DefaultItemBlock((assembler = OrientedBlock.create("assembler", Material.ROCK, SoundType.STONE, 0, Assembler.class, PropertyOrientation.HOR_AXIS)).setCreativeTab(tabCircuits));
 		new ItemCircuit((circuit = new BlockCircuit("circuit", Material.ROCK, SoundType.STONE, Circuit.class)).setCreativeTab(tabCircuits));
-		new DefaultItemBlock((multilever = OrientedBlock.create("multilever", Material.ROCK, SoundType.STONE, 0, MultiLever.class, Orientation.HOR_AXIS)).setCreativeTab(tabCircuits));
-		new DefaultItemBlock((potentiometer = OrientedBlock.create("potentiometer", Material.ROCK, SoundType.STONE, 0, Potentiometer.class, Orientation.HOR_AXIS)).setCreativeTab(tabCircuits));
-		new DefaultItemBlock((display = OrientedBlock.create("display", Material.ROCK, SoundType.STONE, 0, Display8bit.class, Orientation.XY_12_ROT)).setCreativeTab(tabCircuits).setLightLevel(0.375F));
-		new DefaultItemBlock((sensor_reader = OrientedBlock.create("sensor_reader", Material.ROCK, SoundType.STONE, 3, BlockSensor.class, Orientation.ALL_AXIS).setBlockBounds(new AxisAlignedBB(0.125, 0.125, 0, 0.875, 0.875, 0.25))).setCreativeTab(tabCircuits));
-		new DefaultItemBlock((oszillograph = OrientedBlock.create("oszillograph", Material.ROCK, SoundType.STONE, 0, Oszillograph.class, Orientation.XY_12_ROT)).setCreativeTab(tabCircuits).setLightLevel(0.375F));
+		new DefaultItemBlock((multilever = OrientedBlock.create("multilever", Material.ROCK, SoundType.STONE, 0, MultiLever.class, PropertyOrientation.HOR_AXIS)).setCreativeTab(tabCircuits));
+		new DefaultItemBlock((potentiometer = OrientedBlock.create("potentiometer", Material.ROCK, SoundType.STONE, 0, Potentiometer.class, PropertyOrientation.HOR_AXIS)).setCreativeTab(tabCircuits));
+		new DefaultItemBlock((display = OrientedBlock.create("display", Material.ROCK, SoundType.STONE, 0, Display8bit.class, PropertyOrientation.XY_12_ROT)).setCreativeTab(tabCircuits).setLightLevel(0.375F));
+		new DefaultItemBlock((sensor_reader = OrientedBlock.create("sensor_reader", Material.ROCK, SoundType.STONE, 3, BlockSensor.class, PropertyOrientation.ALL_AXIS).setBlockBounds(new AxisAlignedBB(0.125, 0.125, 0, 0.875, 0.875, 0.25))).setCreativeTab(tabCircuits));
+		new DefaultItemBlock((oszillograph = OrientedBlock.create("oszillograph", Material.ROCK, SoundType.STONE, 0, Oszillograph.class, PropertyOrientation.XY_12_ROT)).setCreativeTab(tabCircuits).setLightLevel(0.375F));
 		new DefaultItemBlock((rsp_32bit = BlockPipe.create("rsp_32bit", Material.IRON, SoundType.METAL, IntegerPipe.class, 1).setSize(0.5)).setCreativeTab(tabCircuits));
 		new ItemRSPipe((rsp_basic = BlockPipe.create("rsp_basic", Material.IRON, SoundType.METAL, BasicRSPipe.class, 3).setSize(0.25)).setCreativeTab(tabCircuits));
-		new DefaultItemBlock((bit_shifter = OrientedBlock.create("bit_shifter", Material.IRON, SoundType.METAL, 3, BitShifter.class, Orientation.ALL_AXIS)).setBlockBounds(new AxisAlignedBB(0.25, 0.25, 0.0, 0.75, 0.75, 1.0)).setCreativeTab(tabCircuits));
-		new DefaultItemBlock((fluid_valve = OrientedBlock.create("fluid_valve", Material.IRON, SoundType.METAL, 0, FluidValve.class, Orientation.ALL_AXIS)).setCreativeTab(tabCircuits));
-		new DefaultItemBlock((energy_valve = OrientedBlock.create("energy_valve", Material.IRON, SoundType.METAL, 0, EnergyValve.class, Orientation.ALL_AXIS)).setCreativeTab(tabCircuits));
+		new DefaultItemBlock((bit_shifter = OrientedBlock.create("bit_shifter", Material.IRON, SoundType.METAL, 3, BitShifter.class, PropertyOrientation.ALL_AXIS)).setBlockBounds(new AxisAlignedBB(0.25, 0.25, 0.0, 0.75, 0.75, 1.0)).setCreativeTab(tabCircuits));
+		new DefaultItemBlock((fluid_valve = OrientedBlock.create("fluid_valve", Material.IRON, SoundType.METAL, 0, FluidValve.class, PropertyOrientation.ALL_AXIS)).setCreativeTab(tabCircuits));
+		new DefaultItemBlock((energy_valve = OrientedBlock.create("energy_valve", Material.IRON, SoundType.METAL, 0, EnergyValve.class, PropertyOrientation.ALL_AXIS)).setCreativeTab(tabCircuits));
 		new DefaultItemBlock((inv_connector = BlockPipe.create("inv_connector", Material.GLASS, SoundType.GLASS, InvConnector.class, 1).setSize(0.375)).setCreativeTab(tabCircuits).setHardness(0.5F));
-		new ItemWirelessCon((wireless_con = OrientedBlock.create("wireless_con", Material.IRON, SoundType.METAL, 3, WirelessConnector.class, Orientation.ALL_AXIS)).setBlockBounds(new AxisAlignedBB(0.25, 0.25, 0.0, 0.75, 0.75, 0.875)).setCreativeTab(tabCircuits));
+		new ItemWirelessCon((wireless_con = OrientedBlock.create("wireless_con", Material.IRON, SoundType.METAL, 3, WirelessConnector.class, PropertyOrientation.ALL_AXIS)).setBlockBounds(new AxisAlignedBB(0.25, 0.25, 0.0, 0.75, 0.75, 0.875)).setCreativeTab(tabCircuits));
 		
 		(circuit_plan = new ItemProgramm("circuit_plan")).setCreativeTab(tabCircuits);
 		(item_sensor = new ItemItemSensor("item_sensor")).setCreativeTab(tabCircuits);
