@@ -15,7 +15,7 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 public class BasicRSPipe extends IntegerPipe {
 
 	@Override
-	protected int bitSize() {return 4;}
+	protected int bitSize() {return 8;}
 
 	@Override
 	protected void checkCons() {
