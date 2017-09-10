@@ -1,4 +1,4 @@
-VERSION = 404;
+VERSION = 405;
 {
 	circuit_ticks = [20, 5, 1]#; !min operation delay in ticks for each tier of circuit casing
 	Loc range = 20; !maximum range for sensor modules in blocks
@@ -33,7 +33,6 @@ INIT() {
 	add("shaped", it("tile.display"), "000/121/000", "dustGlowstone", slab, "gemQuartz");
 	add("shaped", it("tile.rsp_32bit", 2), "000/010/000", it("rsp1bitN"), "nuggetGold");
 	add("shaped", it("rsp1bitN", 12), "000/111/000", it("minecraft:iron_bars"), "dustRedstone");
-	if(hasit("RstMetall")) {add("shaped", it("rsp1bitN", 8), "000", it("RstMetall"));}
 	add("shaped", it("rsp1bitI", 2), "001", it("rsp1bitN"), "dustRedstone");
 	add("shaped", it("rsp1bitO", 2), "001", it("rsp1bitN"), it("minecraft:redstone_torch"));
 	add("shaped", it("tile.bit_shifter"), "0/1", it("m.io_relay"), it("tile.rsp_32bit"));
