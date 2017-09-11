@@ -33,6 +33,7 @@ public class GuiAssembler extends GuiMachine {
 			guiComps.add(new Text<Object[]>(2 * i + 1, 62, 26 + i * 8, 52, 8, "\\%d / %d", ()-> new Object[]{cont.refInts[j + 4], cont.refInts[j]}).center().setTooltip("assembler.cmp" + i));
 		}
 		guiComps.add(new Text<Integer>(8, 62, 18, 52, 8, "assembler.err#", ()-> cont.refInts[8]).center().setTooltip("assembler.msg#"));
+		guiComps.add(new InfoTab(9, 7, 6, 7, 8, "assembler.info"));
 	}
 
 }

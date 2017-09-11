@@ -30,6 +30,7 @@ public class GuiBlockSensor extends GuiMachine {
 		guiComps.add(new NumberSel(2, 7, 15, 36, 18, "", 1, 1200, 20).setup(8, 0xff404040, 2, true).around());
 		guiComps.add(new Text<Float>(3, 8, 20, 34, 8, "sensor.tick").center().setTooltip("sensor.timer"));
 		guiComps.add(new Tooltip<Integer>(4, 152, 16, 16, 16, "sensor.out"));
+		guiComps.add(new InfoTab(5, 7, 6, 7, 8, "sensor.info"));
 	}
 
 	@Override
