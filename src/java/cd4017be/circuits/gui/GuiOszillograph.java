@@ -38,16 +38,13 @@ public class GuiOszillograph extends GuiMachine {
 		for (int i = 0; i < 4; i++) guiComps.add(new TextField(i + 20, 45, 25 + i * 18, 11, 7, 2).setTooltip("circuit.ext"));
 		for (int i = 0; i < 4; i++) guiComps.add(new TextField(i + 24, 58, 25 + i * 18, 11, 7, 2).setTooltip("circuit.size"));
 		for (int i = 0; i < 4; i++) guiComps.add(new Button(i + 28, 71, 24 + i * 18, 7, 9, 0).texture(208, 36).setTooltip("oszi.signed#"));
-		guiComps.add(new Button(32, 7, 87, 18, 5, -1));//+1s
-		guiComps.add(new Button(33, 7, 100, 18, 5, -1));//-1s
-		guiComps.add(new Button(34, 25, 87, 18, 5, -1));//+1t
-		guiComps.add(new Button(35, 25, 100, 18, 5, -1));//-1t
-		guiComps.add(new Text<>(36, 7, 92, 36, 8, "oszi.int").center().setTooltip("oszi.time"));
-		guiComps.add(new Button(37, 44, 91, 16, 9, 0).texture(208, 0).setTooltip("oszi.trigger#"));
-		guiComps.add(new Button(38, 62, 91, 16, 9, 1).texture(176, 0).setTooltip("oszi.src"));
-		guiComps.add(new Button(39, 80, 91, 16, 9, 0).texture(192, 72).setTooltip("oszi.comp#"));
-		guiComps.add(new TextField(40, 98, 92, 63, 7, 11).color(0xff40c0c0, 0xffff4040).setTooltip("oszi.level"));
-		guiComps.add(new InfoTab(41, 7, 6, 7, 8, "oszi.info"));
+		guiComps.add(new NumberSel(32, 7, 87, 36, 18, "", 1, 1200, 20).setup(8, 0xff404040, 2, true).around());
+		guiComps.add(new Text<>(33, 7, 92, 36, 8, "oszi.int").center().setTooltip("oszi.time"));
+		guiComps.add(new Button(34, 44, 91, 16, 9, 0).texture(208, 0).setTooltip("oszi.trigger#"));
+		guiComps.add(new Button(35, 62, 91, 16, 9, 1).texture(176, 0).setTooltip("oszi.src"));
+		guiComps.add(new Button(36, 80, 91, 16, 9, 0).texture(192, 72).setTooltip("oszi.comp#"));
+		guiComps.add(new TextField(37, 98, 92, 63, 7, 11).color(0xff40c0c0, 0xffff4040).setTooltip("oszi.level"));
+		guiComps.add(new InfoTab(38, 7, 6, 7, 8, "oszi.info"));
 	}
 
 	@Override
@@ -60,13 +57,14 @@ public class GuiOszillograph extends GuiMachine {
 		else if (id < 28) return "" + ((int)(tile.cfg >> (id - 24) * 16 + 9 & 31) + 1);
 		else if (id < 32) return (int)(tile.cfg >> (id - 28) * 16 + 14) & 1;
 		else switch(id) {
-		case 36: return (float)tile.tickInt / 2F;
-		case 37: return tile.mode & 3;
-		case 38: {
+		case 32: return tile.tickInt;
+		case 33: return (float)tile.tickInt / 20F;
+		case 34: return tile.mode & 3;
+		case 35: {
 			int m = tile.mode & 3;
 			return m == 1 ? EnumFacing.VALUES[tile.mode >> 2 & 7] : m == 2 ? (tile.mode >> 2 & 7) + 6 : 10;
-		} case 39: return tile.mode >> 5 & 1;
-		case 40: return Float.toString(tile.triggerLevel);
+		} case 36: return tile.mode >> 5 & 1;
+		case 37: return Float.toString(tile.triggerLevel);
 		default: return null;
 		}
 	}
@@ -90,17 +88,16 @@ public class GuiOszillograph extends GuiMachine {
 		else if (id < 32) 
 			dos.writeByte(15).writeLong(tile.cfg ^= 0x4000L << (id - 28) * 16);
 		else switch(id) {
-		case 32: case 34: dos.writeByte(8).writeInt(tile.tickInt = Math.min(1200, tile.tickInt + (id == 32 ? 20 : 1))); break;
-		case 33: case 35: dos.writeByte(8).writeInt(tile.tickInt = Math.max(1, tile.tickInt - (id == 33 ? 20 : 1))); break;
-		case 37: dos.writeByte(9).writeInt(tile.mode = Utils.cycleState(tile.mode, 0, 3, 4, (Integer)obj == 0)); break;
-		case 38: 
+		case 32: dos.writeByte(8).writeInt(tile.tickInt = (Integer)obj); break;
+		case 34: dos.writeByte(9).writeInt(tile.mode = Utils.cycleState(tile.mode, 0, 3, 4, (Integer)obj == 0)); break;
+		case 35: 
 			int m = tile.mode & 3;
 			m = m == 1 ? 6 : m == 2 ? 4 : 0;
 			if (m == 0) return;
 			dos.writeByte(9).writeInt(tile.mode = Utils.cycleState(tile.mode, 2, 7, m, (Integer)obj == 0));
 			break;
-		case 39: dos.writeByte(9).writeInt(tile.mode ^= 0x20); break;
-		case 40: try {
+		case 36: dos.writeByte(9).writeInt(tile.mode ^= 0x20); break;
+		case 37: try {
 			dos.writeByte(14);
 			dos.writeFloat(Float.parseFloat((String)obj));
 			break;

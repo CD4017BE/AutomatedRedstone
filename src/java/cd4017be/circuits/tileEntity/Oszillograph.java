@@ -35,7 +35,7 @@ import cd4017be.lib.util.Utils;
 
 public class Oszillograph extends BaseTileEntity implements ITilePlaceHarvest, ITickable, IGuiData, IDirectionalRedstone, ClientPacketReceiver {
 
-	private static final float[] DefTransf = {1, 0, 1, 0, 1, 0, 1, 0};
+	private static final float[] DefTransf = {15, 0, 15, 0, 15, 0, 15, 0};
 	public static final int Size = 60;
 	public final BasicInventory inventory = new BasicInventory(4);
 	public final int[][] points = new int[4][];
@@ -60,9 +60,9 @@ public class Oszillograph extends BaseTileEntity implements ITilePlaceHarvest, I
 			if (!item.isEmpty() && item.getItem() instanceof ISensor) {
 				nstate = ((ISensor)item.getItem()).measure(item, world, pos);
 			} else nstate = getRedstone((int)(cfg >> i * 16 + 1) & 0x3fff);
-			nstate /= transf[i * 2];
-			nstate += transf[i * 2 + 1];
-			points[i][idx] = Float.floatToIntBits(Math.min(0.5F, Math.max(-0.5F, (float)nstate / 6F)));
+			float l = transf[i * 2 + 1], h = transf[i * 2];
+			nstate = (nstate - l) / (h - l);
+			points[i][idx] = Float.floatToIntBits(Math.min(0.5F, Math.max(-0.5F, (float)nstate - 0.5F)));
 		}
 		markUpdate();
 	}
