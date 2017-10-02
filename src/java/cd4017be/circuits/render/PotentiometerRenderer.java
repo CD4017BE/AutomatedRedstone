@@ -19,6 +19,9 @@ public class PotentiometerRenderer extends TileEntitySpecialRenderer<Potentiomet
 
 	@Override
 	public void renderTileEntityAt(Potentiometer te, double x, double y, double z, float partialTicks, int destroyStage) {
+		GlStateManager.color(1, 1, 1, 1);
+		GlStateManager.disableLighting();
+		Util.luminate(te, te.getOrientation().front, 0);
 		GlStateManager.pushMatrix();
 		Util.moveAndOrientToBlock(x, y, z, te.getOrientation());
 		Util.moveAndOrientToBlock(-0.5, ((float)te.cur - (float)te.min) / ((float)te.max - (float)te.min) * 25F / 32F - 0.5, -0.5, Orientation.S);

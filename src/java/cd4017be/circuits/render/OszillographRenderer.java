@@ -8,7 +8,6 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.GlStateManager.DestFactor;
 import net.minecraft.client.renderer.GlStateManager.SourceFactor;
-import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
@@ -34,7 +33,7 @@ public class OszillographRenderer extends TileEntitySpecialRenderer<Oszillograph
 		GlStateManager.color(1, 1, 1, 1);
 		GlStateManager.depthMask(false);
 		GlStateManager.disableLighting();
-		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240.0F, 240.0F);
+		Util.luminate(te, te.getOrientation().front, 15);
 		Util.moveAndOrientToBlock(x, y, z, te.getOrientation());
 		GL11.glScalef(-0.9375F, 0.9375F, -1F);
 		bindTexture(texture);

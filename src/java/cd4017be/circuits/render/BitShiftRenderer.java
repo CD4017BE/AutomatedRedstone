@@ -20,6 +20,8 @@ public class BitShiftRenderer extends TileEntitySpecialRenderer<BitShifter> {
 	@Override
 	public void renderTileEntityAt(BitShifter te, double x, double y, double z, float partialTicks, int destroyStage) {
 		GlStateManager.pushMatrix();
+		GlStateManager.disableLighting();
+		Util.luminate(te, null, 0);
 		Util.moveAndOrientToBlock(x, y, z, te.getOrientation());
 		Util.rotateTo(Orientation.E);
 		bindTexture(texture);

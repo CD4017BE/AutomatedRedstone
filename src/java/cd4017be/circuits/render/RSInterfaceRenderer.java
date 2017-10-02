@@ -3,7 +3,6 @@ package cd4017be.circuits.render;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.entity.RenderManager;
@@ -69,7 +68,7 @@ public class RSInterfaceRenderer extends TileEntitySpecialRenderer<BaseTileEntit
 	public void renderTileEntityAt(BaseTileEntity te, double x, double y, double z, float partialTicks, int destroyStage) {
 		GlStateManager.color(1, 1, 1, 1);
 		GlStateManager.disableLighting();
-		OpenGlHelper.setLightmapTextureCoords(OpenGlHelper.lightmapTexUnit, 240.0F, 240.0F);
+		Util.luminate(te, te.getOrientation().front, te instanceof MultiLever ? 0 : 15);
 		GL11.glPushMatrix();
 		Util.moveAndOrientToBlock(x, y, z, te.getOrientation());
 		/*
