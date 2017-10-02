@@ -49,6 +49,7 @@ public class IntegerPipe extends PassiveMultiblockTile<IntegerComp, SharedIntege
 	public void neighborBlockChange(Block b, BlockPos pos) {
 		if (b != Blocks.REDSTONE_TORCH) checkCons();
 		comp.updateInput();
+		super.neighborBlockChange(b, pos);
 	}
 
 	@Override

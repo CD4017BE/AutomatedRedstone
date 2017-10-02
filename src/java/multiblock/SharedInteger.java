@@ -1,7 +1,7 @@
 package multiblock;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import cd4017be.lib.TickRegistry;
 import cd4017be.lib.TickRegistry.IUpdatable;
@@ -14,8 +14,8 @@ import cd4017be.lib.templates.SharedNetwork;
 public class SharedInteger extends SharedNetwork<IntegerComp, SharedInteger> implements IUpdatable {
 
 	private static final short AllIn = 0x5555, AllOut = (short)0xaaaa;
-	public ArrayList<IntegerComp> inputs = new ArrayList<IntegerComp>();
-	public ArrayList<IntegerComp> outputs = new ArrayList<IntegerComp>();
+	public HashSet<IntegerComp> inputs = new HashSet<IntegerComp>();
+	public HashSet<IntegerComp> outputs = new HashSet<IntegerComp>();
 	public int outputState = 0;
 	public boolean updateState;
 
