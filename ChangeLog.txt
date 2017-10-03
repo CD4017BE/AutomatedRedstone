@@ -1,0 +1,9 @@
+v5.0.2
+Changes:
+- use min/max instead of scale/offset in oscilloscope because it's more obvious
+- fix rare crash on pipe removal
+- fix light bugs
+Dependencies:
+- for MC-1.11.2
+- forge-13.20.0.2315 (or newer)
+- CD4017BE_lib-5.0.4
