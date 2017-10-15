@@ -14,15 +14,15 @@ public class CommonProxy {
 	public void registerRenderers() {}
 
 	public void registerBlocks() {
-		BlockGuiHandler.registerContainer(assembler, TileContainer.class);
-		BlockGuiHandler.registerContainer(circuit, DataContainer.class);
-		BlockGuiHandler.registerContainer(potentiometer, DataContainer.class);
-		BlockGuiHandler.registerContainer(display, DataContainer.class);
-		BlockGuiHandler.registerContainer(sensor_reader, TileContainer.class);
-		BlockGuiHandler.registerContainer(oszillograph, TileContainer.class);
-		BlockGuiHandler.registerContainer(designer, TileContainer.class);
-		BlockGuiHandler.registerContainer(fluid_valve, DataContainer.class);
-		BlockGuiHandler.registerContainer(energy_valve, DataContainer.class);
+		BlockGuiHandler.registerContainer(ASSEMBLER, TileContainer.class);
+		BlockGuiHandler.registerContainer(CIRCUIT, DataContainer.class);
+		BlockGuiHandler.registerContainer(POTENTIOMETER, DataContainer.class);
+		BlockGuiHandler.registerContainer(DISPLAY, DataContainer.class);
+		BlockGuiHandler.registerContainer(SENSOR_READER, TileContainer.class);
+		BlockGuiHandler.registerContainer(OSZILLOGRAPH, TileContainer.class);
+		BlockGuiHandler.registerContainer(DESIGNER, TileContainer.class);
+		BlockGuiHandler.registerContainer(FLUID_VALVE, DataContainer.class);
+		BlockGuiHandler.registerContainer(ENERGY_VALVE, DataContainer.class);
 	}
 
 }

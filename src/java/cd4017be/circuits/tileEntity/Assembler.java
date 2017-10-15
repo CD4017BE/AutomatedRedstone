@@ -8,7 +8,6 @@ import org.apache.logging.log4j.Level;
 
 import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Slot;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -33,7 +32,6 @@ import cd4017be.lib.tileentity.BaseTileEntity;
  */
 public class Assembler extends BaseTileEntity implements ITickable, IGuiData, ISlotClickHandler {
 
-	private static final Item circuit = Item.getItemFromBlock(Objects.circuit);
 	public static final String[] tagNames = {"IO", "Cap", "Gate", "Calc"};
 	public static final ItemStack[] materials = new ItemStack[4];
 	/**0-3:needed 4-7: provided 8:errCode{-1:clear 0:successful 1:outOfBounds 2:tooManyConstants 3:tooManyIO 4:dataSyntaxErr} */
@@ -76,7 +74,7 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 				inventory.items[1] = inventory.insertItem(2, item, false);
 				for (int i = 4; i < 8; i++) N[i] = 0;
 			}
-		} else if (inventory.items[0].getItem() == circuit) {
+		} else if (inventory.items[0].getItem() == Objects.circuit) {
 			inventory.items[1] = item = inventory.extractItem(0, 1, false);
 			NBTTagCompound nbt = item.getTagCompound();
 			if (nbt == null) for (int i = 4; i < 8; i++) N[i] = 0;
@@ -236,7 +234,7 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 	public void initContainer(DataContainer container) {
 		TileContainer c = (TileContainer)container;
 		c.clickHandler = this;
-		c.addItemSlot(new SlotItemType(inventory, 0, 152, 16, new ItemStack(circuit, 64), new ItemStack(circuit, 64, 1), new ItemStack(circuit, 64, 2)));
+		c.addItemSlot(new SlotItemType(inventory, 0, 152, 16, new ItemStack(Objects.circuit, 64), new ItemStack(Objects.circuit, 64, 1), new ItemStack(Objects.circuit, 64, 2)));
 		c.addItemSlot(new SlotItemType(inventory, 2, 152, 52));
 		c.addItemSlot(new SlotItemType(inventory, 3, 26, 16, ItemHandlerHelper.copyStackWithSize(materials[0], 64)));
 		c.addItemSlot(new SlotItemType(inventory, 4, 8, 16, ItemHandlerHelper.copyStackWithSize(materials[1], 64)));
@@ -263,7 +261,7 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 	public int insertAmount(int s, ItemStack insert) {
 		if ((s >= 3 && s < 7 && !insert.isItemEqual(materials[s - 3]))
 			|| (s == 7 && insert.getItem() != Objects.circuit_plan)
-			|| (s == 0 && insert.getItem() != circuit)) return 0;
+			|| (s == 0 && insert.getItem() != Objects.circuit)) return 0;
 		return Math.min(64, insert.getMaxStackSize());
 	}
 

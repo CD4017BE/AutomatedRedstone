@@ -27,46 +27,46 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public void registerBlocks() {
 		super.registerBlocks();
-		BlockGuiHandler.registerGui(assembler, GuiAssembler.class);
-		BlockGuiHandler.registerGui(circuit, GuiCircuit.class);
-		BlockGuiHandler.registerGui(potentiometer, GuiPotentiometer.class);
-		BlockGuiHandler.registerGui(display, GuiDisplay8bit.class);
-		BlockGuiHandler.registerGui(sensor_reader, GuiBlockSensor.class);
-		BlockGuiHandler.registerGui(oszillograph, GuiOszillograph.class);
-		BlockGuiHandler.registerGui(designer, GuiCircuitDesigner.class);
-		BlockGuiHandler.registerGui(fluid_valve, GuiFluidValve.class);
-		BlockGuiHandler.registerGui(energy_valve, GuiEnergyValve.class);
+		BlockGuiHandler.registerGui(ASSEMBLER, GuiAssembler.class);
+		BlockGuiHandler.registerGui(CIRCUIT, GuiCircuit.class);
+		BlockGuiHandler.registerGui(POTENTIOMETER, GuiPotentiometer.class);
+		BlockGuiHandler.registerGui(DISPLAY, GuiDisplay8bit.class);
+		BlockGuiHandler.registerGui(SENSOR_READER, GuiBlockSensor.class);
+		BlockGuiHandler.registerGui(OSZILLOGRAPH, GuiOszillograph.class);
+		BlockGuiHandler.registerGui(DESIGNER, GuiCircuitDesigner.class);
+		BlockGuiHandler.registerGui(FLUID_VALVE, GuiFluidValve.class);
+		BlockGuiHandler.registerGui(ENERGY_VALVE, GuiEnergyValve.class);
 		
-		inv_connector.setBlockLayer(BlockRenderLayer.CUTOUT);
+		INV_CONNECTOR.setBlockLayer(BlockRenderLayer.CUTOUT);
 		
 		SpecialModelLoader.setMod("circuits");
-		SpecialModelLoader.registerBlockModel(rsp_basic, new MultipartModel(rsp_basic).setPipeVariants(3));
-		SpecialModelLoader.registerBlockModel(rsp_32bit, new MultipartModel(rsp_32bit).setPipeVariants(4));
-		SpecialModelLoader.registerBlockModel(inv_connector, new MultipartModel(inv_connector).setPipeVariants(3));
+		SpecialModelLoader.registerBlockModel(RSP_BASIC, new MultipartModel(RSP_BASIC).setPipeVariants(3));
+		SpecialModelLoader.registerBlockModel(RSP_32BIT, new MultipartModel(RSP_32BIT).setPipeVariants(4));
+		SpecialModelLoader.registerBlockModel(INV_CONNECTOR, new MultipartModel(INV_CONNECTOR).setPipeVariants(3));
 	}
 
 	@Override
 	public void registerRenderers() {
-		BlockItemRegistry.registerRender(designer);
-		BlockItemRegistry.registerRender(assembler);
-		BlockItemRegistry.registerRender(circuit, 0, 2);
-		BlockItemRegistry.registerRender(rsp_32bit);
-		BlockItemRegistry.registerRender(rsp_basic, 0, 2);
-		BlockItemRegistry.registerRender(bit_shifter);
-		BlockItemRegistry.registerRender(multilever);
-		BlockItemRegistry.registerRender(potentiometer);
-		BlockItemRegistry.registerRender(display);
-		BlockItemRegistry.registerRender(sensor_reader);
-		BlockItemRegistry.registerRender(inv_connector);
+		BlockItemRegistry.registerRender(DESIGNER);
+		BlockItemRegistry.registerRender(ASSEMBLER);
+		BlockItemRegistry.registerRender(CIRCUIT, 0, 2);
+		BlockItemRegistry.registerRender(RSP_32BIT);
+		BlockItemRegistry.registerRender(RSP_BASIC, 0, 2);
+		BlockItemRegistry.registerRender(BIT_SHIFTER);
+		BlockItemRegistry.registerRender(MULTILEVER);
+		BlockItemRegistry.registerRender(POTENTIOMETER);
+		BlockItemRegistry.registerRender(DISPLAY);
+		BlockItemRegistry.registerRender(SENSOR_READER);
+		BlockItemRegistry.registerRender(INV_CONNECTOR);
 		BlockItemRegistry.registerRender(circuit_plan);
 		BlockItemRegistry.registerRender(item_sensor);
 		BlockItemRegistry.registerRender(fluid_sensor);
 		BlockItemRegistry.registerRender(energy_sensor);
 		BlockItemRegistry.registerRender(time_sensor);
-		BlockItemRegistry.registerRender(oszillograph);
-		BlockItemRegistry.registerRender(fluid_valve);
-		BlockItemRegistry.registerRender(energy_valve);
-		BlockItemRegistry.registerRender(wireless_con, 0, 1);
+		BlockItemRegistry.registerRender(OSZILLOGRAPH);
+		BlockItemRegistry.registerRender(FLUID_VALVE);
+		BlockItemRegistry.registerRender(ENERGY_VALVE);
+		BlockItemRegistry.registerRender(WIRELESS_CON, 0, 1);
 		ClientRegistry.bindTileEntitySpecialRenderer(MultiLever.class, new RSInterfaceRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(Display8bit.class, new RSInterfaceRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(Oszillograph.class, new OszillographRenderer());

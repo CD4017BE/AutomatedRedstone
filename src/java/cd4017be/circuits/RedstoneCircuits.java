@@ -13,17 +13,19 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
  *
  * @author CD4017BE
  */
-@Mod(modid="circuits", useMetadata = true)
+@Mod(modid = RedstoneCircuits.ID, useMetadata = true)
 public class RedstoneCircuits {
 
-	@Instance("circuits")
+	public static final String ID = "circuits";
+
+	@Instance(ID)
 	public static RedstoneCircuits instance;
 
 	@SidedProxy(clientSide="cd4017be.circuits.ClientProxy", serverSide="cd4017be.circuits.CommonProxy")
 	public static CommonProxy proxy;
 
 	public RedstoneCircuits() {
-		RecipeScriptContext.scriptRegistry.add(new Version("automatedRedstone", 405, "/assets/circuits/config/recipes.rcp"));
+		RecipeScriptContext.scriptRegistry.add(new Version("automatedRedstone", 405, "/assets/" + ID + "/config/recipes.rcp"));
 	}
 
 	@Mod.EventHandler
