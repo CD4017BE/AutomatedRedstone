@@ -6,10 +6,10 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import cd4017be.lib.DefaultItemBlock;
+import cd4017be.lib.item.BaseItemBlock;
 import cd4017be.lib.util.TooltipUtil;
 
-public class ItemWirelessCon extends DefaultItemBlock {
+public class ItemWirelessCon extends BaseItemBlock {
 
 	public ItemWirelessCon(Block id) {
 		super(id);

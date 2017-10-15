@@ -8,10 +8,10 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.Gui.DataContainer;
-import cd4017be.lib.Gui.GuiMachine;
+import cd4017be.lib.Gui.AdvancedGui;
 import static java.util.Calendar.*;
 
-public class GuiTimeSensor extends GuiMachine {
+public class GuiTimeSensor extends AdvancedGui {
 
 	private final InventoryPlayer inv;
 	

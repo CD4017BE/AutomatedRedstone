@@ -30,10 +30,10 @@ import cd4017be.circuits.tileEntity.CircuitDesigner.ModuleType;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.util.TooltipUtil;
-import cd4017be.lib.Gui.GuiMachine;
+import cd4017be.lib.Gui.AdvancedGui;
 import cd4017be.lib.Gui.TileContainer;
 
-public class GuiCircuitDesigner extends GuiMachine {
+public class GuiCircuitDesigner extends AdvancedGui {
 
 	private static final float ScrollSize = 1F / (float)(CircuitDesigner.ModuleType.values().length - 8);
 	private static final ResourceLocation BG_TEX = new ResourceLocation("circuits", "textures/gui/circuit_designer.png");

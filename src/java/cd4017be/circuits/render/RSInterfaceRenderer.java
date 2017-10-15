@@ -14,8 +14,8 @@ import org.lwjgl.opengl.GL11;
 
 import cd4017be.circuits.tileEntity.Display8bit;
 import cd4017be.circuits.tileEntity.MultiLever;
-import cd4017be.lib.block.BaseTileEntity;
 import cd4017be.lib.render.Util;
+import cd4017be.lib.tileentity.BaseTileEntity;
 
 /**
  *

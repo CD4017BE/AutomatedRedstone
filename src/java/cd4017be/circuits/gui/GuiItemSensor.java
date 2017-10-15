@@ -5,10 +5,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import cd4017be.lib.BlockGuiHandler;
-import cd4017be.lib.Gui.GuiMachine;
+import cd4017be.lib.Gui.AdvancedGui;
 import cd4017be.lib.Gui.TileContainer;
 
-public class GuiItemSensor extends GuiMachine {
+public class GuiItemSensor extends AdvancedGui {
 
 	private final InventoryPlayer inv;
 

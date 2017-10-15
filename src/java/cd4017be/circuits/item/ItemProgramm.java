@@ -2,7 +2,7 @@ package cd4017be.circuits.item;
 
 import java.util.List;
 
-import cd4017be.lib.DefaultItem;
+import cd4017be.lib.item.BaseItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -11,7 +11,7 @@ import net.minecraft.nbt.NBTTagCompound;
  *
  * @author CD4017BE
  */
-public class ItemProgramm extends DefaultItem {
+public class ItemProgramm extends BaseItem {
 
 	public ItemProgramm(String id) {
 		super(id);

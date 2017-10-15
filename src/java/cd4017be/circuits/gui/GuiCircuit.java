@@ -12,13 +12,13 @@ import cd4017be.circuits.tileEntity.Circuit.IOcfg;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
-import cd4017be.lib.Gui.GuiMachine;
+import cd4017be.lib.Gui.AdvancedGui;
 
 /**
  *
  * @author CD4017BE
  */
-public class GuiCircuit extends GuiMachine {
+public class GuiCircuit extends AdvancedGui {
 
 	private final Circuit tile;
 

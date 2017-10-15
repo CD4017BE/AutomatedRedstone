@@ -8,7 +8,7 @@ import cd4017be.lib.block.AdvancedBlock.IInteractiveTile;
 import cd4017be.lib.block.AdvancedBlock.IRedstoneTile;
 import cd4017be.lib.block.AdvancedBlock.ITilePlaceHarvest;
 import cd4017be.lib.block.MultipartBlock.IModularTile;
-import cd4017be.lib.templates.PassiveMultiblockTile;
+import cd4017be.lib.tileentity.PassiveMultiblockTile;
 import cd4017be.lib.util.Utils;
 import multiblock.IntegerComp;
 import multiblock.SharedInteger;

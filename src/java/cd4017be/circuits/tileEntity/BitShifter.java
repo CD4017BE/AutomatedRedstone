@@ -25,7 +25,7 @@ import cd4017be.lib.block.AdvancedBlock.IInteractiveTile;
 import cd4017be.lib.block.AdvancedBlock.INeighborAwareTile;
 import cd4017be.lib.block.AdvancedBlock.IRedstoneTile;
 import cd4017be.lib.block.AdvancedBlock.ITilePlaceHarvest;
-import cd4017be.lib.block.BaseTileEntity;
+import cd4017be.lib.tileentity.BaseTileEntity;
 import cd4017be.lib.util.ItemFluidUtil;
 import cd4017be.lib.util.Utils;
 

@@ -8,11 +8,11 @@ import cd4017be.circuits.render.OszillographRenderer;
 import cd4017be.circuits.tileEntity.Oszillograph;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
-import cd4017be.lib.Gui.GuiMachine;
+import cd4017be.lib.Gui.AdvancedGui;
 import cd4017be.lib.Gui.TileContainer;
 import cd4017be.lib.util.Utils;
 
-public class GuiOszillograph extends GuiMachine {
+public class GuiOszillograph extends AdvancedGui {
 
 	private final Oszillograph tile;
 

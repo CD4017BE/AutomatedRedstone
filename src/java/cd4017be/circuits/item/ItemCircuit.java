@@ -2,7 +2,7 @@ package cd4017be.circuits.item;
 
 import java.util.List;
 
-import cd4017be.lib.DefaultItemBlock;
+import cd4017be.lib.item.BaseItemBlock;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -12,7 +12,7 @@ import net.minecraft.nbt.NBTTagCompound;
  *
  * @author CD4017BE
  */
-public class ItemCircuit extends DefaultItemBlock {
+public class ItemCircuit extends BaseItemBlock {
 
 	public ItemCircuit(Block id){
 		super(id);

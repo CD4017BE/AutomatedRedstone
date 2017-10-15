@@ -20,14 +20,14 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import cd4017be.api.circuits.ISensor;
 import cd4017be.circuits.gui.GuiTimeSensor;
 import cd4017be.lib.BlockGuiHandler;
-import cd4017be.lib.DefaultItem;
-import cd4017be.lib.IGuiItem;
 import cd4017be.lib.BlockGuiHandler.ClientItemPacketReceiver;
 import cd4017be.lib.Gui.DataContainer;
+import cd4017be.lib.Gui.IGuiItem;
 import cd4017be.lib.Gui.ItemGuiData;
+import cd4017be.lib.item.BaseItem;
 import cd4017be.lib.util.TooltipUtil;
 
-public class ItemTimeSensor extends DefaultItem implements ISensor, IGuiItem, ClientItemPacketReceiver {
+public class ItemTimeSensor extends BaseItem implements ISensor, IGuiItem, ClientItemPacketReceiver {
 
 	public double RangeSQ = 400D;
 

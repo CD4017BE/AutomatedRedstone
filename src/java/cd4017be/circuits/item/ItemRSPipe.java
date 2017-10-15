@@ -7,7 +7,7 @@
 package cd4017be.circuits.item;
 
 import cd4017be.lib.BlockItemRegistry;
-import cd4017be.lib.DefaultItemBlock;
+import cd4017be.lib.item.BaseItemBlock;
 import net.minecraft.block.Block;
 import net.minecraft.item.ItemStack;
 
@@ -15,7 +15,7 @@ import net.minecraft.item.ItemStack;
  *
  * @author CD4017BE
  */
-public class ItemRSPipe extends DefaultItemBlock
+public class ItemRSPipe extends BaseItemBlock
 {
 
 	public ItemRSPipe(Block id) {

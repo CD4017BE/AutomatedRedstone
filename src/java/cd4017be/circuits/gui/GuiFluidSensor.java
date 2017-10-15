@@ -9,10 +9,10 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
 import cd4017be.lib.BlockGuiHandler;
-import cd4017be.lib.Gui.GuiMachine;
+import cd4017be.lib.Gui.AdvancedGui;
 import cd4017be.lib.Gui.TileContainer;
 
-public class GuiFluidSensor extends GuiMachine {
+public class GuiFluidSensor extends AdvancedGui {
 
 	private final InventoryPlayer inv;
 

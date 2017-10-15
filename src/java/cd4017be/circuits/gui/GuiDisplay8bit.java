@@ -7,9 +7,9 @@ import cd4017be.circuits.tileEntity.Display8bit;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
-import cd4017be.lib.Gui.GuiMachine;
+import cd4017be.lib.Gui.AdvancedGui;
 
-public class GuiDisplay8bit extends GuiMachine {
+public class GuiDisplay8bit extends AdvancedGui {
 
 	private final Display8bit tile;
 

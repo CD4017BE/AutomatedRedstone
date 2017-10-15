@@ -17,10 +17,10 @@ import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.BlockGuiHandler.ClientPacketReceiver;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
-import cd4017be.lib.block.BaseTileEntity;
 import cd4017be.lib.util.Orientation;
 import cd4017be.lib.block.AdvancedBlock.IInteractiveTile;
 import cd4017be.lib.block.AdvancedBlock.IRedstoneTile;
+import cd4017be.lib.tileentity.BaseTileEntity;
 
 public class Potentiometer extends BaseTileEntity implements IInteractiveTile, IRedstoneTile, IDirectionalRedstone, IGuiData, ClientPacketReceiver {
 

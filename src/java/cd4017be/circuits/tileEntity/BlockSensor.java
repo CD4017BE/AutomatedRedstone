@@ -20,8 +20,8 @@ import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.Gui.TileContainer;
 import cd4017be.lib.block.AdvancedBlock.IRedstoneTile;
 import cd4017be.lib.block.AdvancedBlock.ITilePlaceHarvest;
-import cd4017be.lib.block.BaseTileEntity;
-import cd4017be.lib.templates.LinkedInventory;
+import cd4017be.lib.capability.LinkedInventory;
+import cd4017be.lib.tileentity.BaseTileEntity;
 import cd4017be.lib.util.Utils;
 
 public class BlockSensor extends BaseTileEntity implements ITilePlaceHarvest, IRedstoneTile, ITickable, IDirectionalRedstone, IGuiData, ClientPacketReceiver {

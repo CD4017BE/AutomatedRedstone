@@ -7,10 +7,10 @@ import cd4017be.circuits.tileEntity.FluidValve;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
-import cd4017be.lib.Gui.GuiMachine;
+import cd4017be.lib.Gui.AdvancedGui;
 import cd4017be.lib.util.TooltipUtil;
 
-public class GuiFluidValve extends GuiMachine {
+public class GuiFluidValve extends AdvancedGui {
 
 	private final FluidValve tile;
 

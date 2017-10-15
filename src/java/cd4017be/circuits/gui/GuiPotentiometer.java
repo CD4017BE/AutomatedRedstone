@@ -7,9 +7,9 @@ import cd4017be.circuits.tileEntity.Potentiometer;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
-import cd4017be.lib.Gui.GuiMachine;
+import cd4017be.lib.Gui.AdvancedGui;
 
-public class GuiPotentiometer extends GuiMachine {
+public class GuiPotentiometer extends AdvancedGui {
 
 	private final Potentiometer tile;
 

@@ -25,14 +25,14 @@ import net.minecraftforge.items.IItemHandler;
 import cd4017be.api.circuits.ItemBlockSensor;
 import cd4017be.circuits.gui.GuiItemSensor;
 import cd4017be.lib.BlockGuiHandler;
-import cd4017be.lib.IGuiItem;
 import cd4017be.lib.BlockGuiHandler.ClientItemPacketReceiver;
 import cd4017be.lib.Gui.DataContainer;
+import cd4017be.lib.Gui.IGuiItem;
 import cd4017be.lib.Gui.ItemGuiData;
 import cd4017be.lib.Gui.SlotHolo;
 import cd4017be.lib.Gui.TileContainer;
-import cd4017be.lib.templates.InventoryItem;
-import cd4017be.lib.templates.InventoryItem.IItemInventory;
+import cd4017be.lib.capability.InventoryItem;
+import cd4017be.lib.capability.InventoryItem.IItemInventory;
 import cd4017be.lib.util.TooltipUtil;
 import cd4017be.lib.util.Utils.ItemType;
 

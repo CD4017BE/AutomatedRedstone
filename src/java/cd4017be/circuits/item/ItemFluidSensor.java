@@ -28,12 +28,12 @@ import cd4017be.api.circuits.ItemBlockSensor;
 import cd4017be.circuits.gui.GuiFluidSensor;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.BlockGuiHandler.ClientItemPacketReceiver;
-import cd4017be.lib.IGuiItem;
 import cd4017be.lib.Gui.DataContainer;
+import cd4017be.lib.Gui.IGuiItem;
+import cd4017be.lib.Gui.ITankContainer;
 import cd4017be.lib.Gui.ItemGuiData;
 import cd4017be.lib.Gui.TileContainer;
 import cd4017be.lib.Gui.TileContainer.TankSlot;
-import cd4017be.lib.templates.ITankContainer;
 import cd4017be.lib.util.TooltipUtil;
 
 public class ItemFluidSensor extends ItemBlockSensor implements IGuiItem, ClientItemPacketReceiver {

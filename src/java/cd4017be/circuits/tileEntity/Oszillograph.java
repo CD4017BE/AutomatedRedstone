@@ -29,8 +29,8 @@ import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.Gui.TileContainer;
 import cd4017be.lib.block.AdvancedBlock.ITilePlaceHarvest;
-import cd4017be.lib.block.BaseTileEntity;
-import cd4017be.lib.templates.BasicInventory;
+import cd4017be.lib.capability.BasicInventory;
+import cd4017be.lib.tileentity.BaseTileEntity;
 import cd4017be.lib.util.Utils;
 
 public class Oszillograph extends BaseTileEntity implements ITilePlaceHarvest, ITickable, IGuiData, IDirectionalRedstone, ClientPacketReceiver {

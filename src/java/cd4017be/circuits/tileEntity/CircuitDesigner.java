@@ -19,9 +19,9 @@ import cd4017be.circuits.Objects;
 import cd4017be.lib.BlockGuiHandler.ClientPacketReceiver;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
+import cd4017be.lib.capability.LinkedInventory;
 import cd4017be.lib.Gui.TileContainer;
-import cd4017be.lib.block.BaseTileEntity;
-import cd4017be.lib.templates.LinkedInventory;
+import cd4017be.lib.tileentity.BaseTileEntity;
 
 public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientPacketReceiver {
 

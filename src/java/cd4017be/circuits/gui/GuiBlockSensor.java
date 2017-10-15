@@ -6,10 +6,10 @@ import net.minecraft.util.ResourceLocation;
 import cd4017be.circuits.tileEntity.BlockSensor;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
-import cd4017be.lib.Gui.GuiMachine;
+import cd4017be.lib.Gui.AdvancedGui;
 import cd4017be.lib.Gui.TileContainer;
 
-public class GuiBlockSensor extends GuiMachine {
+public class GuiBlockSensor extends AdvancedGui {
 
 	private final BlockSensor tile;
 

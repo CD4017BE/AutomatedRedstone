@@ -22,8 +22,8 @@ import cd4017be.api.circuits.ILinkedInventory;
 import cd4017be.lib.block.AdvancedBlock.IInteractiveTile;
 import cd4017be.lib.block.AdvancedBlock.INeighborAwareTile;
 import cd4017be.lib.block.AdvancedBlock.ITilePlaceHarvest;
-import cd4017be.lib.block.BaseTileEntity;
 import cd4017be.lib.block.MultipartBlock.IModularTile;
+import cd4017be.lib.tileentity.BaseTileEntity;
 import cd4017be.lib.util.Utils;
 
 public class InvConnector extends BaseTileEntity implements INeighborAwareTile, IInteractiveTile, ITilePlaceHarvest, ILinkedInventory, IModularTile, ITickable {

@@ -24,8 +24,8 @@ import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.Gui.SlotItemType;
 import cd4017be.lib.Gui.TileContainer;
 import cd4017be.lib.Gui.TileContainer.ISlotClickHandler;
-import cd4017be.lib.block.BaseTileEntity;
-import cd4017be.lib.templates.BasicInventory;
+import cd4017be.lib.capability.BasicInventory;
+import cd4017be.lib.tileentity.BaseTileEntity;
 
 /**
  *

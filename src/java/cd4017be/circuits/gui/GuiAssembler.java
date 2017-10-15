@@ -4,14 +4,14 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ResourceLocation;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
-import cd4017be.lib.Gui.GuiMachine;
+import cd4017be.lib.Gui.AdvancedGui;
 import cd4017be.lib.Gui.TileContainer;
 
 /**
  *
  * @author CD4017BE
  */
-public class GuiAssembler extends GuiMachine {
+public class GuiAssembler extends AdvancedGui {
 
 	public GuiAssembler(IGuiData tileEntity, EntityPlayer player) {
 		super(new TileContainer(tileEntity, player));
