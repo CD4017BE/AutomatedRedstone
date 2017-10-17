@@ -83,8 +83,8 @@ dependencies {
 	// JEI
 	deobfProvided "mezz.jei:jei_${mc_version}:${jei_version}:api"
 	runtime "mezz.jei:jei_${mc_version}:${jei_version}"
-	// OC
-	compile "li.cil.oc:OpenComputers:MC${mc_version}-${oc_version}:api"
+	//TODO replace 1.12.1 for OC with actual mc version
+	compile "li.cil.oc:OpenComputers:MC1.12.1-${oc_version}:api"
 	
 	String libDir = new File(file('./').getParentFile(), "CD4017BE_lib").getAbsolutePath()
 	compile files("${libDir}/build/libs/CD4017BE_lib-${mc_version}-${lib_version}-deobf.jar")
