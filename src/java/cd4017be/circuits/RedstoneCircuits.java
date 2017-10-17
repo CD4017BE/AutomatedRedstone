@@ -3,6 +3,7 @@ package cd4017be.circuits;
 import cd4017be.api.recipes.RecipeScriptContext;
 import cd4017be.api.recipes.RecipeScriptContext.ConfigConstants;
 import cd4017be.lib.script.ScriptFiles.Version;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -30,14 +31,15 @@ public class RedstoneCircuits {
 
 	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
-		Objects.init();
-		proxy.registerBlocks();
+		MinecraftForge.EVENT_BUS.register(proxy);
 		RecipeScriptContext.instance.run("automatedRedstone.PRE_INIT");
-		Objects.initConstants(new ConfigConstants(RecipeScriptContext.instance.modules.get("automatedRedstone")));
 	}
 
 	@Mod.EventHandler
 	public void load(FMLInitializationEvent event) {
+		Objects.init();
+		Objects.initConstants(new ConfigConstants(RecipeScriptContext.instance.modules.get("automatedRedstone")));
+		proxy.registerBlocks();
 		proxy.registerRenderers();
 	}
 

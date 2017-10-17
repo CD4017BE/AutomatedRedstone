@@ -15,7 +15,10 @@ import cd4017be.lib.BlockItemRegistry;
 import cd4017be.lib.render.SpecialModelLoader;
 import cd4017be.lib.render.model.MultipartModel;
 import net.minecraft.util.BlockRenderLayer;
+import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+
 import static cd4017be.circuits.Objects.*;
 
 /**
@@ -36,17 +39,26 @@ public class ClientProxy extends CommonProxy {
 		BlockGuiHandler.registerGui(DESIGNER, GuiCircuitDesigner.class);
 		BlockGuiHandler.registerGui(FLUID_VALVE, GuiFluidValve.class);
 		BlockGuiHandler.registerGui(ENERGY_VALVE, GuiEnergyValve.class);
-		
-		INV_CONNECTOR.setBlockLayer(BlockRenderLayer.CUTOUT);
-		
-		SpecialModelLoader.setMod("circuits");
-		SpecialModelLoader.registerBlockModel(RSP_BASIC, new MultipartModel(RSP_BASIC).setPipeVariants(3));
-		SpecialModelLoader.registerBlockModel(RSP_32BIT, new MultipartModel(RSP_32BIT).setPipeVariants(4));
-		SpecialModelLoader.registerBlockModel(INV_CONNECTOR, new MultipartModel(INV_CONNECTOR).setPipeVariants(3));
 	}
 
 	@Override
 	public void registerRenderers() {
+		ClientRegistry.bindTileEntitySpecialRenderer(MultiLever.class, new RSInterfaceRenderer());
+		ClientRegistry.bindTileEntitySpecialRenderer(Display8bit.class, new RSInterfaceRenderer());
+		ClientRegistry.bindTileEntitySpecialRenderer(Oszillograph.class, new OszillographRenderer());
+		ClientRegistry.bindTileEntitySpecialRenderer(Potentiometer.class, new PotentiometerRenderer());
+		ClientRegistry.bindTileEntitySpecialRenderer(BitShifter.class, new BitShiftRenderer());
+	}
+
+	@SubscribeEvent
+	public void registerModels(ModelRegistryEvent ev) {
+		SpecialModelLoader.setMod(RedstoneCircuits.ID);
+		SpecialModelLoader.registerBlockModel(RSP_BASIC, new MultipartModel(RSP_BASIC).setPipeVariants(3));
+		SpecialModelLoader.registerBlockModel(RSP_32BIT, new MultipartModel(RSP_32BIT).setPipeVariants(4));
+		SpecialModelLoader.registerBlockModel(INV_CONNECTOR, new MultipartModel(INV_CONNECTOR).setPipeVariants(3));
+		
+		INV_CONNECTOR.setBlockLayer(BlockRenderLayer.CUTOUT);
+		
 		BlockItemRegistry.registerRender(DESIGNER);
 		BlockItemRegistry.registerRender(ASSEMBLER);
 		BlockItemRegistry.registerRender(CIRCUIT, 0, 2);
@@ -58,20 +70,15 @@ public class ClientProxy extends CommonProxy {
 		BlockItemRegistry.registerRender(DISPLAY);
 		BlockItemRegistry.registerRender(SENSOR_READER);
 		BlockItemRegistry.registerRender(INV_CONNECTOR);
+		BlockItemRegistry.registerRender(OSZILLOGRAPH);
+		BlockItemRegistry.registerRender(FLUID_VALVE);
+		BlockItemRegistry.registerRender(ENERGY_VALVE);
+		BlockItemRegistry.registerRender(WIRELESS_CON, 0, 1);
 		BlockItemRegistry.registerRender(circuit_plan);
 		BlockItemRegistry.registerRender(item_sensor);
 		BlockItemRegistry.registerRender(fluid_sensor);
 		BlockItemRegistry.registerRender(energy_sensor);
 		BlockItemRegistry.registerRender(time_sensor);
-		BlockItemRegistry.registerRender(OSZILLOGRAPH);
-		BlockItemRegistry.registerRender(FLUID_VALVE);
-		BlockItemRegistry.registerRender(ENERGY_VALVE);
-		BlockItemRegistry.registerRender(WIRELESS_CON, 0, 1);
-		ClientRegistry.bindTileEntitySpecialRenderer(MultiLever.class, new RSInterfaceRenderer());
-		ClientRegistry.bindTileEntitySpecialRenderer(Display8bit.class, new RSInterfaceRenderer());
-		ClientRegistry.bindTileEntitySpecialRenderer(Oszillograph.class, new OszillographRenderer());
-		ClientRegistry.bindTileEntitySpecialRenderer(Potentiometer.class, new PotentiometerRenderer());
-		ClientRegistry.bindTileEntitySpecialRenderer(BitShifter.class, new BitShiftRenderer());
 	}
 
 }
