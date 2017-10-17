@@ -1,5 +1,7 @@
 package cd4017be.circuits.item;
 
+import javax.annotation.Nullable;
+import net.minecraft.client.util.ITooltipFlag;
 import java.io.IOException;
 import java.util.List;
 
@@ -51,7 +53,8 @@ public class ItemFluidSensor extends ItemBlockSensor implements IGuiItem, Client
 	}
 
 	@Override
-	public void addInformation(ItemStack item, EntityPlayer player, List<String> list, boolean b) {
+	@SideOnly(Side.CLIENT)
+	public void addInformation(ItemStack item, @Nullable World player, List<String> list, ITooltipFlag b) {
 		if (item.hasTagCompound()) {
 			String[] states = TooltipUtil.translate("gui.cd4017be.fluidSensor.tip").split(",");
 			boolean inv = item.getTagCompound().getBoolean("inv");

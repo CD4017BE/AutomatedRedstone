@@ -1,5 +1,10 @@
 package cd4017be.circuits.item;
 
+import javax.annotation.Nullable;
+import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.List;
 
 import cd4017be.lib.item.BaseItem;
@@ -18,7 +23,8 @@ public class ItemProgramm extends BaseItem {
 	}
 
 	@Override
-	public void addInformation(ItemStack item, EntityPlayer player, List<String> list, boolean par4) {
+	@SideOnly(Side.CLIENT)
+	public void addInformation(ItemStack item, @Nullable World player, List<String> list, ITooltipFlag par4) {
 		NBTTagCompound nbt = item.getTagCompound();
 		if (nbt != null) {
 			list.add(nbt.getString("name"));

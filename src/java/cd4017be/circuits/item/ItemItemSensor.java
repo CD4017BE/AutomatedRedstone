@@ -1,5 +1,7 @@
 package cd4017be.circuits.item;
 
+import javax.annotation.Nullable;
+import net.minecraft.client.util.ITooltipFlag;
 import java.io.IOException;
 import java.util.List;
 import net.minecraft.block.state.IBlockState;
@@ -43,11 +45,12 @@ public class ItemItemSensor extends ItemBlockSensor implements IGuiItem, IItemIn
 	}
 
 	@Override
-	public void addInformation(ItemStack item, EntityPlayer player, List<String> list, boolean b) {
+	@SideOnly(Side.CLIENT)
+	public void addInformation(ItemStack item, @Nullable World player, List<String> list, ITooltipFlag b) {
 		if (item.hasTagCompound()) {
 			String[] states = TooltipUtil.translate("gui.cd4017be.itemSensor.tip").split(",");
 			byte mode = item.getTagCompound().getByte("mode");
-			ItemStack stack = this.loadInventory(item, player)[0];
+			ItemStack stack = this.loadInventory(item, null)[0];
 			if (states.length >= 6) {
 				String s;
 				if (stack.isEmpty()) s = states[mode & 1];
@@ -132,7 +135,7 @@ public class ItemItemSensor extends ItemBlockSensor implements IGuiItem, IItemIn
 			if (empty && !inv) return 0F;
 			ItemType type = empty ? null : new ItemType((mode & 2) != 0, (mode & 4) != 0, (mode & 8) != 0, filter);
 			for (EntityItem e : world.getEntitiesWithinAABB(EntityItem.class, new AxisAlignedBB(pos))) {
-				item = e.getEntityItem();
+				item = e.getItem();
 				if (type == null || (inv ^ type.matches(item))) n += item.getCount();
 			}
 			IBlockState state = world.getBlockState(pos);

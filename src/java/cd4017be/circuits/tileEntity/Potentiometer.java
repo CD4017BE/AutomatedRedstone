@@ -35,13 +35,13 @@ public class Potentiometer extends BaseTileEntity implements IInteractiveTile, I
 		}
 		if (world.isRemote) return true;
 		Vec3d vec = o.reverse().rotate(new Vec3d(X - 0.5, Y - 0.5, Z - 0.5));
-		boolean abs = vec.xCoord > 0;
+		boolean abs = vec.x > 0;
 		int state;
 		if (abs) {
-			Y = (float)vec.yCoord + 0.5F - 3.5F/32F; Y *= 32F/25F; //normalize to [0,1]
+			Y = (float)vec.y + 0.5F - 3.5F/32F; Y *= 32F/25F; //normalize to [0,1]
 			state = Math.round((float)min + ((float)max - (float)min) * Y); //set to interpolated absolute
 		} else {
-			Y = (float)vec.yCoord; Y *= 2F; //normalize to [-1,1]
+			Y = (float)vec.y; Y *= 2F; //normalize to [-1,1]
 			state = cur + (Y > 0 ? (int)Math.pow((double)max - (double)min, Y) : -(int)Math.pow((double)max - (double)min, -Y)); //offset by logarithmic scaled
 		}
 		if (state < min) state = min;

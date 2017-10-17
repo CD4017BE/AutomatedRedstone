@@ -9,7 +9,7 @@ import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.GlStateManager.DestFactor;
 import net.minecraft.client.renderer.GlStateManager.SourceFactor;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
@@ -26,7 +26,7 @@ public class OszillographRenderer extends TileEntitySpecialRenderer<Oszillograph
 	private static final ResourceLocation texture = new ResourceLocation("circuits", "textures/blocks/oszi_line.png");
 
 	@Override
-	public void renderTileEntityAt(Oszillograph te, double x, double y, double z, float partialTicks, int destroyStage) {
+	public void render(Oszillograph te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
 		GlStateManager.pushMatrix();
 		GlStateManager.enableBlend();
 		GlStateManager.blendFunc(SourceFactor.SRC_ALPHA, DestFactor.ONE);
@@ -37,7 +37,7 @@ public class OszillographRenderer extends TileEntitySpecialRenderer<Oszillograph
 		Util.moveAndOrientToBlock(x, y, z, te.getOrientation());
 		GL11.glScalef(-0.9375F, 0.9375F, -1F);
 		bindTexture(texture);
-		VertexBuffer buff = Tessellator.getInstance().getBuffer();
+		BufferBuilder buff = Tessellator.getInstance().getBuffer();
 		buff.begin(GL11.GL_QUAD_STRIP, DefaultVertexFormats.POSITION_TEX_COLOR);
 		for (int i = 0; i < te.vertexData.length; i++) {
 			int[] vb = te.vertexData[i];

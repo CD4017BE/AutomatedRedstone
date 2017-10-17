@@ -38,8 +38,8 @@ public class MultiLever extends BaseTileEntity implements IRedstoneTile, IIntera
 			return true;
 		} else if (s == o.front) {
 			Vec3d vec = o.reverse().rotate(new Vec3d(X - 0.5, Y - 0.5, Z - 0.5));
-			int i = vec.yCoord < 0 ? 4 : 0;
-			i |= (int)Math.floor(-vec.xCoord * 4F + 2F);
+			int i = vec.y < 0 ? 4 : 0;
+			i |= (int)Math.floor(-vec.x * 4F + 2F);
 			state ^= 1 << i;
 			world.notifyNeighborsOfStateChange(pos, Blocks.REDSTONE_TORCH, false);
 			this.markUpdate();

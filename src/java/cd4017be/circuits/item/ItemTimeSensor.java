@@ -1,5 +1,7 @@
 package cd4017be.circuits.item;
 
+import javax.annotation.Nullable;
+import net.minecraft.client.util.ITooltipFlag;
 import java.io.IOException;
 import java.util.List;
 
@@ -36,7 +38,8 @@ public class ItemTimeSensor extends BaseItem implements ISensor, IGuiItem, Clien
 	}
 
 	@Override
-	public void addInformation(ItemStack item, EntityPlayer player, List<String> list, boolean b) {
+	@SideOnly(Side.CLIENT)
+	public void addInformation(ItemStack item, @Nullable World player, List<String> list, ITooltipFlag b) {
 		if (item.hasTagCompound()) list.add(TooltipUtil.formatLink(BlockPos.fromLong(item.getTagCompound().getLong("link")), EnumFacing.getFront(item.getTagCompound().getByte("side"))));
 		super.addInformation(item, player, list, b);
 	}

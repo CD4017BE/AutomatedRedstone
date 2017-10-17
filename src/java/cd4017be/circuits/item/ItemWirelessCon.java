@@ -1,5 +1,10 @@
 package cd4017be.circuits.item;
 
+import javax.annotation.Nullable;
+import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.List;
 
 import net.minecraft.block.Block;
@@ -17,7 +22,8 @@ public class ItemWirelessCon extends BaseItemBlock {
 	}
 
 	@Override
-	public void addInformation(ItemStack item, EntityPlayer player, List<String> list, boolean f) {
+	@SideOnly(Side.CLIENT)
+	public void addInformation(ItemStack item, @Nullable World player, List<String> list, ITooltipFlag f) {
 		if (item.getItemDamage() != 0 && item.hasTagCompound()) {
 			NBTTagCompound nbt = item.getTagCompound();
 			list.add(TooltipUtil.format("msg.cd4017be.wireless3", nbt.getInteger("lx"), nbt.getInteger("ly"), nbt.getInteger("lz"), nbt.getInteger("ld")));

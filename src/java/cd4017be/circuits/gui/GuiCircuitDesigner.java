@@ -17,7 +17,7 @@ import org.lwjgl.opengl.GL11;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.PacketBuffer;
@@ -251,15 +251,15 @@ public class GuiCircuitDesigner extends AdvancedGui {
 	}
 
 	private void drawScaledString(int x, int y, int width, int height, String s, int color) {
-		int w = fontRendererObj.getStringWidth(s);
-		boolean doScale = w > width || fontRendererObj.FONT_HEIGHT - 1 > height;
+		int w = fontRenderer.getStringWidth(s);
+		boolean doScale = w > width || fontRenderer.FONT_HEIGHT - 1 > height;
 		if (doScale) {
-			int scale = Math.max((w + width - 1) / width, (fontRendererObj.FONT_HEIGHT + height - 2) / height);
+			int scale = Math.max((w + width - 1) / width, (fontRenderer.FONT_HEIGHT + height - 2) / height);
 			GlStateManager.pushMatrix();
 			GlStateManager.scale(1F/(float)scale, 1F/(float)scale, 1);
 			x *= scale; y *= scale;
 		}
-		fontRendererObj.drawString(s, x, y, color);
+		fontRenderer.drawString(s, x, y, color);
 		if (doScale) GlStateManager.popMatrix();
 	}
 
@@ -281,7 +281,7 @@ public class GuiCircuitDesigner extends AdvancedGui {
 			j = Assembler.calcCost(mt, 1); k = Assembler.calcCost(mt, 4);
 			String c = j == k ? Integer.toString(j) : Integer.toString(j) + "-" + Integer.toString(k);
 			list.add(TooltipUtil.format("gui.cd4017be.designer.cost", l, c));
-			drawHoveringText(list, mx, my, fontRendererObj);
+			drawHoveringText(list, mx, my, fontRenderer);
 		}
 
 		@Override
@@ -363,7 +363,7 @@ public class GuiCircuitDesigner extends AdvancedGui {
 			int x1 = px + (m.pos & 7) * 24;
 			int y1 = py + (m.pos >> 3) * 16;
 			GlStateManager.disableTexture2D();
-			VertexBuffer vb = Tessellator.getInstance().getBuffer();
+			BufferBuilder vb = Tessellator.getInstance().getBuffer();
 			vb.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
 			int r, g, b, a = tile.renderAll || m.pos == tile.selMod ? 0xff : 0x60;
 			for (int i = 0; i < m.cons.length; i++) {

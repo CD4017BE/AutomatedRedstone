@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -27,7 +27,7 @@ public class RSInterfaceRenderer extends TileEntitySpecialRenderer<BaseTileEntit
 
 	private void renderStateBinary(byte state, int tex, int h) {
 		manager.renderEngine.bindTexture(new ResourceLocation("circuits", "textures/blocks/display_ovl.png"));
-		VertexBuffer t = Tessellator.getInstance().getBuffer();
+		BufferBuilder t = Tessellator.getInstance().getBuffer();
 		t.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 		for (int i = 0; i < 8; i++)
 			this.renderFace(t, tex | (state >> i & 1), 4 * (i % 4), h * (i / 4) + 8 - h, 4, 8);
@@ -36,7 +36,7 @@ public class RSInterfaceRenderer extends TileEntitySpecialRenderer<BaseTileEntit
 
 	private void renderState(int state) {
 		manager.renderEngine.bindTexture(new ResourceLocation("circuits", "textures/blocks/display_ovl.png"));
-		VertexBuffer t = Tessellator.getInstance().getBuffer();
+		BufferBuilder t = Tessellator.getInstance().getBuffer();
 		t.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_TEX);
 		int n = state >> 24;
 		float dx = 20F / (float)(n + 1), x = 16F;
@@ -56,7 +56,7 @@ public class RSInterfaceRenderer extends TileEntitySpecialRenderer<BaseTileEntit
 		GL11.glPopMatrix();
 	}
 
-	private void renderFace(VertexBuffer t, int idx, float x, float y, float w, float h) {
+	private void renderFace(BufferBuilder t, int idx, float x, float y, float w, float h) {
 		float tw = 0.125F, th = 0.25F, tx = (float)(idx % 8) * tw, ty = (float)(idx / 8) * th;
 		t.pos(x, y + h, -0.25F).tex(tx, ty + th).endVertex();
 		t.pos(x + w, y + h, -0.25F).tex(tx + tw, ty + th).endVertex();
@@ -65,7 +65,7 @@ public class RSInterfaceRenderer extends TileEntitySpecialRenderer<BaseTileEntit
 	}
 
 	@Override
-	public void renderTileEntityAt(BaseTileEntity te, double x, double y, double z, float partialTicks, int destroyStage) {
+	public void render(BaseTileEntity te, double x, double y, double z, float partialTicks, int destroyStage, float alpha) {
 		GlStateManager.color(1, 1, 1, 1);
 		GlStateManager.disableLighting();
 		Util.luminate(te, te.getOrientation().front, te instanceof MultiLever ? 0 : 15);
