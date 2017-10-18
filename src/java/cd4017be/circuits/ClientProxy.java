@@ -14,7 +14,6 @@ import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.BlockItemRegistry;
 import cd4017be.lib.render.SpecialModelLoader;
 import cd4017be.lib.render.model.MultipartModel;
-import net.minecraft.util.BlockRenderLayer;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -55,9 +54,6 @@ public class ClientProxy extends CommonProxy {
 		SpecialModelLoader.setMod(RedstoneCircuits.ID);
 		SpecialModelLoader.registerBlockModel(RSP_BASIC, new MultipartModel(RSP_BASIC).setPipeVariants(3));
 		SpecialModelLoader.registerBlockModel(RSP_32BIT, new MultipartModel(RSP_32BIT).setPipeVariants(4));
-		SpecialModelLoader.registerBlockModel(INV_CONNECTOR, new MultipartModel(INV_CONNECTOR).setPipeVariants(3));
-		
-		INV_CONNECTOR.setBlockLayer(BlockRenderLayer.CUTOUT);
 		
 		BlockItemRegistry.registerRender(DESIGNER);
 		BlockItemRegistry.registerRender(ASSEMBLER);
@@ -69,7 +65,6 @@ public class ClientProxy extends CommonProxy {
 		BlockItemRegistry.registerRender(POTENTIOMETER);
 		BlockItemRegistry.registerRender(DISPLAY);
 		BlockItemRegistry.registerRender(SENSOR_READER);
-		BlockItemRegistry.registerRender(INV_CONNECTOR);
 		BlockItemRegistry.registerRender(OSZILLOGRAPH);
 		BlockItemRegistry.registerRender(FLUID_VALVE);
 		BlockItemRegistry.registerRender(ENERGY_VALVE);

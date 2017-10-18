@@ -14,7 +14,6 @@ tile.cd4017be.potentiometer.name=Redstone Potentiometer
 tile.cd4017be.display.name=LED-Signalanzeige
 tile.cd4017be.sensor_reader.name=Sensorausleser
 tile.cd4017be.oszillograph.name=Oszilloskop
-tile.cd4017be.inv_connector.name=Block Fernzugriffsleitung
 tile.cd4017be.designer.name=Schaltkreisplaner
 tile.cd4017be.fluid_valve.name=Flüssigkeitsventil
 tile.cd4017be.energy_valve.name=Energieflussregler
@@ -36,7 +35,6 @@ tile.cd4017be.potentiometer.tip=Gibt ein Signal mit regelbarer Intensität ab,\n
 tile.cd4017be.display.tip=Zeigt den Intensitätswert von Redstone-Signalen an.\nUnterstützt einen 32-bit Wertebereich von +/- 2.147.483.648
 tile.cd4017be.sensor_reader.tip=Gibt den Messwert eines §6Sensor§7moduls als Redstone-Signal aus.
 tile.cd4017be.oszillograph.tip=Plottet den zeitlichen verlauf von bis zu 4 Eingangswerten grafisch.\nDiese können Redstone-Signale oder Messwerte von §6Sensor§7en sein.
-tile.cd4017be.inv_connector.tip=Spiegelt die Capabilities des angeschlossenen\nBlocks wieder (Items, Flüssigkeiten, usw.).\nMarkierungen zeigen grün = verbunden, Rot = nicht\nInteragiere (ohne Item) zum neu orientieren.\nInteragiere mit solidem Block zum abdecken.
 tile.cd4017be.fluid_valve.tip=Misst oder begrenzt Flüssigkeitsfluss mit Redstone-Signalen.\n(zählt in Einheiten von 1mB)
 tile.cd4017be.energy_valve.tip=Misst oder begrenzt Energiefluss mit Redstone-Signalen.\nUnterstützt §3RF§7 und §3Tesla§7 (gezählt in RF Einheiten).
 tile.cd4017be.wireless_con\:0.tip=Verbindet §6solide Redstone§7- oder §632-bit Signalleiter\nüber beliebige Entfernungen (auch zwischen Dimensionen).\nDen zweiten Verbinder erhälst du beim plazieren des ersten.
