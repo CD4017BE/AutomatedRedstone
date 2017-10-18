@@ -27,7 +27,6 @@ import cd4017be.circuits.tileEntity.Display8bit;
 import cd4017be.circuits.tileEntity.EnergyValve;
 import cd4017be.circuits.tileEntity.FluidValve;
 import cd4017be.circuits.tileEntity.IntegerPipe;
-import cd4017be.circuits.tileEntity.InvConnector;
 import cd4017be.circuits.tileEntity.MultiLever;
 import cd4017be.circuits.tileEntity.Oszillograph;
 import cd4017be.circuits.tileEntity.Potentiometer;
@@ -69,7 +68,6 @@ public class Objects {
 	public static final OrientedBlock FLUID_VALVE = null;
 	public static final OrientedBlock ENERGY_VALVE = null;
 	public static final OrientedBlock WIRELESS_CON = null;
-	public static final BlockPipe INV_CONNECTOR = null;
 
 	//ItemBlocks
 	public static final BaseItemBlock designer = null;
@@ -85,7 +83,6 @@ public class Objects {
 	public static final BaseItemBlock bit_shifter = null;
 	public static final BaseItemBlock fluid_valve = null;
 	public static final BaseItemBlock energy_valve = null;
-	public static final BaseItemBlock inv_connector = null;
 	public static final ItemWirelessCon wireless_con = null;
 
 	//Items
@@ -133,7 +130,6 @@ public class Objects {
 			OrientedBlock.create("bit_shifter", Material.IRON, SoundType.METAL, 3, BitShifter.class, PropertyOrientation.ALL_AXIS).setBlockBounds(new AxisAlignedBB(0.25, 0.25, 0.0, 0.75, 0.75, 1.0)).setLightOpacity(0).setCreativeTab(tabCircuits),
 			OrientedBlock.create("fluid_valve", Material.IRON, SoundType.METAL, 0, FluidValve.class, PropertyOrientation.ALL_AXIS).setCreativeTab(tabCircuits),
 			OrientedBlock.create("energy_valve", Material.IRON, SoundType.METAL, 0, EnergyValve.class, PropertyOrientation.ALL_AXIS).setCreativeTab(tabCircuits),
-			BlockPipe.create("inv_connector", Material.GLASS, SoundType.GLASS, InvConnector.class, 1).setSize(0.375).setLightOpacity(0).setCreativeTab(tabCircuits).setHardness(0.5F),
 			OrientedBlock.create("wireless_con", Material.IRON, SoundType.METAL, 3, WirelessConnector.class, PropertyOrientation.ALL_AXIS).setBlockBounds(new AxisAlignedBB(0.25, 0.25, 0.0, 0.75, 0.75, 0.875)).setLightOpacity(0).setCreativeTab(tabCircuits)
 		);
 	}
@@ -154,7 +150,6 @@ public class Objects {
 			new BaseItemBlock(BIT_SHIFTER),
 			new BaseItemBlock(FLUID_VALVE),
 			new BaseItemBlock(ENERGY_VALVE),
-			new BaseItemBlock(INV_CONNECTOR),
 			new ItemWirelessCon(WIRELESS_CON),
 			new ItemProgramm("circuit_plan").setCreativeTab(tabCircuits),
 			new ItemItemSensor("item_sensor").setCreativeTab(tabCircuits),

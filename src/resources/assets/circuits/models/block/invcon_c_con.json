@@ -1,6 +1,0 @@
-{
-	"parent": "circuits:block/pipe6con",
-    "textures": {
-        "tex": "circuits:blocks/invcon_c"
-    }
-}
