@@ -1,0 +1,38 @@
+{
+	dependencies = ["pipe"];
+	textures = [
+		"circuits:blocks/rsp32n",
+		"circuits:blocks/rsp32i",
+		"circuits:blocks/rsp32o",
+		"circuits:blocks/rsp32b",
+		"circuits:blocks/rsp1n",
+		"circuits:blocks/rsp1i",
+		"circuits:blocks/rsp1o",
+		"circuits:blocks/rsp_shift"
+	];
+	sizes = [8,8,8,8,4,4,4,10]#;
+}
+
+core(t) {
+	texIdx(t);
+	pipe.core(sizes:t);
+}
+
+con(t) {
+	texIdx(t);
+	pipe.con(sizes:t);
+}
+
+item(t) {
+	texIdx(t);
+	pipe.full(sizes:t);
+}
+
+item_s(t) {
+	push();
+		texIdx(t);
+		pipe.full(sizes:t);
+	pop();
+	texIdx(7);
+	pipe.core(sizes:7);
+}
