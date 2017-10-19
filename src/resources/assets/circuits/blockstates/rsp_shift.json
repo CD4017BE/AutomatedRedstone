@@ -1,0 +1,31 @@
+{
+    "variants": {
+		"inventory": { "model": "circuits:_pipes.item_s(0)"},
+		"normal": { "model": "circuits:rsp_shift" },
+		"base": { "model": "circuits:_pipes.core(7)" },
+		"cn0": { "model": "circuits:_pipes.con(0)" },
+		"ce0": { "model": "circuits:_pipes.con(0)#e" },
+		"cs0": { "model": "circuits:_pipes.con(0)#s" },
+		"cw0": { "model": "circuits:_pipes.con(0)#w" },
+		"cb0": { "model": "circuits:_pipes.con(0)#bn" },
+		"ct0": { "model": "circuits:_pipes.con(0)#tn" },
+		"cn1": { "model": "circuits:_pipes.con(1)" },
+		"ce1": { "model": "circuits:_pipes.con(1)#e" },
+		"cs1": { "model": "circuits:_pipes.con(1)#s" },
+		"cw1": { "model": "circuits:_pipes.con(1)#w" },
+		"cb1": { "model": "circuits:_pipes.con(1)#bn" },
+		"ct1": { "model": "circuits:_pipes.con(1)#tn" },
+		"cn2": { "model": "circuits:_pipes.con(2)" },
+		"ce2": { "model": "circuits:_pipes.con(2)#e" },
+		"cs2": { "model": "circuits:_pipes.con(2)#s" },
+		"cw2": { "model": "circuits:_pipes.con(2)#w" },
+		"cb2": { "model": "circuits:_pipes.con(2)#bn" },
+		"ct2": { "model": "circuits:_pipes.con(2)#tn" },
+		"cn3": { "model": "circuits:_pipes.con(3)" },
+		"ce3": { "model": "circuits:_pipes.con(3)#e" },
+		"cs3": { "model": "circuits:_pipes.con(3)#s" },
+		"cw3": { "model": "circuits:_pipes.con(3)#w" },
+		"cb3": { "model": "circuits:_pipes.con(3)#bn" },
+		"ct3": { "model": "circuits:_pipes.con(3)#tn" }
+    }
+}

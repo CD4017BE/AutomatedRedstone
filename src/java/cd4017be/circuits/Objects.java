@@ -19,6 +19,7 @@ import cd4017be.circuits.block.*;
 import cd4017be.circuits.item.*;
 import cd4017be.circuits.tileEntity.Assembler;
 import cd4017be.circuits.tileEntity.BasicRSPipe;
+import cd4017be.circuits.tileEntity.BitShiftPipe;
 import cd4017be.circuits.tileEntity.BitShifter;
 import cd4017be.circuits.tileEntity.BlockSensor;
 import cd4017be.circuits.tileEntity.Circuit;
@@ -59,6 +60,7 @@ public class Objects {
 	public static final BlockCircuit CIRCUIT = null;
 	public static final BlockPipe RSP_32BIT = null;
 	public static final BlockPipe RSP_BASIC = null;
+	public static final BlockPipe RSP_SHIFT = null;
 	public static final OrientedBlock MULTILEVER = null;
 	public static final OrientedBlock DISPLAY = null;
 	public static final OrientedBlock SENSOR_READER = null;
@@ -80,6 +82,7 @@ public class Objects {
 	public static final BaseItemBlock oszillograph = null;
 	public static final BaseItemBlock rsp_32bit = null;
 	public static final ItemRSPipe rsp_basic = null;
+	public static final BaseItemBlock rsp_shift = null;
 	public static final BaseItemBlock bit_shifter = null;
 	public static final BaseItemBlock fluid_valve = null;
 	public static final BaseItemBlock energy_valve = null;
@@ -127,6 +130,7 @@ public class Objects {
 			OrientedBlock.create("oszillograph", Material.ROCK, SoundType.STONE, 0, Oszillograph.class, PropertyOrientation.XY_12_ROT).setCreativeTab(tabCircuits).setLightLevel(0.375F),
 			BlockPipe.create("rsp_32bit", Material.IRON, SoundType.METAL, IntegerPipe.class, 1).setSize(0.5).setLightOpacity(0).setCreativeTab(tabCircuits),
 			BlockPipe.create("rsp_basic", Material.IRON, SoundType.METAL, BasicRSPipe.class, 3).setSize(0.25).setLightOpacity(0).setCreativeTab(tabCircuits),
+			BlockPipe.create("rsp_shift", Material.IRON, SoundType.METAL, BitShiftPipe.class, 1).setSize(0.5).setBlockBounds(new AxisAlignedBB(3D/16D, 3D/16D, 3D/16D, 13D/16D, 13D/16D, 13D/16D)).setLightOpacity(0).setCreativeTab(tabCircuits),
 			OrientedBlock.create("bit_shifter", Material.IRON, SoundType.METAL, 3, BitShifter.class, PropertyOrientation.ALL_AXIS).setBlockBounds(new AxisAlignedBB(0.25, 0.25, 0.0, 0.75, 0.75, 1.0)).setLightOpacity(0).setCreativeTab(tabCircuits),
 			OrientedBlock.create("fluid_valve", Material.IRON, SoundType.METAL, 0, FluidValve.class, PropertyOrientation.ALL_AXIS).setCreativeTab(tabCircuits),
 			OrientedBlock.create("energy_valve", Material.IRON, SoundType.METAL, 0, EnergyValve.class, PropertyOrientation.ALL_AXIS).setCreativeTab(tabCircuits),
@@ -147,6 +151,7 @@ public class Objects {
 			new BaseItemBlock(OSZILLOGRAPH),
 			new BaseItemBlock(RSP_32BIT),
 			new ItemRSPipe(RSP_BASIC),
+			new BaseItemBlock(RSP_SHIFT),
 			new BaseItemBlock(BIT_SHIFTER),
 			new BaseItemBlock(FLUID_VALVE),
 			new BaseItemBlock(ENERGY_VALVE),

@@ -21,6 +21,7 @@ tile.cd4017be.fluid_valve.name=Fluid Valve
 tile.cd4017be.energy_valve.name=Energy Valve
 tile.cd4017be.wireless_con\:0.name=Wireless Signal Connectors
 tile.cd4017be.wireless_con\:1.name=§bLinked§f Wireless Signal Connector
+tile.cd4017be.rsp_shift.name=Bit-Shifting Signal Wire
 # tooltips
 tile.cd4017be.designer.tip=Used to design the circuit architecture\nand write it on a §6Schematic§7 for Assembling.
 tile.cd4017be.assembler.tip=Used to install components into a\n§6Circuit Casing§7 based on a §6Schematic§7.
@@ -87,6 +88,7 @@ gui.cd4017be.designer.name=Circuit Design:
 gui.cd4017be.potentiometer.name=Range:
 gui.cd4017be.fluid_valve.name=Fluid Valve Control
 gui.cd4017be.energy_valve.name=Energy Valve Control
+gui.cd4017be.rsp_shift.name=Bit Shifters
 # Gui tooltips
 gui.cd4017be.itemSensor.neg=Invert filter?
 gui.cd4017be.itemSensor.ore=Use Ore-Dictionary?
@@ -246,4 +248,10 @@ gui.cd4017be.designer.addOut=add Output\n
 gui.cd4017be.designer.info=Basic Controls\nSimulation mechanics\nSignal types
 gui.cd4017be.designer.info0=§7Click on Components in List on the right to add them to the circuitboard.\n§7Left-click a component on the circuitboard to select it for configuration.\n§7Hold Left-mouse to move it around.\n§7Use mouse-wheel to cycle through its input sockets.\n§7Right-click another component to connect the currently selected input socket with the output of that component.
 gui.cd4017be.designer.info1=§7Each simulation cycle the output states of all the components are recalculated in the order top row to bottom row and left to right in every row.\n§7So if a component uses itself or a component that comes after it as input then it will receive the signal by 1 cycle delayed (it still sees the state of the previous cycle).
-gui.cd4017be.designer.info2=§7The In- and Outputs of components can be either §4logic§7 (active/inactive) or §1nummeric§7 (numbers). The allowed range of §1nummeric§7 signals is determined by their bandwidth which is set to 8-bit (numbers in range -128 to +127) by default. Using the component settings on the right next to the inventory the bandwidth can be changed to 16-bit (-32768 to +32767), 24-bit (-8388608 to +8388607) or 32-bit (-2147483648 to +2147483648). The bigger the output-bandwidth of a component the more space it occupies on the circuitboard (indicated by bars next to it). Inputs and Outputs that are connected to each other should be set to the same bandwidth so the transmitted number doesn't get corrupted.\n§7If a §4logic§7 output is connected to a §1nummeric§7 8-bit input then §4inactive§7 is converted to §10§7 and §4active§7 is converted to §1-1§7. In the opposite case it depends on the setting of the logic input (see button tooltip). 
+gui.cd4017be.designer.info2=§7The In- and Outputs of components can be either §4logic§7 (active/inactive) or §1nummeric§7 (numbers). The allowed range of §1nummeric§7 signals is determined by their bandwidth which is set to 8-bit (numbers in range -128 to +127) by default. Using the component settings on the right next to the inventory the bandwidth can be changed to 16-bit (-32768 to +32767), 24-bit (-8388608 to +8388607) or 32-bit (-2147483648 to +2147483648). The bigger the output-bandwidth of a component the more space it occupies on the circuitboard (indicated by bars next to it). Inputs and Outputs that are connected to each other should be set to the same bandwidth so the transmitted number doesn't get corrupted.\n§7If a §4logic§7 output is connected to a §1nummeric§7 8-bit input then §4inactive§7 is converted to §10§7 and §4active§7 is converted to §1-1§7. In the opposite case it depends on the setting of the logic input (see button tooltip).
+gui.cd4017be.bit.size=Bandwidth
+gui.cd4017be.bit.ofs=Offset: %.0f bit
+gui.cd4017be.bit.out=Emitter
+gui.cd4017be.bit.in=Receiver
+gui.cd4017be.bit.info=
+gui.cd4017be.bit.info0=

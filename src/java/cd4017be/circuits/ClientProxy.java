@@ -35,10 +35,12 @@ public class ClientProxy extends CommonProxy {
 		BlockGuiHandler.registerGui(DESIGNER, GuiCircuitDesigner.class);
 		BlockGuiHandler.registerGui(FLUID_VALVE, GuiFluidValve.class);
 		BlockGuiHandler.registerGui(ENERGY_VALVE, GuiEnergyValve.class);
+		BlockGuiHandler.registerGui(RSP_SHIFT, GuiBitShiftPipe.class);
 		
 		SpecialModelLoader.setMod("circuits");
 		SpecialModelLoader.registerBlockModel(RSP_BASIC, new MultipartModel(RSP_BASIC).setPipeVariants(3));
 		SpecialModelLoader.registerBlockModel(RSP_32BIT, new MultipartModel(RSP_32BIT).setPipeVariants(4));
+		SpecialModelLoader.registerBlockModel(RSP_SHIFT, new MultipartModel(RSP_SHIFT).setPipeVariants(4));
 	}
 
 	@Override
@@ -48,6 +50,7 @@ public class ClientProxy extends CommonProxy {
 		BlockItemRegistry.registerRender(CIRCUIT, 0, 2);
 		BlockItemRegistry.registerRender(RSP_32BIT);
 		BlockItemRegistry.registerRender(RSP_BASIC, 0, 2);
+		BlockItemRegistry.registerRender(RSP_SHIFT);
 		BlockItemRegistry.registerRender(BIT_SHIFTER);
 		BlockItemRegistry.registerRender(MULTILEVER);
 		BlockItemRegistry.registerRender(POTENTIOMETER);

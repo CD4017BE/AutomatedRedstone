@@ -23,11 +23,25 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 		for (EnumFacing s : EnumFacing.values()) {
 			int i = s.ordinal(), k = shifts[i + 18];
 			if (k > 0)
-				newIn |= (world.getRedstonePower(pos.offset(s), s) & ~(-1 << k)) << shifts[i + 12];
+				newIn |= (world.getRedstonePower(pos.offset(s), s) & 0xffffffff >>> (32 - k)) << shifts[i + 12];
 		}
 		if (newIn != comp.inputState) {
 			comp.inputState = newIn;
 			comp.network.markStateDirty();
+		}
+	}
+
+	@Override
+	protected void checkCons() {
+		short pre = comp.rsIO;
+		super.checkCons();
+		pre ^= comp.rsIO;
+		if (pre != 0) {
+			for (int i = 0; i < 12 ; i++)
+				if ((pre >> i & 1) != 0) {
+					int j = i / 2 - (i & 1) * 12 + 18;
+					if (shifts[j] <= 0) shifts[j] = (byte)(32 - shifts[j - 6]);
+				}
 		}
 	}
 
@@ -41,7 +55,7 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 	public int redstoneLevel(EnumFacing side, boolean strong) {
 		int i = side.ordinal(), k = shifts[i + 6];
 		if (strong || k == 0) return 0;
-		return comp.network.outputState >> shifts[i] & ~(-1 << k);
+		return comp.network.outputState >> shifts[i] & 0xffffffff >>> (32 - k);
 	}
 
 	@Override
@@ -68,9 +82,13 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 		byte cmd = data.readByte();
 		if (cmd >= 0 && cmd < shifts.length) {
 			byte v = data.readByte();
+			if (v < 0) v = 0;
+			else if (v > 32) v = 32;
 			shifts[cmd] = v;
 			int s = cmd % 12 - 6;
 			if (s >= 0) {
+				byte b = (byte) (32 - v);
+				if (shifts[s] > b) shifts[s] = b;
 				s *= 2;
 				if (cmd < 12) s++;
 				if ((comp.rsIO >> s & 1) != 0 ^ v > 0) {
@@ -78,6 +96,8 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 					markUpdate();
 				}
 			}
+			if (cmd < 12) comp.onStateChange();
+			else updateInput();
 		}
 	}
 
