@@ -63,9 +63,4 @@ public class BasicRSPipe extends IntegerPipe {
 		} else return false;
 	}
 
-	@Override
-	public int redstoneLevel(EnumFacing s, boolean str) {
-		return !str && (comp.rsIO >> (s.ordinal() * 2) & 2) != 0 ? comp.convertSignal(comp.network.outputState) : 0;
-	}
-
 }

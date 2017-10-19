@@ -40,15 +40,33 @@ public class IntegerPipe extends PassiveMultiblockTile<IntegerComp, SharedIntege
 
 	protected int bitSize() {return 32;}
 
+	protected int convertSignal(int s) {
+		return (s & ~comp.mask) == 0 ? s : s < 0 ? 0 : comp.mask;
+	}
+
+	protected void updateInput() {
+		int newIn = 0;
+		for (byte i = 0; i < 6; i++)
+			if ((comp.rsIO >> (i * 2) & 1) != 0) {
+				EnumFacing s = EnumFacing.VALUES[i];
+				newIn |= world.getRedstonePower(pos.offset(s), s);
+			}
+		newIn = convertSignal(newIn);
+		if (newIn != comp.inputState) {
+			comp.inputState = newIn;
+			comp.network.markStateDirty();
+		}
+	}
+
 	@Override
 	public void onRedstoneStateChange(EnumFacing side, int value, TileEntity src) {
-		comp.updateInput();
+		updateInput();
 	}
 
 	@Override
 	public void neighborBlockChange(Block b, BlockPos pos) {
 		if (b != Blocks.REDSTONE_TORCH) checkCons();
-		comp.updateInput();
+		updateInput();
 		super.neighborBlockChange(b, pos);
 	}
 
@@ -100,7 +118,7 @@ public class IntegerPipe extends PassiveMultiblockTile<IntegerComp, SharedIntege
 
 	@Override
 	public int redstoneLevel(EnumFacing side, boolean strong) {
-		return !strong && (comp.rsIO >> (side.ordinal() * 2) & 2) != 0 ? comp.convertSignal(comp.network.outputState) : 0;
+		return !strong && (comp.rsIO >> (side.ordinal() * 2) & 2) != 0 ? convertSignal(comp.network.outputState) : 0;
 	}
 
 	@Override
