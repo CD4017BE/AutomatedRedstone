@@ -27,10 +27,10 @@ public class GuiDisplay8bit extends AdvancedGui {
 		super.initGui();
 		//guiComps.add(new TextField(0, 8, 27, 11, 7, 2).setTooltip("circuit.ext"));
 		//guiComps.add(new TextField(1, 21, 27, 11, 7, 2).setTooltip("circuit.size"));
-		guiComps.add(new Button(0, 21, 26, 18, 9, 0).texture(108, 100).setTooltip("display8bit.mode"));
-		guiComps.add(new TextField(1, 54, 27, 46, 7, 8).setTooltip("display8bit.format"));
-		guiComps.add(new TextField(2, 8, 16, 92, 7, 16).setTooltip("display8bit.text"));
-		guiComps.add(new TextField(3, 8, 38, 92, 7, 16).setTooltip("display8bit.text"));
+		guiComps.add(new Button(0, 21, 26, 18, 9, 0).texture(108, 100).setTooltip("display.mode"));
+		guiComps.add(new TextField(1, 54, 27, 46, 7, 8).setTooltip("display.format"));
+		guiComps.add(new TextField(2, 8, 16, 92, 7, 16).setTooltip("display.text"));
+		guiComps.add(new TextField(3, 8, 38, 92, 7, 16).setTooltip("display.text"));
 	}
 
 	@Override

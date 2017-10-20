@@ -21,7 +21,7 @@ tile.cd4017be.fluid_valve.name=Fluid Valve
 tile.cd4017be.energy_valve.name=Energy Valve
 tile.cd4017be.wireless_con\:0.name=Wireless Signal Connectors
 tile.cd4017be.wireless_con\:1.name=§bLinked§f Wireless Signal Connector
-tile.cd4017be.rsp_shift.name=Bit-Shifting Signal Wire
+tile.cd4017be.rsp_shift.name=Bit Splitter Wire
 # tooltips
 tile.cd4017be.designer.tip=Used to design the circuit architecture\nand write it on a §6Schematic§7 for Assembling.
 tile.cd4017be.assembler.tip=Used to install components into a\n§6Circuit Casing§7 based on a §6Schematic§7.
@@ -42,6 +42,7 @@ tile.cd4017be.fluid_valve.tip=Can control or measure fluid flow with redstone si
 tile.cd4017be.energy_valve.tip=Can control or measure energy flow with redstone signals.\nSupports §3RF§7 and §3Tesla§7 (counts in unit of 1RF).
 tile.cd4017be.wireless_con\:0.tip=Connects two §6Solid Redstone§7 or §632-bit-Signal Wires\nacross any distance and even between dimensions.\nYou'll get the second connector when placing this one.
 tile.cd4017be.wireless_con\:1.tip=Place to establish a connection with linked block.\nWarning: At least one of both connectors must\nstay placed in world to keep up the linkage.\nSneak-Click block to remove both connectors at once\nand get them back as the unlinked connector.
+tile.cd4017be.rsp_shift.tip=Used to transmit multiple signals over the same wire by splitting its bandwidth.\nSneak-Click to disconnect Wires & Normal-Click to open GUI.
 
 tile.cd4017be.multilever.click0=Output as bits 0-7 [1-128]
 tile.cd4017be.multilever.click1=Output as bits 8-15 [256-32768]
@@ -142,7 +143,7 @@ gui.cd4017be.circuit.ext=Signal bit offset
 gui.cd4017be.circuit.size=Signal bandwidth in bits
 gui.cd4017be.circuit.info=Update modes\nSignal I/O\nState manipulation
 gui.cd4017be.circuit.info0=§7The update modes define how the circuit logic is updated:\n§7Timer Mode is recommended when working with timed events. Whereas the interrupt modes are usefull when fast (50ms) reaction on input changes is required.\n§7Tick Interval then defines the delay or cooldown between updates. Better casings allow smaller intervals.
-gui.cd4017be.circuit.info1=§7All Redstone I/O ports defined in the circuit are listed in the bottom right, where you can set which block face they should be bound to (multiple I/O ports can share the same block face).\n§7The sliders allow combining multiple signals in their binary representation and this way send them through a single cable without interference (bit-shifter).
+gui.cd4017be.circuit.info1=§7All Redstone I/O ports defined in the circuit are listed in the bottom right, where you can set which block face they should be bound to (multiple I/O ports can share the same block face).\n§7The sliders allow combining multiple signals in their binary representation and this way send them through a single cable without interference (see §6Bit Splitter Wire§7).
 gui.cd4017be.circuit.info2=§7The grid below shows the current output states of all the components in the circuit (arranged like in Circuit Designer).\n§7Left-/right-click a cell to set it to the logic value active/inactive or scroll to increase/decrease its nummeric value by 1 (16 when holding SHIFT).\n§7Note that manual edits are uneffective on components that override their output state before it's read by others!
 gui.cd4017be.potent.min=Minimum redstone value\n(any integer allowed)
 gui.cd4017be.potent.max=Maximum redstone value\n(any integer allowed)
@@ -253,5 +254,6 @@ gui.cd4017be.bit.size=Bandwidth
 gui.cd4017be.bit.ofs=Offset: %.0f bit
 gui.cd4017be.bit.out=Emitter
 gui.cd4017be.bit.in=Receiver
-gui.cd4017be.bit.info=
-gui.cd4017be.bit.info0=
+gui.cd4017be.bit.info=Concept\nConfiguration
+gui.cd4017be.bit.info0=§7How to transmit 5 numbers in range 0-99 over a connection that only supports a single 10 digit number?\n§7Well, just make a 10 digit number whose first two digits are those of our first number, the next two digit are filled with out second number and so on ...\n§7This is actually how this device works but using binary bits instead of decimal digits.\n§7§oPlayers with more experience in binary numbers may also exploit this device for other uses.
+gui.cd4017be.bit.info1=§7Using the text fields you can specify for each of the 6 block faces an input and output bandwidth (0 = not connected).\n§7You have a total of 32 bit available to freely distribute over all the individual signals you want to transfer. How many bits you should give each signal depends individually on the range of possible redstone strength values they could carry: n bits -> range 0 ... 2^n - 1\n§7Using the sliders you can then define where in the total bit pattern each value should be located (make sure they don't overlap to prevent interference). Of course also all entrance and exit points in your cable network that belong to the same signal must have the same bandwidth and bit offset setting for the transmission to work.
