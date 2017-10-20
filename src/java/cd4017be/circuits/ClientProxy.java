@@ -49,7 +49,7 @@ public class ClientProxy extends CommonProxy {
 		BlockItemRegistry.registerRender(ASSEMBLER);
 		BlockItemRegistry.registerRender(CIRCUIT, 0, 2);
 		BlockItemRegistry.registerRender(RSP_32BIT);
-		BlockItemRegistry.registerRender(RSP_BASIC, 0, 2);
+		BlockItemRegistry.registerRenderBS(RSP_BASIC, 0, 2);
 		BlockItemRegistry.registerRender(RSP_SHIFT);
 		BlockItemRegistry.registerRender(BIT_SHIFTER);
 		BlockItemRegistry.registerRender(MULTILEVER);

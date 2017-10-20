@@ -1,5 +1,8 @@
 {
     "variants": {
+		"inventory": { "model": "circuits:_pipes.item(4)"},
+		"inventory1": { "model": "circuits:_pipes.item(5)"},
+		"inventory2": { "model": "circuits:_pipes.item(6)"},
 		"type=0": { "model": "circuits:rsp_basic" },
 		"type=1": { "model": "circuits:rsp_basic" },
 		"type=2": { "model": "circuits:rsp_basic" },
