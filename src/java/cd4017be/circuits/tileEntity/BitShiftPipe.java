@@ -2,24 +2,41 @@ package cd4017be.circuits.tileEntity;
 
 import java.io.IOException;
 
+import cd4017be.api.computers.ComputerAPI;
 import cd4017be.lib.BlockGuiHandler.ClientPacketReceiver;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
+import li.cil.oc.api.machine.Arguments;
+import li.cil.oc.api.machine.Callback;
+import li.cil.oc.api.machine.Context;
+import li.cil.oc.api.network.Environment;
+import li.cil.oc.api.network.Message;
+import li.cil.oc.api.network.Node;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.ITickable;
+import net.minecraftforge.fml.common.Optional.*;
 
-public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketReceiver {
+/**
+ * 
+ * @author CD4017BE
+ */
+@InterfaceList(value = {
+	@Interface(iface = "li.cil.oc.api.network.Environment", modid = "OpenComputers"),
+	@Interface(iface = "net.minecraft.util.ITickable", modid = "OpenComputers")})
+public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketReceiver, Environment, ITickable {
 
 	/**[0-5]: out ofs, [6-11]: out size, [12-17]: in ofs, [18-23]: in size */
 	public final byte[] shifts = new byte[24];
+	public int internal;
 
 	@Override
 	protected void updateInput() {
-		int newIn = 0;
+		int newIn = internal;
 		for (EnumFacing s : EnumFacing.values()) {
 			int i = s.ordinal(), k = shifts[i + 18];
 			if (k > 0)
@@ -60,6 +77,8 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+		if (node != null) ComputerAPI.saveNode(node, nbt);
+		nbt.setInteger("int", internal);
 		nbt.setByteArray("shift", shifts);
 		return super.writeToNBT(nbt);
 	}
@@ -67,6 +86,8 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
+		if (node != null) ComputerAPI.readNode(node, nbt);
+		internal = nbt.getInteger("int");
 		byte[] b = nbt.getByteArray("shift");
 		System.arraycopy(b, 0, shifts, 0, Math.min(b.length, shifts.length));
 		short x = 0;
@@ -98,6 +119,9 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 			}
 			if (cmd < 12) comp.onStateChange();
 			else updateInput();
+		} else {
+			internal = 0;
+			updateInput();
 		}
 	}
 
@@ -107,9 +131,10 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 
 	@Override
 	public int[] getSyncVariables() {
-		int[] data = new int[6];
+		int[] data = new int[7];
 		for (int i = 0; i < shifts.length; i++)
 			data[i % 6] |= (shifts[i] & 0xff) << (i / 6 * 8);
+		data[6] = internal;
 		return data;
 	}
 
@@ -118,6 +143,7 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 		if (i < 6)
 			for (int j = 0; j < 4; j++)
 				shifts[i + j * 6] = (byte)(v >> j * 8);
+		else internal = v;
 	}
 
 	@Override
@@ -127,6 +153,52 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 
 	@Override
 	public void updateClientChanges(DataContainer container, PacketBuffer dis) {
+	}
+
+	private Object node = ComputerAPI.newOCnode(this, "analog_port", false);
+
+	@Override
+	public void update() {
+		if (!world.isRemote && node != null) ComputerAPI.update(this, node, 0);
+	}
+
+	@Override
+	public Node node() {
+		return (Node) node;
+	}
+
+	@Override
+	public void onConnect(Node node) {
+	}
+
+	@Override
+	public void onDisconnect(Node node) {
+	}
+
+	@Override
+	public void onMessage(Message message) {
+	}
+
+	@Method(modid = "OpenComputers")
+	@Callback
+	public Object[] read(Context context, Arguments args) throws Exception {
+		return new Object[] {comp.network.outputState};
+	}
+
+	@Method(modid = "OpenComputers")
+	@Callback
+	public Object[] write(Context context, Arguments args) throws Exception {
+		internal = args.checkInteger(0);
+		updateInput();
+		return null;
+	}
+
+	public void setInput(int v, EnumFacing side) {
+		int i = side.ordinal() + 12, o = shifts[i];
+		int mask = 0xffffffff >>> (32 - shifts[i + 6]) << o;
+		internal &= ~mask;
+		internal |= v << o & mask;
+		updateInput();
 	}
 
 }

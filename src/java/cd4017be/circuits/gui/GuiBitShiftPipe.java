@@ -23,17 +23,17 @@ public class GuiBitShiftPipe extends AdvancedGui {
 	@Override
 	public void initGui() {
 		xSize = 134;
-		ySize = 76;
+		ySize = 84;
 		super.initGui();
 		tabsY = -56;
 		for (int i = 0; i < 6; i++)
 			setSlider(i);
 		for (int i = 0; i < 6; i++)
-			guiComps.add(new TextField(i + 6, 80, 16 + i * 9, 12, 7, 2).setTooltip("bit.size"));
+			guiComps.add(new TextField(i + 6, 80, 16 + i * 9, 12, 7, 2).color(0xff00ffc0, 0xffff0000).setTooltip("bit.size"));
 		for (int i = 12; i < 18; i++)
 			setSlider(i);
 		for (int i = 0; i < 6; i++)
-			guiComps.add(new TextField(i + 18, 42, 16 + i * 9, 12, 7, 2).setTooltip("bit.size"));
+			guiComps.add(new TextField(i + 18, 42, 16 + i * 9, 12, 7, 2).color(0xff00c0ff, 0xffff0000).setTooltip("bit.size"));
 		for (int i = 0; i < 6; i++) {
 			final EnumFacing f = EnumFacing.VALUES[i];
 			guiComps.add(new Button(i + 24, 70, 15 + i * 9, 9, 9, 2, ()-> f, (o)-> {}).texture(143, 5).setTooltip("bit.out"));
@@ -43,6 +43,8 @@ public class GuiBitShiftPipe extends AdvancedGui {
 			guiComps.add(new Button(i + 30, 55, 15 + i * 9, 9, 9, 1, ()-> f, (o)-> {}).texture(134, 5).setTooltip("bit.in"));
 		}
 		guiComps.add(new InfoTab(36, 7, 6, 7, 8, "bit.info"));
+		guiComps.add(new Text<Integer>(37, 7, 70, 48, 7, "\\%08X", ()-> tile.internal).font(0xff8000ff, 8).setTooltip("bit.int"));
+		guiComps.add(new Button(38, 72, 70, 21, 7, (b)-> sendCommand(24)).setTooltip("bit.reset"));
 	}
 
 	private void setSlider(int i) {
