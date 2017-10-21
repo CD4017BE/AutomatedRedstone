@@ -106,13 +106,13 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 					skip += l;
 					continue;
 				}
-				ModuleType mt = ModuleType.values()[t & 0x3f];
+				ModuleType mt = ModuleType.get(t & 0x3f);
 				int sz = (t >> 6 & 3) + 1;
 				if (mt == ModuleType.OUT) {
 					NBTTagCompound tag = new NBTTagCompound();
 					tag.setBoolean("d", true);
 					byte addr = data.get();
-					if (addrSize(addr, mt, 0) >= size) {N[8] = 1; return;}
+					if (addrSize(addr, (byte) 0) >= size) {N[8] = 1; return;}
 					tag.setByte("p", addr);
 					byte[] str = new byte[data.get()];
 					data.get(str);
@@ -144,18 +144,24 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 						NBTTagCompound tag = new NBTTagCompound();
 						tag.setBoolean("d", false);
 						tag.setByte("p", (byte)(p & 0x3f | t & 0xc0));
-						io += sz * 4 + 4;
+						io += sz * 8;
 						byte[] str = new byte[data.get()];
 						data.get(str);
 						tag.setString("n", new String(str));
 						list.appendTag(tag);
 						p += sz;
 					} else {
-						byte[] buf = new byte[mt.varInAm ? sz : mt.cons()];
-						data.get(buf);
-						out.writeBytes(buf);
-						for (int i = 0; i < buf.length; i++)
-							maxAddr = Math.max(maxAddr, addrSize(buf[i], mt, i));
+						int w = mt.varInAm ? sz * mt.group : mt.cons();
+						for (int i = 0; i < w; i++) {
+							byte con = mt.conType(i);
+							byte addr = data.get();
+							out.writeByte(addr);
+							if (extraByte(addr, con)) {
+								out.writeByte(data.get());
+								logic++;
+							}
+							maxAddr = Math.max(maxAddr, addrSize(addr, con));
+						}
 						logic += logicCost(mt, sz);
 						calc += calcCost(mt, sz);
 						data.position(data.get() + data.position());//skip labels
@@ -189,8 +195,12 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 		nbt.setString("name", name);
 	}
 
-	private int addrSize(byte val, ModuleType mt, int i) {
-		return (val & 0x3f) + (mt.conType(i) < 4 ? (val >> 6 & 3) : 0);
+	public static boolean extraByte(byte val, byte ct) {
+		return (val & 0xc0) >= 0x80 && ct >= 4;
+	}
+
+	private int addrSize(byte val, byte ct) {
+		return (val & 0x3f) + (ct < 4 ? (val >> 6 & 3) : 0);
 	}
 
 	public static int logicCost(ModuleType t, int sz) {
@@ -199,7 +209,7 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 		case NOT: return 1;
 		case LS: case NLS: case EQ: case NEQ: return 2;
 		case SWT: case MIN: case MAX: return (sz + 1) / 2 + 1;
-		case CNT1: return 1;
+		case CNT1: case COMB: return 1;
 		case CNT2: return 2;
 		default: return 0;
 		}
@@ -213,6 +223,7 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 		case CNT2: return sz;
 		case RNG: return sz + 2;
 		case SQRT: return 2 * sz + 6;
+		case BSL: case BSR: return 1;
 		default: return 0;
 		}
 	}

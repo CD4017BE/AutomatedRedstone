@@ -39,6 +39,7 @@ public class GuiCircuitDesigner extends AdvancedGui {
 	private static final ResourceLocation BG_TEX = new ResourceLocation("circuits", "textures/gui/circuit_designer.png");
 	private final CircuitDesigner tile;
 	private int scroll;
+	private Button conMode;
 
 	public GuiCircuitDesigner(IGuiData tile, EntityPlayer player) {
 		super(new TileContainer(tile, player));
@@ -57,7 +58,7 @@ public class GuiCircuitDesigner extends AdvancedGui {
 		guiComps.add(new Button(1, 184, 232, 16, 16, -1).setTooltip("designer.save"));
 		guiComps.add(new Button(2, 220, 232, 16, 16, -1).setTooltip("designer.load"));
 		guiComps.add(new Button(3, 220, 214, 16, 16, 0).texture(36, 144).setTooltip("designer.wire#"));
-		guiComps.add(new Button(4, 183, 173, 18, 9, 0).texture(0, 144).setTooltip("designer.in#"));
+		guiComps.add((conMode = new Button(4, 183, 173, 18, 9, 0)).setTooltip("designer.in#"));
 		guiComps.add(new Button(5, 201, 173, 18, 9, 0).texture(18, 144).setTooltip("designer.out#"));
 		guiComps.add(new Button(6, 219, 173, 18, 9, -1).setTooltip("designer.del"));
 		guiComps.add(new TextField(7, 184, 188, 52, 7, 10).color(0xffc0c000, 0xffff0000).setTooltip("designer.label"));
@@ -83,15 +84,18 @@ public class GuiCircuitDesigner extends AdvancedGui {
 		case 0: return tile.name;
 		case 3: return tile.renderAll ? 1 : 0;
 		case 4: {
-			if (tile.selMod < 0 || (m = tile.modules[tile.selMod]) == null || m.cons.length == 0) return 0;
+			if (tile.selMod < 0 || (m = tile.modules[tile.selMod]) == null || m.cons.length == 0) return setIn(0);
 			Con c = m.cons[m.selCon];
-			if (c == null) return 0;
-			return (int)c.type + 1;
+			if (c == null) return setIn(0);
+			return setIn(c.type + 1);
 		}
 		case 5:
 			if (tile.selMod < 0 || (m = tile.modules[tile.selMod]) == null) return 0;
 			if (m.type.isNum) return m.size;
-			if (m.type.varInAm) return m.cons() + 4;
+			if (m.type.varInAm) {
+				int n = m.cons();
+				return n < 4 ? n + 4 : n / 2 + 6;
+			}
 			else return 0;
 		case 7:
 			if (tile.selMod < 0 || (m = tile.modules[tile.selMod]) == null) return "";
@@ -99,6 +103,12 @@ public class GuiCircuitDesigner extends AdvancedGui {
 		case 10: return (float)scroll * ScrollSize;
 		default: return null;
 		}
+	}
+
+	private int setIn(int i) {
+		if (i > 6) conMode.texture(60, 81);
+		else conMode.texture(0, 144);
+		return i;
 	}
 
 	@Override
@@ -136,11 +146,13 @@ public class GuiCircuitDesigner extends AdvancedGui {
 			if (c == null) break;
 			if (c.type < 4) {
 				c.type = (byte)((c.type + ((Integer)obj == 0 ? 1 : 3)) % 4);
-				tile.modified++;
-			} else if (m.type.can8bit) {
-				c.type ^= 1;
-				tile.modified++;
-			} break;
+			} else {
+				boolean back = (Integer)obj == 0;
+				c.type = (byte)((c.type + (back ? 7 : 9)) % 10 + 4);
+				if (c.type == 5 && !m.type.can8bit) c.type += back ? -1 : 1;
+			}
+			tile.modified++;
+			break;
 		case 5:
 			if (tile.selMod < 0 || (m = tile.modules[tile.selMod]) == null) break;
 			if (m.type.isNum) {
@@ -329,7 +341,7 @@ public class GuiCircuitDesigner extends AdvancedGui {
 					if (mod.type.varInAm) {
 						for (int j = 0; j < mod.cons.length; j++)
 							if (mod.cons[j] == null)
-								drawTexturedModalRect(x1 + 1, y1 + mod.type.conRenderPos(j), 0, 128, 4, 4);
+								drawTexturedModalRect(x1 + mod.type.conRenderX(j), y1 + mod.type.conRenderY(j), 0, 128, 4, 4);
 					}
 					if (mod.type == ModuleType.CST)
 						drawSmallNum(x1 + 3, y1 + 9, mod.label, 4);
@@ -345,7 +357,7 @@ public class GuiCircuitDesigner extends AdvancedGui {
 						if (mod.cons.length > 0) {
 							Con c = mod.cons[mod.selCon];
 							if (c != null)
-								drawTexturedModalRect(x1 + 1, y1 + mod.type.conRenderPos(mod.selCon), 0, c.type < 4 ? 136 : 132, 4, 4);
+								drawTexturedModalRect(x1 + mod.type.conRenderX(mod.selCon), y1 + mod.type.conRenderY(mod.selCon), 0, c.type < 4 ? 136 : 132, 4, 4);
 						}
 					}
 				}
@@ -372,9 +384,9 @@ public class GuiCircuitDesigner extends AdvancedGui {
 				g = m.pos == tile.selMod && i == m.selCon ? 0xc0 : 0;
 				if (c.type < 4) {r = 0; b = 0xff;}
 				else {r = 0xff; b = 0;}
-				int addr = c.getAddr(), y2 = y1 + m.type.conRenderPos(i) + 2;
+				int addr = c.getAddr(), x2 = x1 + m.type.conRenderX(i) + 2, y2 = y1 + m.type.conRenderY(i) + 2;
 				for (int n = c.type < 4 ? c.type : 0; n >= 0; n--, addr++) {
-					vb.pos(x1 + 3, y2, zLevel).color(r,g,b,a).endVertex();
+					vb.pos(x2, y2, zLevel).color(r,g,b,a).endVertex();
 					vb.pos(px + (addr & 7) * 24 + 22, (double)(py + (addr >> 3) * 16) + 8.5, zLevel).color(r,g,b,a).endVertex();
 				}
 			}
