@@ -1,8 +1,8 @@
 {
     "variants": {
-		"inventory": { "model": "circuits:_pipes.item(0)"},
-		"normal": { "model": "circuits:rsp_32bit" },
-		"base": { "model": "circuits:_pipes.core(0)" },
+		"inventory": { "model": "circuits:_pipes.item_s(0)"},
+		"normal": { "model": "circuits:rsp_shift" },
+		"base": { "model": "circuits:_pipes.core(7)" },
 		"cn0": { "model": "circuits:_pipes.con(0)" },
 		"ce0": { "model": "circuits:_pipes.con(0)#e" },
 		"cs0": { "model": "circuits:_pipes.con(0)#s" },

@@ -1,0 +1,28 @@
+core(size) {
+	Loc a = 8 - size/2, b = 8 + size/2;
+	Loc Q = [a,a,a, b,b,b]#, T = [a,a, b,b]#;
+	for(F:["uv-","Uv+","-uv","+Uv","v-u","v+U"]) {add(rect(Q, T, F));}
+}
+
+con(size) {
+	Loc a = 8 - size/2, b = 8 + size/2;
+	Loc Q = [a,a,0, b,b,a]#, T = [0,a, a,b]#;
+	for(F:["-vu","+Vu","v-u","V+u"]) {add(rect(Q, T, F));}
+	add(rect(Q, [a,a, b,b]#, "uv-N"));
+}
+
+full(size) {
+	Loc a = 8 - size/2, b = 8 + size/2;
+	Loc Q = [a,a,0, b,b,16]#, T = [0,a, 16,b]#;
+	for(F:["-vU","+vU","v-U","v+U"]) {add(rect(Q, T, F));}
+	T = [a,a, b,b]#;
+	add(rect(Q, T, "uv-N"), rect(Q, T, "Uv+S"));
+}
+
+filter(w,d) {
+	Loc a = 8 - w/2, b = 8 + w/2;
+	Loc Q = [a,a,-0.01, b,b,d]#, T = [w,0, w+d,w]#;
+	for(F:["-vU","+vU","v-U","v+U"]) {add(rect(Q, T, F));}
+	T = [0,0, w,w]#;
+	add(rect(Q, T, "uv-N"), rect(Q, T, "Uv+"));
+}

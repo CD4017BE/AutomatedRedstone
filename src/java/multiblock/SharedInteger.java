@@ -42,12 +42,8 @@ public class SharedInteger extends SharedNetwork<IntegerComp, SharedInteger> imp
 	@Override
 	public void remove(IntegerComp comp) {
 		super.remove(comp);
-		if ((comp.rsIO & AllIn) != 0) {
-			inputs.remove(comp);
-			markStateDirty();
-		}
-		if ((comp.rsIO & AllOut) != 0) 
-			outputs.remove(comp);
+		if (inputs.remove(comp)) markStateDirty();
+		outputs.remove(comp);
 	}
 
 	@Override
@@ -55,13 +51,13 @@ public class SharedInteger extends SharedNetwork<IntegerComp, SharedInteger> imp
 		SharedInteger si = new SharedInteger(comps);
 		si.outputState = outputState;
 		for (IntegerComp c : comps.values()) {
+			this.inputs.remove(c);
 			if ((c.rsIO & AllIn) != 0) {
-				this.inputs.remove(c);
 				si.inputs.add(c);
 				markStateDirty();
 			}
+			this.outputs.remove(c);
 			if ((c.rsIO & AllOut) != 0) {
-				this.outputs.remove(c);
 				si.outputs.add(c);
 			}
 		}
@@ -70,10 +66,10 @@ public class SharedInteger extends SharedNetwork<IntegerComp, SharedInteger> imp
 	}
 
 	public void setIO(IntegerComp c, short con) {
-		if ((con & AllIn) != 0 && (c.rsIO & AllIn) == 0) inputs.add(c);
-		else if ((con & AllIn) == 0 && (c.rsIO & AllIn) != 0) inputs.remove(c);
-		if ((con & AllOut) != 0 && (c.rsIO & AllOut) == 0) outputs.add(c);
-		else if ((con & AllOut) == 0 && (c.rsIO & AllOut) != 0) outputs.remove(c);
+		if ((con & AllIn) != 0) inputs.add(c);
+		else inputs.remove(c);
+		if ((con & AllOut) != 0) outputs.add(c);
+		else outputs.remove(c);
 		c.rsIO = con;
 		markStateDirty();
 	}

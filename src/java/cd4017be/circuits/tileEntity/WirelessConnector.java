@@ -54,6 +54,7 @@ public class WirelessConnector extends BaseTileEntity implements INeighborAwareT
 	}
 
 	private void checkLink(boolean forceLoad) {
+		if (world.isRemote) return;
 		World world = DimensionManager.getWorld(linkDim);
 		TileEntity te = world != null && (forceLoad || world.isBlockLoaded(linkPos)) ? world.getTileEntity(linkPos) : null;
 		if (te == linkTile) return;
@@ -115,7 +116,7 @@ public class WirelessConnector extends BaseTileEntity implements INeighborAwareT
 	@Override
 	public void validate() {
 		updateLink = updateCon = true;
-		TickRegistry.instance.updates.add(this);
+		if (!world.isRemote) TickRegistry.instance.updates.add(this);
 		super.validate();
 	}
 

@@ -12,16 +12,20 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.SlotItemHandler;
 import cd4017be.circuits.Objects;
+import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.BlockGuiHandler.ClientPacketReceiver;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.capability.LinkedInventory;
 import cd4017be.lib.Gui.TileContainer;
 import cd4017be.lib.tileentity.BaseTileEntity;
+import cd4017be.lib.util.Utils;
 
 public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientPacketReceiver {
 
@@ -100,6 +104,22 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 			break;
 		case 6: renderAll = false; break;
 		case 7: renderAll = true; break;
+		case 8:
+			for (EnumFacing side : EnumFacing.HORIZONTALS) {
+				TileEntity te = Utils.neighborTile(this, side);
+				if (te instanceof Assembler) {
+					Assembler ass = (Assembler)te;
+					if (dataItem.getItem() == Objects.circuit_plan) {
+						dataItem.setTagCompound(writeNBT(new NBTTagCompound()));
+						ItemStack item = ass.inventory.items[7];
+						ass.inventory.setStackInSlot(7, dataItem);
+						dataItem = item;
+					}
+					BlockGuiHandler.openBlockGui(sender, world, pos.offset(side));
+					return;
+				}
+			}
+			break;
 		}
 	}
 
@@ -164,13 +184,15 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 					dos.writeByte(m.pos - pnp);
 					n++;
 				}
-				int t = m.type.ordinal();
+				int t = m.type.id();
 				if (m.type.isNum) t |= (m.size - 1) << 6;
-				else if (m.type.varInAm) t |= (m.cons() - 1) << 6;
+				else if (m.type.varInAm) t |= ((m.cons() - 1) / m.type.group) << 6;
 				dos.writeByte(t);
 				for (Con c : m.cons)
-					if (c != null)
-						dos.writeByte(c.getAddr() & 0x3f | (c.type & 3) << 6);
+					if (c != null) {
+						if (c.type >= 6) dos.writeByte(c.getAddr() & 0x3f | 0x80).writeByte(1 << (c.type - 6));
+						else dos.writeByte(c.getAddr() & 0x3f | (c.type & 3) << 6);
+					}
 				byte[] b = m.label.getBytes();
 				dos.writeByte(b.length);
 				dos.writeBytes(b);
@@ -188,17 +210,18 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 			int t = dis.readByte();
 			if (t == -1) p += dis.readByte() & 0xff;
 			else {
-				Module m = new Module(ModuleType.values()[t & 0x3f]);
+				Module m = new Module(ModuleType.get(t & 0x3f));
 				int sz = (t >> 6 & 3) + 1;
 				if (m.type.isNum) m.size = sz;
 				else if (m.type.varInAm)
-					for (int i = sz; i < m.cons.length; i++)
+					for (int i = sz * m.type.group; i < m.cons.length; i++)
 						m.cons[i] = null;
 				for (Con c : m.cons)
 					if (c != null) {
 						byte b = dis.readByte();
 						c.addr = b & 0x3f;
 						c.type = (byte)(c.type & 4 | b >> 6 & 3);
+						if (c.type >= 6) c.type = (byte)(6 + Integer.numberOfTrailingZeros(dis.readByte()));
 					}
 				byte[] b = new byte[dis.readByte() & 0xff];
 				dis.readBytes(b);
@@ -264,7 +287,7 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 		public Con(int ad, byte t) {addr = ad; type = t;}
 		public Module mod;
 		public int addr;
-		/** 0-3: 8-32 bit num, 4: 1 bit bin, 5: 8 bit bin */
+		/** 0-3: 8-32 bit num, 4: 1 bit bin, 5: 8 bit bin, 6-14: sel bit 0-7 */
 		public byte type;
 		public int getAddr() {return mod != null ? mod.pos + addr : addr;}
 		public void setAddr(Module m, int ad) {
@@ -317,18 +340,20 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 		}
 
 		public void addCon() {
+			int n = type.group;
 			for (int i = 0; i < cons.length; i++)
 				if (cons[i] == null) {
 					cons[i] = new Con(-1, type.conType(i));
-					break;
+					if (--n <= 0) break;
 				}
 		}
 
 		public void removeCon() {
+			int n = type.group;
 			for (int i = cons.length - 1; i > 0; i--)
 				if (cons[i] != null) {
 					cons[i] = null;
-					break;
+					if (--n <= 0) break;
 				}
 		}
 
@@ -338,28 +363,45 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 		CST(0,0,1), IN(0,0,1), OR(4,0,6), NOR(4,0,6), AND(4,0,6), NAND(4,0,6), XOR(4,0,6), XNOR(4,0,6),
 		BUF(0,1,1), NOT(1,0,2), LS(0,2,0), NLS(0,2,0), EQ(0,2,0), NEQ(0,2,0), NEG(0,1,1), ABS(0,1,1),
 		ADD(0,2,1), SUB(0,2,1), MUL(0,2,1), DIV(0,2,1), MOD(0,2,1), MIN(0,2,1), MAX(0,2,1),
-		SWT(1,2,1), CNT1(2,0,1), CNT2(2,2,1), RNG(0,1,1), SQRT(0,1,1), OUT(0,1,0);
+		SWT(1,2,1), CNT1(2,0,1), CNT2(2,2,1), RNG(0,1,1), SQRT(0,1,1), BSL(0,2,1), BSR(0,2,1), COMB(8,0,6), OUT(0,1,0);
+
+		public final int binCon, numCon, group;
+		public final boolean varInAm, can8bit, isNum;
+
 		private ModuleType(int bc, int nc, int type) {
 			binCon = bc;
 			numCon = nc;
+			group = Math.max((bc + nc + 3) / 4, 1);
 			isNum = (type & 1) != 0;
 			can8bit = (type & 2) != 0;
 			varInAm = (type & 4) != 0;
 		}
-		public final int binCon, numCon;
-		public final boolean varInAm, can8bit, isNum;
+
+		public static ModuleType get(int i) {
+			ModuleType[] arr = values();
+			if (i >= 0 && i < arr.length) return arr[i];
+			else return OUT;
+		}
+
 		public int cons() {return binCon + numCon;}
-		public byte conType(int i) {return i >= binCon ? (byte)0 : 4;}
+		public byte conType(int i) {return i >= binCon ? (byte)0 : (byte)4;}
+		public int id() {return this == OUT ? 63 : ordinal();}
+
 		@SideOnly(Side.CLIENT)
-		public int conRenderPos(int i) {
+		public int conRenderY(int i) {
 			if (this == OUT) return 2;
 			switch(cons()) {
 			case 1: return 6;
 			case 2: return 3 + i * 7;
 			case 3: return 2 + i * 4;
 			case 4: return 2 + i * 3;
-			default: return 0;
+			default: return 2 + i % 4 * 3;
 			}
+		}
+
+		@SideOnly(Side.CLIENT)
+		public int conRenderX(int i) {
+			return 1 + i / 4 * 3;
 		}
 	}
 

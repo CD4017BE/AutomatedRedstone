@@ -70,7 +70,10 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 		C_CNT = 24,	//simple counter
 		C_CNT_ = 25,//advanced counter
 		C_RNG = 26,	//random generator
-		C_SQRT = 27;//square root
+		C_SQRT = 27,//square root
+		C_BSR = 28,	//>> operator
+		C_BSL = 29,	//<< operator
+		C_COMB = 30;//bit combiner
 
 	public String name = "";
 	/** var[0-7]: IO, var[8-15]: cap, var[16-23]: gates, var[24-31]: calc */
@@ -82,6 +85,7 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 	private long nextUpdate = 0;
 	public byte mode = 0;
 	public int startIdx;
+	private int readIdx;
 
 	@Override
 	public void update() {
@@ -99,15 +103,16 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 			} catch (Exception e) {
 				e.printStackTrace();
 				ram = new byte[0];
-				name = "�cERROR: invalid code!�8";
+				startIdx = 0;
+				name = TooltipUtil.translate("gui.cd4017be.circuit.error");
 			}
 		}
 	}
 
 	private int[] cpuTick() {
 		int idxIO = 0, n = 0, x, s;
-		for (int i = startIdx; i < ram.length; i++) {
-			byte cmd = ram[i];
+		for (readIdx = startIdx; readIdx < ram.length; readIdx++) {
+			byte cmd = ram[readIdx];
 			s = cmd >> 6 & 3;
 			switch(cmd & 0x3f) {
 			case C_NULL: n += s + 1; continue;
@@ -116,69 +121,78 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 				x = ioacc[cfg.side].stateI >> cfg.ofs;
 				break;
 			case C_OR:
-				for (s += i, x = 0; i <= s;) x |= getBool(ram[++i]);
+				for (x = 0; s >= 0; s--) x |= read8bit();
 				ram[n++] = (byte)x;
 				continue;
 			case C_NOR:
-				for (s += i, x = 0; i <= s;) x |= getBool(ram[++i]);
+				for (x = 0; s >= 0; s--) x |= read8bit();
 				ram[n++] = (byte)~x;
 				continue;
 			case C_AND:
-				for (s += i, x = 0xff; i <= s;) x &= getBool(ram[++i]);
+				for (x = 0xff; s >= 0; s--) x &= read8bit();
 				ram[n++] = (byte)x;
 				continue;
 			case C_NAND:
-				for (s += i, x = 0xff; i <= s;) x &= getBool(ram[++i]);
+				for (x = 0xff; s >= 0; s--) x &= read8bit();
 				ram[n++] = (byte)~x;
 				continue;
 			case C_XOR:
-				for (s += i, x = 0; i <= s;) x ^= getBool(ram[++i]);
+				for (x = 0; s >= 0; s--) x ^= read8bit();
 				ram[n++] = (byte)x;
 				continue;
 			case C_NXOR:
-				for (s += i, x = 0xff; i <= s;) x ^= getBool(ram[++i]);
+				for (x = 0xff; s >= 0; s--) x ^= read8bit();
 				ram[n++] = (byte)x;
 				continue;
-			case C_REP: x = getNum(ram[++i]); break;
-			case C_NOT: ram[n++] = (byte)~getBool(ram[++i]); continue;
-			case C_LS: ram[n++] = getNum(ram[++i]) < getNum(ram[++i]) ? (byte)0xff : 0; continue;
-			case C_NLS: ram[n++] = getNum(ram[++i]) >= getNum(ram[++i]) ? (byte)0xff : 0; continue;
-			case C_EQ: ram[n++] = getNum(ram[++i]) == getNum(ram[++i]) ? (byte)0xff : 0; continue;
-			case C_NEQ: ram[n++] = getNum(ram[++i]) != getNum(ram[++i]) ? (byte)0xff : 0; continue;
-			case C_NEG: x = -getNum(ram[++i]); break;
-			case C_ABS: x = Math.abs(getNum(ram[++i])); break;
-			case C_ADD: x = getNum(ram[++i]) + getNum(ram[++i]); break;
-			case C_SUB:	x = getNum(ram[++i]) - getNum(ram[++i]); break;
-			case C_MUL: x = getNum(ram[++i]) * getNum(ram[++i]); break;
+			case C_REP: x = getNum(ram[++readIdx]); break;
+			case C_NOT: ram[n++] = (byte)~read8bit(); continue;
+			case C_LS: ram[n++] = getNum(ram[++readIdx]) < getNum(ram[++readIdx]) ? (byte)0xff : 0; continue;
+			case C_NLS: ram[n++] = getNum(ram[++readIdx]) >= getNum(ram[++readIdx]) ? (byte)0xff : 0; continue;
+			case C_EQ: ram[n++] = getNum(ram[++readIdx]) == getNum(ram[++readIdx]) ? (byte)0xff : 0; continue;
+			case C_NEQ: ram[n++] = getNum(ram[++readIdx]) != getNum(ram[++readIdx]) ? (byte)0xff : 0; continue;
+			case C_NEG: x = -getNum(ram[++readIdx]); break;
+			case C_ABS: x = Math.abs(getNum(ram[++readIdx])); break;
+			case C_ADD: x = getNum(ram[++readIdx]) + getNum(ram[++readIdx]); break;
+			case C_SUB:	x = getNum(ram[++readIdx]) - getNum(ram[++readIdx]); break;
+			case C_MUL: x = getNum(ram[++readIdx]) * getNum(ram[++readIdx]); break;
 			case C_DIV: {
-				int a = getNum(ram[++i]), b = getNum(ram[++i]);
+				int a = getNum(ram[++readIdx]), b = getNum(ram[++readIdx]);
 				x = b != 0 ? Math.floorDiv(a, b) : LIMIT[s | (a >= 0 ? 4 : 0)];
 			} break;
 			case C_MOD: {
-				int a = getNum(ram[++i]), b = getNum(ram[++i]);
+				int a = getNum(ram[++readIdx]), b = getNum(ram[++readIdx]);
 				x = b != 0 ? Math.floorMod(a, b) : 0;
 			} break;
-			case C_MIN: x = Math.min(getNum(ram[++i]), getNum(ram[++i])); break;
-			case C_MAX: x = Math.max(getNum(ram[++i]), getNum(ram[++i])); break;
-			case C_SWT: x = getNum(ram[ram[++i] & 0x3f] != 0 ? ram[i+2] : ram[i+1]); i+=2; break;
-			case C_CNT:
-				if (ram[ram[i+2] & 0x3f] != 0) x = 0;
-				else if (ram[ram[i+1] & 0x3f] != 0) x = getNum(n | s << 6) + 1;
-				else { n += s + 1; i += 2; continue; }
-				i+=2; break;
-			case C_CNT_:
-				if (ram[ram[i+2] & 0x3f] != 0) x = getNum(ram[i+4]);
-				else if (ram[ram[i+1] & 0x3f] != 0) x = getNum(ram[i+3]) + getNum(n | s << 6);
-				else { n += s + 1; i += 4; continue; }
-				i+=4; break;
+			case C_MIN: x = Math.min(getNum(ram[++readIdx]), getNum(ram[++readIdx])); break;
+			case C_MAX: x = Math.max(getNum(ram[++readIdx]), getNum(ram[++readIdx])); break;
+			case C_SWT: x = getNum(ram[ram[++readIdx] & 0x3f] != 0 ? ram[readIdx+2] : ram[readIdx+1]); readIdx+=2; break;
+			case C_CNT: {
+				boolean incr = readBool(), reset = readBool();
+				if (reset) x = 0;
+				else if (incr) x = getNum(n | s << 6) + 1;
+				else { n += s + 1; continue; }
+			} break;
+			case C_CNT_: {
+				boolean incr = readBool(), reset = readBool();
+				readIdx+=2;
+				if (reset) x = getNum(ram[readIdx]);
+				else if (incr) x = getNum(n | s << 6) + getNum(ram[readIdx-1]);
+				else { n += s + 1; continue; }
+			} break;
 			case C_RNG: {
-				int a = getNum(ram[++i]);
+				int a = getNum(ram[++readIdx]);
 				x = a > 0 ? RANDOM.nextInt(a) : a < 0 ? -RANDOM.nextInt(-a) : 0;
 			} break;
 			case C_SQRT: {
-				int a = getNum(ram[++i]);
+				int a = getNum(ram[++readIdx]);
 				x = a >= 0 ? sqrt(a) : -sqrt(-a);
 			} break;
+			case C_BSR: x = getNum(ram[++readIdx]) >>> getNum(ram[++readIdx]); break;
+			case C_BSL: x = getNum(ram[++readIdx]) << getNum(ram[++readIdx]); break;
+			case C_COMB: x = 0; s = s * 2 + 1;
+				for (int mask = 1; s >= 0; s--, mask <<= 1) x |= read8bit() & mask;
+				ram[n++] = (byte)x;
+				continue;
 			default: throw new IllegalArgumentException("invalid command byte:" + cmd);
 			}
 			for (; s > 0; s--, x >>= 8) ram[n++] = (byte)x;
@@ -214,9 +228,20 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 		return y;
 	}
 
-	private int getBool(byte idx) {
+	private boolean readBool() {
+		int idx = ram[++readIdx];
 		byte x = ram[idx & 0x3f];
-		return x == 0 ? 0 : (idx & 0x40) != 0 ? x : 0xff;
+		return (idx & 0xc0) < 0x80 ? x != 0 : (x & ram[++readIdx]) != 0;
+	}
+
+	private int read8bit() {
+		int idx = ram[++readIdx];
+		byte x = ram[idx & 0x3f];
+		switch(idx & 0xc0) {
+		default: x &= ram[++readIdx];
+		case 0: return x != 0 ? 0xff : 0;
+		case 0x40: return x;
+		}
 	}
 
 	public int getNum(int idx) {
@@ -274,7 +299,9 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 			for (int i = startIdx, j = 0; i < ram.length; i++) {
 				byte b = ram[i];
 				ModuleType mt = ModuleType.values()[b & 0x3f];
-				i += mt.varInAm ? (b >> 6 & 3) + 1 : mt.cons();
+				int w = mt.varInAm ? ((b >> 6 & 3) + 1) * mt.group : mt.cons();
+				for (int k = 0; k < w; k++)
+					if (Assembler.extraByte(ram[++i], mt.conType(k))) i++;
 				int k = mt.isNum ? j + (b >> 6 & 3) : j;
 				if (mt.cons() == 0) j = k + 1;
 				else {
