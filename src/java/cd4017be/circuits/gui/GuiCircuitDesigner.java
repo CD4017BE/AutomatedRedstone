@@ -309,6 +309,7 @@ public class GuiCircuitDesigner extends AdvancedGui {
 
 		@Override
 		public boolean mouseIn(int x, int y, int b, int d) {
+			if (d == 3) guiComps.get(10).mouseIn(x, y, b, d);
 			if (d != 0) return false;
 			int i = (y - py) / 16 + scroll;
 			if (i >= 0 && i < ModuleType.values().length) {
