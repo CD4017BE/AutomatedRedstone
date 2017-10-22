@@ -1,3 +1,18 @@
+v5.1.0
+Changes:
+- moved Remote Block Connector over to mod Inductive Logistics
+- added a Bit Splitter Pipe
+- added posibility to have full bandwidth redstone communication with OpenComputers and TIS-3D
+- added new Circuit operations: bit shifters and bit combiner
+- added convenient GUI hot-switch buttons in Assembler and Designer
+- made pipe item models 3D
+- fixed missing German localization entries and other localization bugs
+- fixed singleplayer bug where WirelessConnectors connect cables between client & server side
+Dependencies:
+- for MC-1.11.2
+- forge-13.20.0.2315 (or newer)
+- CD4017BE_lib-5.1.0
+
 v5.0.2
 Changes:
 - use min/max instead of scale/offset in oscilloscope because it's more obvious
