@@ -3,21 +3,27 @@ package cd4017be.circuits.tileEntity;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import org.apache.logging.log4j.Level;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.items.ItemHandlerHelper;
 import cd4017be.circuits.Objects;
 import cd4017be.circuits.tileEntity.CircuitDesigner.ModuleType;
+import cd4017be.lib.BlockGuiHandler;
+import cd4017be.lib.BlockGuiHandler.ClientPacketReceiver;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.Gui.SlotItemType;
@@ -25,12 +31,13 @@ import cd4017be.lib.Gui.TileContainer;
 import cd4017be.lib.Gui.TileContainer.ISlotClickHandler;
 import cd4017be.lib.capability.BasicInventory;
 import cd4017be.lib.tileentity.BaseTileEntity;
+import cd4017be.lib.util.Utils;
 
 /**
  *
  * @author CD4017BE
  */
-public class Assembler extends BaseTileEntity implements ITickable, IGuiData, ISlotClickHandler {
+public class Assembler extends BaseTileEntity implements ITickable, IGuiData, ISlotClickHandler, ClientPacketReceiver {
 
 	public static final String[] tagNames = {"IO", "Cap", "Gate", "Calc"};
 	public static final ItemStack[] materials = new ItemStack[4];
@@ -296,6 +303,25 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 
 	@Override
 	public void updateClientChanges(DataContainer container, PacketBuffer dis) {
+	}
+
+	@Override
+	public void onPacketFromClient(PacketBuffer data, EntityPlayer sender) throws IOException {
+		if (data.readByte() == 0) {
+			for (EnumFacing side : EnumFacing.HORIZONTALS) {
+				TileEntity te = Utils.neighborTile(this, side);
+				if (te instanceof CircuitDesigner) {
+					CircuitDesigner dsg = (CircuitDesigner)te;
+					ItemStack item = inventory.items[7];
+					if (item.getItem() == Objects.circuit_plan) {
+						inventory.setStackInSlot(7, dsg.dataItem);
+						dsg.dataItem = item;
+					}
+					BlockGuiHandler.openBlockGui(sender, world, pos.offset(side));
+					return;
+				}
+			}
+		}
 	}
 
 }

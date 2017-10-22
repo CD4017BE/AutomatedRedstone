@@ -34,6 +34,7 @@ public class GuiAssembler extends AdvancedGui {
 		}
 		guiComps.add(new Text<Integer>(8, 62, 18, 52, 8, "assembler.err#", ()-> cont.refInts[8]).center().setTooltip("assembler.msg#"));
 		guiComps.add(new InfoTab(9, 7, 6, 7, 8, "assembler.info"));
+		guiComps.add(new Button(10, 134, 34, 16, 16, (b)-> sendCommand(0)).setTooltip("assembler.swap"));
 	}
 
 }

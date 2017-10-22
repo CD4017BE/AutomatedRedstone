@@ -68,6 +68,7 @@ public class GuiCircuitDesigner extends AdvancedGui {
 		guiComps.add(new ModuleList(11, 202, 16).setTooltip("designer.mod"));
 		guiComps.add(new WorkPane(12, 8, 16, 8));
 		guiComps.add(new InfoTab(13, 7, 6, 7, 8, "designer.info"));
+		guiComps.add(new Button(14, 184, 214, 16, 16, -1).setTooltip("designer.swap"));
 	}
 
 	@Override
@@ -181,6 +182,7 @@ public class GuiCircuitDesigner extends AdvancedGui {
 		case 10: scroll = (int)((Float)obj / ScrollSize); break;
 		case 8: obj = ModuleType.OUT;
 		case 11: tile.add((ModuleType)obj); break;
+		case 14: sendCommand(8); break;
 		}
 	}
 

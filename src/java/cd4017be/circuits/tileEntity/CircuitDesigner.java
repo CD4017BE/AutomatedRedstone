@@ -12,16 +12,20 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.SlotItemHandler;
 import cd4017be.circuits.Objects;
+import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.BlockGuiHandler.ClientPacketReceiver;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.capability.LinkedInventory;
 import cd4017be.lib.Gui.TileContainer;
 import cd4017be.lib.tileentity.BaseTileEntity;
+import cd4017be.lib.util.Utils;
 
 public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientPacketReceiver {
 
@@ -100,6 +104,22 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 			break;
 		case 6: renderAll = false; break;
 		case 7: renderAll = true; break;
+		case 8:
+			for (EnumFacing side : EnumFacing.HORIZONTALS) {
+				TileEntity te = Utils.neighborTile(this, side);
+				if (te instanceof Assembler) {
+					Assembler ass = (Assembler)te;
+					if (dataItem.getItem() == Objects.circuit_plan) {
+						dataItem.setTagCompound(writeNBT(new NBTTagCompound()));
+						ItemStack item = ass.inventory.items[7];
+						ass.inventory.setStackInSlot(7, dataItem);
+						dataItem = item;
+					}
+					BlockGuiHandler.openBlockGui(sender, world, pos.offset(side));
+					return;
+				}
+			}
+			break;
 		}
 	}
 
