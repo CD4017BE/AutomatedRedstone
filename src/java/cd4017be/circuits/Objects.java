@@ -120,14 +120,14 @@ public class Objects {
 	@SubscribeEvent
 	public static void registerBlocks(RegistryEvent.Register<Block> ev) {
 		ev.getRegistry().registerAll(
-			OrientedBlock.create("designer", Material.ROCK, SoundType.STONE, 0, CircuitDesigner.class, PropertyOrientation.HOR_AXIS).setCreativeTab(tabCircuits),
-			OrientedBlock.create("assembler", Material.ROCK, SoundType.STONE, 0, Assembler.class, PropertyOrientation.HOR_AXIS).setCreativeTab(tabCircuits),
+			OrientedBlock.create("designer", Material.ROCK, SoundType.STONE, 8, CircuitDesigner.class, PropertyOrientation.HOR_AXIS).setCreativeTab(tabCircuits),
+			OrientedBlock.create("assembler", Material.ROCK, SoundType.STONE, 8, Assembler.class, PropertyOrientation.HOR_AXIS).setCreativeTab(tabCircuits),
 			new BlockCircuit("circuit", Material.ROCK, SoundType.STONE, Circuit.class).setCreativeTab(tabCircuits),
-			OrientedBlock.create("multilever", Material.ROCK, SoundType.STONE, 0, MultiLever.class, PropertyOrientation.HOR_AXIS).setCreativeTab(tabCircuits),
-			OrientedBlock.create("potentiometer", Material.ROCK, SoundType.STONE, 0, Potentiometer.class, PropertyOrientation.HOR_AXIS).setCreativeTab(tabCircuits),
-			OrientedBlock.create("display", Material.ROCK, SoundType.STONE, 0, Display8bit.class, PropertyOrientation.XY_12_ROT).setCreativeTab(tabCircuits).setLightLevel(0.375F),
+			OrientedBlock.create("multilever", Material.ROCK, SoundType.STONE, 8, MultiLever.class, PropertyOrientation.HOR_AXIS).setCreativeTab(tabCircuits),
+			OrientedBlock.create("potentiometer", Material.ROCK, SoundType.STONE, 8, Potentiometer.class, PropertyOrientation.HOR_AXIS).setCreativeTab(tabCircuits),
+			OrientedBlock.create("display", Material.ROCK, SoundType.STONE, 8, Display8bit.class, PropertyOrientation.XY_12_ROT).setCreativeTab(tabCircuits).setLightLevel(0.375F),
 			OrientedBlock.create("sensor_reader", Material.ROCK, SoundType.STONE, 3, BlockSensor.class, PropertyOrientation.ALL_AXIS).setBlockBounds(new AxisAlignedBB(0.125, 0.125, 0, 0.875, 0.875, 0.25)).setLightOpacity(0).setCreativeTab(tabCircuits),
-			OrientedBlock.create("oszillograph", Material.ROCK, SoundType.STONE, 0, Oszillograph.class, PropertyOrientation.XY_12_ROT).setCreativeTab(tabCircuits).setLightLevel(0.375F),
+			OrientedBlock.create("oszillograph", Material.ROCK, SoundType.STONE, 8, Oszillograph.class, PropertyOrientation.XY_12_ROT).setCreativeTab(tabCircuits).setLightLevel(0.375F),
 			BlockPipe.create("rsp_32bit", Material.IRON, SoundType.METAL, IntegerPipe.class, 1).setSize(0.5).setLightOpacity(0).setCreativeTab(tabCircuits),
 			BlockPipe.create("rsp_basic", Material.IRON, SoundType.METAL, BasicRSPipe.class, 3).setSize(0.25).setLightOpacity(0).setCreativeTab(tabCircuits),
 			BlockPipe.create("rsp_shift", Material.IRON, SoundType.METAL, BitShiftPipe.class, 1).setSize(0.5).setBlockBounds(new AxisAlignedBB(3D/16D, 3D/16D, 3D/16D, 13D/16D, 13D/16D, 13D/16D)).setLightOpacity(0).setCreativeTab(tabCircuits),
