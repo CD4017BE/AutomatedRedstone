@@ -165,7 +165,7 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 			} break;
 			case C_MIN: x = Math.min(getNum(ram[++readIdx]), getNum(ram[++readIdx])); break;
 			case C_MAX: x = Math.max(getNum(ram[++readIdx]), getNum(ram[++readIdx])); break;
-			case C_SWT: x = getNum(ram[ram[++readIdx] & 0x3f] != 0 ? ram[readIdx+2] : ram[readIdx+1]); readIdx+=2; break;
+			case C_SWT: x = getNum(readBool() ? ram[readIdx+2] : ram[readIdx+1]); readIdx+=2; break;
 			case C_CNT: {
 				boolean incr = readBool(), reset = readBool();
 				if (reset) x = 0;
