@@ -35,6 +35,7 @@ public class ClientProxy extends CommonProxy {
 		BlockGuiHandler.registerGui(DESIGNER, GuiCircuitDesigner.class);
 		BlockGuiHandler.registerGui(FLUID_VALVE, GuiFluidValve.class);
 		BlockGuiHandler.registerGui(ENERGY_VALVE, GuiEnergyValve.class);
+		BlockGuiHandler.registerGui(ITEM_VALVE, GuiItemValve.class);
 		BlockGuiHandler.registerGui(RSP_SHIFT, GuiBitShiftPipe.class);
 		
 		SpecialModelLoader.setMod("circuits");
@@ -64,6 +65,7 @@ public class ClientProxy extends CommonProxy {
 		BlockItemRegistry.registerRender(OSZILLOGRAPH);
 		BlockItemRegistry.registerRender(FLUID_VALVE);
 		BlockItemRegistry.registerRender(ENERGY_VALVE);
+		BlockItemRegistry.registerRender(ITEM_VALVE);
 		BlockItemRegistry.registerRender(WIRELESS_CON, 0, 1);
 		ClientRegistry.bindTileEntitySpecialRenderer(MultiLever.class, new RSInterfaceRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(Display8bit.class, new RSInterfaceRenderer());
