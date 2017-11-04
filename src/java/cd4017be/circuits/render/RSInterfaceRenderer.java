@@ -83,7 +83,7 @@ public class RSInterfaceRenderer extends TileEntitySpecialRenderer<BaseTileEntit
 			this.renderStateBinary(((MultiLever)te).state, 0, 8);
 		} else if (te instanceof Display8bit) {
 			Display8bit dsp = (Display8bit)te;
-			if ((dsp.dspType & 3) == 0) this.renderStateBinary((byte)dsp.display, 2, 4);
+			if ((dsp.dspMode & 3) == 0) this.renderStateBinary((byte)dsp.display, 2, 4);
 			else this.renderState(dsp.display);
 			if (!dsp.text0.isEmpty()) this.renderText(dsp.text0, 1);
 			if (!dsp.text1.isEmpty()) this.renderText(dsp.text1, 12);

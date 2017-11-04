@@ -38,7 +38,7 @@ public class GuiDisplay8bit extends AdvancedGui {
 		switch(id) {
 		//case 0: return Integer.toString(tile.dspType >> 2 & 0x1f);
 		//case 1: return Integer.toString((tile.dspType >> 7 & 0x1f) + 1);
-		case 0: return (int)(tile.dspType & 3);
+		case 0: return (int)(tile.dspMode & 3);
 		case 1: return tile.format;
 		case 2: return tile.text0;
 		case 3: return tile.text1;
@@ -58,7 +58,7 @@ public class GuiDisplay8bit extends AdvancedGui {
 			int i = (Integer.parseInt((String)obj) - 1) << 7;
 			dos.writeByte(0).writeShort(tile.dspType = (short)(tile.dspType & 0xf07f | (i & 0x0f80))); break;
 		} catch (NumberFormatException e) {return;}*/
-		case 0: dos.writeByte(0).writeShort(tile.dspType = (short)(tile.dspType & 0xfffc | ((tile.dspType & 0x0003) + 1) % 3)); break;
+		case 0: dos.writeByte(0).writeShort(tile.dspMode = (short)(tile.dspMode & 0xfffc | ((tile.dspMode & 0x0003) + 1) % 3)); break;
 		case 1: dos.writeByte(1); dos.writeString(tile.format = (String)obj); break;
 		case 2: dos.writeByte(2); dos.writeString(tile.text0 = (String)obj); break;
 		case 3: dos.writeByte(3); dos.writeString(tile.text1 = (String)obj); break;
