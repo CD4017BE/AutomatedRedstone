@@ -340,7 +340,7 @@ public class GuiCircuitDesigner extends AdvancedGui {
 					int t = mod.type.ordinal();
 					drawTexturedModalRect(x1, y1, (t >> 3) * 24, (t & 7) * 16, 24, 16);
 					for (int j = 1; j < mod.size; j++)
-						drawTexturedModalRect(px + (i + j & 7) * 24, py + ((i + j) >> 3) * 16, j * 24, 128, 24, 16);
+						drawTexturedModalRect(px + (i + j & 7) * 24, py + ((i + j) >> 3) * 16, 232, (j - mod.size) * 16 + (mod.type.isNum ? 64 : 128), 24, 16);
 					if (mod.type.varInAm) {
 						for (int j = 0; j < mod.cons.length; j++)
 							if (mod.cons[j] == null)

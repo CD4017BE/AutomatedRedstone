@@ -73,7 +73,8 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 		C_SQRT = 27,//square root
 		C_BSR = 28,	//>> operator
 		C_BSL = 29,	//<< operator
-		C_COMB = 30;//bit combiner
+		C_COMB = 30,//bit combiner
+		C_FRG = 31;	//Fredkin gate
 
 	public String name = "";
 	/** var[0-7]: IO, var[8-15]: cap, var[16-23]: gates, var[24-31]: calc */
@@ -193,6 +194,11 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 				for (int mask = 1; s >= 0; s--, mask <<= 1) x |= read8bit() & mask;
 				ram[n++] = (byte)x;
 				continue;
+			case C_FRG: {
+				int a = read8bit(), b = read8bit(), c = read8bit() & (a ^ b);
+				ram[n++] = (byte) (a ^ c);
+				ram[n++] = (byte) (b ^ c);
+			} continue;
 			default: throw new IllegalArgumentException("invalid command byte:" + cmd);
 			}
 			for (; s > 0; s--, x >>= 8) ram[n++] = (byte)x;
@@ -302,7 +308,7 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 				int w = mt.varInAm ? ((b >> 6 & 3) + 1) * mt.group : mt.cons();
 				for (int k = 0; k < w; k++)
 					if (Assembler.extraByte(ram[++i], mt.conType(k))) i++;
-				int k = mt.isNum ? j + (b >> 6 & 3) : j;
+				int k = mt.isNum ? j + (b >> 6 & 3) : j + mt.size - 1;
 				if (mt.cons() == 0) j = k + 1;
 				else {
 					if (k >= startIdx) k = startIdx - 1;

@@ -233,7 +233,8 @@ gui.cd4017be.designer.mod27=Square root\n§7Emits the square root of the input v
 gui.cd4017be.designer.mod28=Bit right-shift\n§7Emits the §9upper input§7 value right-shifted in its binary representation by the §1lower input§7 value amount of bits.\n§7out = §9U§7 / 2^§1L§7
 gui.cd4017be.designer.mod29=Bit left-shift\n§7Emits the §9upper input§7 value left-shifted in its binary representation by the §1lower input§7 value amount of bits.\n§7out = §9U§7 * 2^§1L§7
 gui.cd4017be.designer.mod30=Bit combiner\n§7Emits a 8-bit value which binary representation is based on the 8 logic input signals.
-gui.cd4017be.designer.mod31=Redstone Output\n§7Sets the value of an outgoing Redstone signal. The side configuration is later done in the §6Circuit Casing§7 UI, so it's recommended to name these in the Label text field when having more than one.
+gui.cd4017be.designer.mod31=Fredkin-Gate\n§7Swaps the upper two inputs when lower input is active, otherwise emits them unchanged.
+gui.cd4017be.designer.mod32=Redstone Output\n§7Sets the value of an outgoing Redstone signal. The side configuration is later done in the §6Circuit Casing§7 UI, so it's recommended to name these in the Label text field when having more than one.
 gui.cd4017be.designer.del=Delete sel Component\nShortcut:§aDELETE
 gui.cd4017be.designer.out0=Settings of sel. Component
 gui.cd4017be.designer.out1=8-bit Output\n(-128 to +127)

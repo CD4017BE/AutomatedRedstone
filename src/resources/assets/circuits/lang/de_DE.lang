@@ -232,7 +232,8 @@ gui.cd4017be.designer.mod27=Quadratwurzel\n§7Gibt die Quadratwurzel des Eingang
 gui.cd4017be.designer.mod28=Bitschieber rechts\n§7Gibt den §9oberen Eingansgwert§7 in seiner Binärdarstellung um den §1unteren Eingangswert§7 nach rechts verschoben aus.\n§7ausg = §9O§7 / 2^§1U§7
 gui.cd4017be.designer.mod29=Bitschieber links\n§7Gibt den §9oberen Eingansgwert§7 in seiner Binärdarstellung um den §1unteren Eingangswert§7 nach links verschoben aus.\n§7ausg = §9O§7 * 2^§1U§7
 gui.cd4017be.designer.mod30=Bit Packer\n§7Gibt einen 8-bit Wert aus, dessen Binärdarstellung sich aus den Zuständen der 8 Logikeingänge zusammen setzt.
-gui.cd4017be.designer.mod31=Redstone-Ausgang\n§7Setzt den Wert eines Redstone-Ausgangs. Die Zuordnung der Blockseiten erfolgt später im §6Schaltgehäuse§7-UI, es empfiehlt sich daher, diese Komponente im Kommentartextfeld zu benennen, falls man mehrere davon verwendet.
+gui.cd4017be.designer.mod31=Fredkin-Gatter\n§7Vertauscht die oberen beiden Eingänge, wenn unterer Eingang aktiv, ansonsten gibt sie unverändert wieder aus.
+gui.cd4017be.designer.mod32=Redstone-Ausgang\n§7Setzt den Wert eines Redstone-Ausgangs. Die Zuordnung der Blockseiten erfolgt später im §6Schaltgehäuse§7-UI, es empfiehlt sich daher, diese Komponente im Kommentartextfeld zu benennen, falls man mehrere davon verwendet.
 gui.cd4017be.designer.del=Ausgew. Komponente löschen\nTaste:§aEntf
 gui.cd4017be.designer.out0=Einstellung der ausgew. Komponente
 gui.cd4017be.designer.out1=8-bit Ausgang
