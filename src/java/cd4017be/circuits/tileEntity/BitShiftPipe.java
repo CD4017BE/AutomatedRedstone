@@ -26,8 +26,8 @@ import net.minecraftforge.fml.common.Optional.*;
  * @author CD4017BE
  */
 @InterfaceList(value = {
-	@Interface(iface = "li.cil.oc.api.network.Environment", modid = "OpenComputers"),
-	@Interface(iface = "net.minecraft.util.ITickable", modid = "OpenComputers")})
+	@Interface(iface = "li.cil.oc.api.network.Environment", modid = "opencomputers"),
+	@Interface(iface = "net.minecraft.util.ITickable", modid = "opencomputers")})
 public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketReceiver, Environment, ITickable {
 
 	/**[0-5]: out ofs, [6-11]: out size, [12-17]: in ofs, [18-23]: in size */
@@ -179,13 +179,13 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 	public void onMessage(Message message) {
 	}
 
-	@Method(modid = "OpenComputers")
+	@Method(modid = "opencomputers")
 	@Callback
 	public Object[] read(Context context, Arguments args) throws Exception {
 		return new Object[] {comp.network.outputState};
 	}
 
-	@Method(modid = "OpenComputers")
+	@Method(modid = "opencomputers")
 	@Callback
 	public Object[] write(Context context, Arguments args) throws Exception {
 		internal = args.checkInteger(0);

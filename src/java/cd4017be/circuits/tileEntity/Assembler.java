@@ -172,7 +172,7 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 						logic += logicCost(mt, sz);
 						calc += calcCost(mt, sz);
 						data.position(data.get() + data.position());//skip labels
-						p += mt.isNum ? sz : 1;
+						p += mt.isNum ? sz : mt.size;
 					}
 				}
 				size = p;
@@ -216,7 +216,7 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 		case NOT: return 1;
 		case LS: case NLS: case EQ: case NEQ: return 2;
 		case SWT: case MIN: case MAX: return (sz + 1) / 2 + 1;
-		case CNT1: case COMB: return 1;
+		case CNT1: case COMB: case FRG: return 1;
 		case CNT2: return 2;
 		default: return 0;
 		}

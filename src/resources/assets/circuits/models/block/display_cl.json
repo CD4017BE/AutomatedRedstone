@@ -1,0 +1,15 @@
+{
+	"parent": "minecraft:block/block",
+    "textures": {
+		"front": "circuits:blocks/display2"
+    },
+	"elements": [
+        {
+			"from": [ 14, 0, -0.0625 ],
+			"to": [ 18, 16, 0 ],
+			"faces": {
+				"north": { "uv": [ 6, 0, 10, 16 ], "texture": "#front", "cullface": "north" }
+			}
+		}
+    ]
+}

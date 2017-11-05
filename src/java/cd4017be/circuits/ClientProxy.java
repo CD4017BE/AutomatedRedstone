@@ -2,9 +2,10 @@ package cd4017be.circuits;
 
 import cd4017be.circuits.gui.*;
 import cd4017be.circuits.render.BitShiftRenderer;
+import cd4017be.circuits.render.DisplayRenderer;
 import cd4017be.circuits.render.OszillographRenderer;
 import cd4017be.circuits.render.PotentiometerRenderer;
-import cd4017be.circuits.render.RSInterfaceRenderer;
+import cd4017be.circuits.render.MultiLeverRenderer;
 import cd4017be.circuits.tileEntity.BitShifter;
 import cd4017be.circuits.tileEntity.Display8bit;
 import cd4017be.circuits.tileEntity.MultiLever;
@@ -35,6 +36,7 @@ public class ClientProxy extends CommonProxy {
 		BlockGuiHandler.registerGui(DESIGNER, GuiCircuitDesigner.class);
 		BlockGuiHandler.registerGui(FLUID_VALVE, GuiFluidValve.class);
 		BlockGuiHandler.registerGui(ENERGY_VALVE, GuiEnergyValve.class);
+		BlockGuiHandler.registerGui(ITEM_VALVE, GuiItemValve.class);
 		BlockGuiHandler.registerGui(RSP_SHIFT, GuiBitShiftPipe.class);
 		
 		SpecialModelLoader.setMod("circuits");
@@ -64,9 +66,10 @@ public class ClientProxy extends CommonProxy {
 		BlockItemRegistry.registerRender(OSZILLOGRAPH);
 		BlockItemRegistry.registerRender(FLUID_VALVE);
 		BlockItemRegistry.registerRender(ENERGY_VALVE);
+		BlockItemRegistry.registerRender(ITEM_VALVE);
 		BlockItemRegistry.registerRender(WIRELESS_CON, 0, 1);
-		ClientRegistry.bindTileEntitySpecialRenderer(MultiLever.class, new RSInterfaceRenderer());
-		ClientRegistry.bindTileEntitySpecialRenderer(Display8bit.class, new RSInterfaceRenderer());
+		ClientRegistry.bindTileEntitySpecialRenderer(MultiLever.class, new MultiLeverRenderer());
+		ClientRegistry.bindTileEntitySpecialRenderer(Display8bit.class, new DisplayRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(Oszillograph.class, new OszillographRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(Potentiometer.class, new PotentiometerRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(BitShifter.class, new BitShiftRenderer());

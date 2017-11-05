@@ -23,6 +23,7 @@ public class CommonProxy {
 		BlockGuiHandler.registerContainer(DESIGNER, TileContainer.class);
 		BlockGuiHandler.registerContainer(FLUID_VALVE, DataContainer.class);
 		BlockGuiHandler.registerContainer(ENERGY_VALVE, DataContainer.class);
+		BlockGuiHandler.registerContainer(ITEM_VALVE, DataContainer.class);
 		BlockGuiHandler.registerContainer(RSP_SHIFT, DataContainer.class);
 	}
 

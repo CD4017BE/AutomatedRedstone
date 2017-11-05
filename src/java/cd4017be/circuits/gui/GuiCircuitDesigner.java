@@ -148,8 +148,8 @@ public class GuiCircuitDesigner extends AdvancedGui {
 			if (c.type < 4) {
 				c.type = (byte)((c.type + ((Integer)obj == 0 ? 1 : 3)) % 4);
 			} else {
-				boolean back = (Integer)obj == 0;
-				c.type = (byte)((c.type + (back ? 7 : 9)) % 10 + 4);
+				boolean back = (Integer)obj != 0;
+				c.type = (byte)((c.type + (back ? 5 : 7)) % 10 + 4);
 				if (c.type == 5 && !m.type.can8bit) c.type += back ? -1 : 1;
 			}
 			tile.modified++;
@@ -340,7 +340,7 @@ public class GuiCircuitDesigner extends AdvancedGui {
 					int t = mod.type.ordinal();
 					drawTexturedModalRect(x1, y1, (t >> 3) * 24, (t & 7) * 16, 24, 16);
 					for (int j = 1; j < mod.size; j++)
-						drawTexturedModalRect(px + (i + j & 7) * 24, py + ((i + j) >> 3) * 16, j * 24, 128, 24, 16);
+						drawTexturedModalRect(px + (i + j & 7) * 24, py + ((i + j) >> 3) * 16, 232, (j - mod.size) * 16 + (mod.type.isNum ? 64 : 128), 24, 16);
 					if (mod.type.varInAm) {
 						for (int j = 0; j < mod.cons.length; j++)
 							if (mod.cons[j] == null)
@@ -380,7 +380,8 @@ public class GuiCircuitDesigner extends AdvancedGui {
 			GlStateManager.disableTexture2D();
 			VertexBuffer vb = Tessellator.getInstance().getBuffer();
 			vb.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
-			int r, g, b, a = tile.renderAll || m.pos == tile.selMod ? 0xff : 0x60;
+			boolean full = tile.renderAll || m.pos == tile.selMod;
+			int r, g, b, a = full ? 0xff : 0x60;
 			for (int i = 0; i < m.cons.length; i++) {
 				Con c = m.cons[i];
 				if (c == null || c.addr < 0) continue;
@@ -388,7 +389,7 @@ public class GuiCircuitDesigner extends AdvancedGui {
 				if (c.type < 4) {r = 0; b = 0xff;}
 				else {r = 0xff; b = 0;}
 				int addr = c.getAddr(), x2 = x1 + m.type.conRenderX(i) + 2, y2 = y1 + m.type.conRenderY(i) + 2;
-				for (int n = c.type < 4 ? c.type : 0; n >= 0; n--, addr++) {
+				for (int n = full && c.type < 4 ? c.type : 0; n >= 0; n--, addr++) {
 					vb.pos(x2, y2, zLevel).color(r,g,b,a).endVertex();
 					vb.pos(px + (addr & 7) * 24 + 22, (double)(py + (addr >> 3) * 16) + 8.5, zLevel).color(r,g,b,a).endVertex();
 				}
