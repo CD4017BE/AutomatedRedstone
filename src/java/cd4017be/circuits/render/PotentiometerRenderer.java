@@ -14,8 +14,8 @@ import net.minecraft.util.ResourceLocation;
 
 public class PotentiometerRenderer extends TileEntitySpecialRenderer<Potentiometer> {
 
-	private static final ResourceLocation texture = new ResourceLocation("circuits", "textures/blocks/display_ovl.png");
-	private static final int[] handleModel = Util.texturedRect(0.0625F-0.5F, 0.0625F-0.5F, 0.515625F, 10F/32F, 3F/32F, 22F/32F, 0, 10F/32F, 3F/32F);
+	private static final ResourceLocation texture = new ResourceLocation("circuits", "textures/blocks/levers.png");
+	private static final int[] handleModel = Util.texturedRect(0.0625F-0.5F, 0.0625F-0.5F, 0.515625F, 10F/32F, 3F/32F, 22F/32F, 0, 10F/32F, 3F/8F);
 
 	@Override
 	public void renderTileEntityAt(Potentiometer te, double x, double y, double z, float partialTicks, int destroyStage) {

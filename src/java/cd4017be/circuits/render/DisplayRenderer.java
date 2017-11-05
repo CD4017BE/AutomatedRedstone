@@ -9,6 +9,8 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.GlStateManager.DestFactor;
+import net.minecraft.client.renderer.GlStateManager.SourceFactor;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -61,12 +63,15 @@ public class DisplayRenderer extends TileEntitySpecialRenderer<Display8bit> {
 
 	@Override
 	public void renderTileEntityAt(Display8bit te, double x, double y, double z, float partialTicks, int destroyStage) {
+		GlStateManager.pushMatrix();
+		Util.moveAndOrientToBlock(x, y, z, te.getOrientation());
+		GlStateManager.scale(-0.0625F, -0.0625F, 0.0625F);
+		GlStateManager.translate(-8F, -8F, -8F);
+		GlStateManager.depthMask(false);
+		GlStateManager.enableBlend();
+		GlStateManager.blendFunc(SourceFactor.SRC_ALPHA, DestFactor.ONE);
 		GlStateManager.disableLighting();
 		Util.luminate(te, te.getOrientation().front, 15);
-		GL11.glPushMatrix();
-		Util.moveAndOrientToBlock(x, y, z, te.getOrientation());
-		GL11.glScalef(-0.0625F, -0.0625F, 0.0625F);
-		GL11.glTranslatef(-8F, -8F, -8F);
 		if (te.display == -1) te.formatState();
 		int c = colors[te.display >> 28 & 15];
 		GlStateManager.color((float)(c >> 16 & 0xff) / 255F, (float)(c >> 8 & 0xff) / 255F, (float)(c & 0xff) / 255F);
@@ -74,7 +79,9 @@ public class DisplayRenderer extends TileEntitySpecialRenderer<Display8bit> {
 		GlStateManager.color(1, 1, 1, 1);
 		if (!te.text0.isEmpty()) this.renderText(te.text0, 1, c);
 		if (!te.text1.isEmpty()) this.renderText(te.text1, 12, c);
-		GL11.glPopMatrix();
+		GlStateManager.popMatrix();
+		GlStateManager.disableBlend();
+		GlStateManager.depthMask(true);
 	}
 
 }
