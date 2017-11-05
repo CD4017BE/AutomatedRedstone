@@ -27,7 +27,7 @@ import net.minecraft.world.World;
  */
 public class Display8bit extends BaseTileEntity implements INeighborAwareTile, IDirectionalRedstone, IGuiData, ClientPacketReceiver {
 
-	private static final int OVERLOAD = 0x3_1E_2B_2B;
+	private static final int OVERLOAD = 0x27_28_2b;
 
 	public int state;
 	/**bits[0,1]: mode, bit2: slave, {bit[4,5]: size, bit[6,7]: pos | bit[4,5,6]: pos + 4}, bits[8-11]: color */
@@ -82,19 +82,15 @@ public class Display8bit extends BaseTileEntity implements INeighborAwareTile, I
 		if ((dspMode & 4) != 0) {
 			update &= ((dspMode ^ prev) & 1) != 0;
 			int dir = (dspMode << 1 & 2) - 1;
-			int p = 0;
 			for (int i = 1; i < 4; i++) {
 				TileEntity te = Utils.getTileAt(world, pos.offset(left, i * dir));
 				if (te instanceof Display8bit) {
 					Display8bit dsp = (Display8bit)te;
-					p = i * dir;
-					if ((dsp.dspMode & 4) == 0) dsp.addSlave(p);
+					if ((dsp.dspMode & 4) == 0) dsp.scanNeighbors(dsp.dspMode);
 					else if ((dsp.dspMode & 1) == (dspMode & 1)) continue;
-				} else p = (i - 1) * dir;
+				}
 				break;
 			}
-			dspMode &= 0xff0f;
-			dspMode |= (p + 4) << 4;
 		} else {
 			int p = 0;
 			for (int i = 1; i < 4; i++) {
@@ -102,15 +98,21 @@ public class Display8bit extends BaseTileEntity implements INeighborAwareTile, I
 				if (te instanceof Display8bit) {
 					Display8bit dsp = (Display8bit)te;
 					if ((dsp.dspMode & 4) == 0 || (dsp.dspMode & 1) == 0) break;
+					short pre = dsp.dspMode;
+					dsp.dspMode = (short) (pre & 0xff0f | (i + 4) << 4);
+					if (dsp.dspMode != pre) dsp.markUpdate();
 					p = i;
 				} else break;
 			}
-			int s = 0;
+			int s = p;
 			for (int i = 1; i < 4 - p; i++) {
 				TileEntity te = Utils.getTileAt(world, pos.offset(left, i));
 				if (te instanceof Display8bit) {
 					Display8bit dsp = (Display8bit)te;
 					if ((dsp.dspMode & 4) == 0 || (dsp.dspMode & 1) != 0) break;
+					short pre = dsp.dspMode;
+					dsp.dspMode = (short) (pre & 0xff0f | (4 - i) << 4);
+					if (dsp.dspMode != pre) dsp.markUpdate();
 					s = i + p;
 				} else break;
 			}
@@ -124,21 +126,6 @@ public class Display8bit extends BaseTileEntity implements INeighborAwareTile, I
 				if ((dsp.dspMode & 4) == 0) dsp.scanNeighbors(dsp.dspMode);
 			}
 		}
-		markUpdate();
-	}
-
-	private void addSlave(int pos) {
-		int p = dspMode >> 6 & 3, s = (dspMode >> 4 & 3) + 1;
-		if (pos > p) {
-			s += pos - p;
-			p = pos;
-		} else if (pos <= p - s) {
-			s = p - pos + 1;
-		} else return;
-		if (--s > 3) s = 3;
-		if (p > s) p = s;
-		dspMode &= 0xff0f;
-		dspMode |= s << 4 | p << 6;
 		markUpdate();
 	}
 
@@ -194,7 +181,7 @@ public class Display8bit extends BaseTileEntity implements INeighborAwareTile, I
 				Display8bit dsp = dsps[i];
 				int d = color | 0x4000000;
 				for (int j = 0; j < 4; j++)
-					d |= (st >> j & 1) | (st >> (j + 3) & 2) << (j * 4);
+					d |= ((st >>> j & 1) | (st >> (j + 3) & 2)) << (12 - j * 4);
 				dsp.display = d;
 				st >>>= 8;
 			}
@@ -258,19 +245,22 @@ public class Display8bit extends BaseTileEntity implements INeighborAwareTile, I
 			}
 			if (n < 3) dsp.display |= (d & 0xff) << (8 * n++);
 		}
-		if (dsp != null)
-			if (st > 0) dsp.display = OVERLOAD | color;
-			else dsp.display |= n << 24 | color;
+		if (dsp != null) {
+			if (st > 0) dsp.display = OVERLOAD;
+			dsp.display |= n << 24 | color;
+		}
 	}
 
 	@Override
 	public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
+		short m = dspMode;
 		state = pkt.getNbtCompound().getInteger("state");
 		dspMode = pkt.getNbtCompound().getShort("dsp");
 		text0 = pkt.getNbtCompound().getString("t0");
 		text1 = pkt.getNbtCompound().getString("t1");
 		format = pkt.getNbtCompound().getString("form");
 		formatState();
+		if (((m ^ dspMode) & 7) != 0) markUpdate();
 	}
 
 	@Override

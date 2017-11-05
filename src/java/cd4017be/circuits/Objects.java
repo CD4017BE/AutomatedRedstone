@@ -24,7 +24,6 @@ import cd4017be.circuits.tileEntity.BitShifter;
 import cd4017be.circuits.tileEntity.BlockSensor;
 import cd4017be.circuits.tileEntity.Circuit;
 import cd4017be.circuits.tileEntity.CircuitDesigner;
-import cd4017be.circuits.tileEntity.Display8bit;
 import cd4017be.circuits.tileEntity.EnergyValve;
 import cd4017be.circuits.tileEntity.FluidValve;
 import cd4017be.circuits.tileEntity.IntegerPipe;
@@ -63,7 +62,7 @@ public class Objects {
 	public static final BlockPipe RSP_BASIC = null;
 	public static final BlockPipe RSP_SHIFT = null;
 	public static final OrientedBlock MULTILEVER = null;
-	public static final OrientedBlock DISPLAY = null;
+	public static final BlockDisplay DISPLAY = null;
 	public static final OrientedBlock SENSOR_READER = null;
 	public static final OrientedBlock OSZILLOGRAPH = null;
 	public static final OrientedBlock POTENTIOMETER = null;
@@ -128,7 +127,7 @@ public class Objects {
 			new BlockCircuit("circuit", Material.ROCK, SoundType.STONE, Circuit.class).setCreativeTab(tabCircuits),
 			OrientedBlock.create("multilever", Material.ROCK, SoundType.STONE, 8, MultiLever.class, PropertyOrientation.HOR_AXIS).setCreativeTab(tabCircuits),
 			OrientedBlock.create("potentiometer", Material.ROCK, SoundType.STONE, 8, Potentiometer.class, PropertyOrientation.HOR_AXIS).setCreativeTab(tabCircuits),
-			OrientedBlock.create("display", Material.ROCK, SoundType.STONE, 8, Display8bit.class, PropertyOrientation.XY_12_ROT).setCreativeTab(tabCircuits).setLightLevel(0.375F),
+			new BlockDisplay("display", Material.ROCK, SoundType.STONE, 8).setCreativeTab(tabCircuits).setLightLevel(0.375F),
 			OrientedBlock.create("sensor_reader", Material.ROCK, SoundType.STONE, 3, BlockSensor.class, PropertyOrientation.ALL_AXIS).setBlockBounds(new AxisAlignedBB(0.125, 0.125, 0, 0.875, 0.875, 0.25)).setLightOpacity(0).setCreativeTab(tabCircuits),
 			OrientedBlock.create("oszillograph", Material.ROCK, SoundType.STONE, 8, Oszillograph.class, PropertyOrientation.XY_12_ROT).setCreativeTab(tabCircuits).setLightLevel(0.375F),
 			BlockPipe.create("rsp_32bit", Material.IRON, SoundType.METAL, IntegerPipe.class, 1).setSize(0.5).setLightOpacity(0).setCreativeTab(tabCircuits),
