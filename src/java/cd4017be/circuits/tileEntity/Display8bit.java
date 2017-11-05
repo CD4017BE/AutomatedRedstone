@@ -19,6 +19,7 @@ import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 /**
  *
@@ -30,7 +31,7 @@ public class Display8bit extends BaseTileEntity implements INeighborAwareTile, I
 
 	public int state;
 	/**bits[0,1]: mode, bit2: slave, {bit[4,5]: size, bit[6,7]: pos | bit[4,5,6]: pos + 4}, bits[8-11]: color */
-	public short dspMode = 0xe01;
+	public short dspMode = 0xe02;
 	public String text0 = "", text1 = "";
 	public String format = "###";
 	/**0xCN332211: C=color, N=symbol count, 123=symbols */
@@ -56,15 +57,89 @@ public class Display8bit extends BaseTileEntity implements INeighborAwareTile, I
 	@Override
 	public void onPacketFromClient(PacketBuffer data, EntityPlayer sender) throws IOException {
 		byte cmd = data.readByte();
-		if (cmd == 0) {
-			dspMode = data.readShort();
-			this.formatState();
-		} else if (cmd == 1) {
-			format = data.readString(8);
-			this.formatState();
-		} else if (cmd == 2) text0 = data.readString(16);
-		else if (cmd == 3) text1 = data.readString(16);
+		switch(cmd) {
+		case 0:
+			short prev = dspMode;
+			dspMode &= 0xfff0;
+			dspMode |= data.readByte() & 7;
+			scanNeighbors(prev);
+			return;
+		case 1: format = data.readString(8); break;
+		case 2: text0 = data.readString(32); break;
+		case 3: text1 = data.readString(32); break;
+		case 4:
+			dspMode &= 0xf0ff;
+			dspMode |= (data.readByte() & 15) << 8;
+			break;
+		}
 		this.markUpdate();
+	}
+
+	private void scanNeighbors(short prev) {
+		boolean update = (prev & 4) != 0;
+		Orientation o = getOrientation();
+		EnumFacing left = o.rotate(EnumFacing.EAST);
+		if ((dspMode & 4) != 0) {
+			update &= ((dspMode ^ prev) & 1) != 0;
+			int dir = (dspMode << 1 & 2) - 1;
+			int p = 0;
+			for (int i = 1; i < 4; i++) {
+				TileEntity te = Utils.getTileAt(world, pos.offset(left, i * dir));
+				if (te instanceof Display8bit) {
+					Display8bit dsp = (Display8bit)te;
+					p = i * dir;
+					if ((dsp.dspMode & 4) == 0) dsp.addSlave(p);
+					else if ((dsp.dspMode & 1) == (dspMode & 1)) continue;
+				} else p = (i - 1) * dir;
+				break;
+			}
+			dspMode &= 0xff0f;
+			dspMode |= (p + 4) << 4;
+		} else {
+			int p = 0;
+			for (int i = 1; i < 4; i++) {
+				TileEntity te = Utils.getTileAt(world, pos.offset(left, -i));
+				if (te instanceof Display8bit) {
+					Display8bit dsp = (Display8bit)te;
+					if ((dsp.dspMode & 4) == 0 || (dsp.dspMode & 1) == 0) break;
+					p = i;
+				} else break;
+			}
+			int s = 0;
+			for (int i = 1; i < 4 - p; i++) {
+				TileEntity te = Utils.getTileAt(world, pos.offset(left, i));
+				if (te instanceof Display8bit) {
+					Display8bit dsp = (Display8bit)te;
+					if ((dsp.dspMode & 4) == 0 || (dsp.dspMode & 1) != 0) break;
+					s = i + p;
+				} else break;
+			}
+			dspMode &= 0xff0f;
+			dspMode |= s << 4 | p << 6;
+		}
+		if (update) {
+			TileEntity te = Utils.getTileAt(world, pos.offset(left, (prev >> 4 & 7) - 4));
+			if (te instanceof Display8bit) {
+				Display8bit dsp = (Display8bit)te;
+				if ((dsp.dspMode & 4) == 0) dsp.scanNeighbors(dsp.dspMode);
+			}
+		}
+		markUpdate();
+	}
+
+	private void addSlave(int pos) {
+		int p = dspMode >> 6 & 3, s = (dspMode >> 4 & 3) + 1;
+		if (pos > p) {
+			s += pos - p;
+			p = pos;
+		} else if (pos <= p - s) {
+			s = p - pos + 1;
+		} else return;
+		if (--s > 3) s = 3;
+		if (p > s) p = s;
+		dspMode &= 0xff0f;
+		dspMode |= s << 4 | p << 6;
+		markUpdate();
 	}
 
 	private void updateFor(int pos) {
@@ -74,7 +149,7 @@ public class Display8bit extends BaseTileEntity implements INeighborAwareTile, I
 		if (p >= 0 && p < s) formatState();
 	}
 
-	private void formatState() {
+	public void formatState() {
 		Orientation o = getOrientation();
 		EnumFacing left = o.rotate(EnumFacing.EAST);
 		//handle slave mode
@@ -125,7 +200,7 @@ public class Display8bit extends BaseTileEntity implements INeighborAwareTile, I
 			}
 			return;
 		}
-		long st = state;
+		long st = state & 0xffffffffL;
 		//handle sign
 		{
 			int i, bit;
@@ -143,7 +218,7 @@ public class Display8bit extends BaseTileEntity implements INeighborAwareTile, I
 			}
 		}
 		//parse string
-		int base = mode == 1 ? 10 : 16;
+		int base = mode == 2 ? 10 : 16;
 		Display8bit dsp = null;
 		int n = 0;
 		for (int i = format.length() - 1; i >= 0; i--) {
@@ -227,7 +302,13 @@ public class Display8bit extends BaseTileEntity implements INeighborAwareTile, I
 		text0 = nbt.getString("t0");
 		text1 = nbt.getString("t1");
 		format = nbt.getString("form");
-		this.formatState();
+		display = -1;
+	}
+
+	@Override
+	public void setWorld(World worldIn) {
+		super.setWorld(worldIn);
+		
 	}
 
 	@Override

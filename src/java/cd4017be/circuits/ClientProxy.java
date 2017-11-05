@@ -2,6 +2,7 @@ package cd4017be.circuits;
 
 import cd4017be.circuits.gui.*;
 import cd4017be.circuits.render.BitShiftRenderer;
+import cd4017be.circuits.render.DisplayRenderer;
 import cd4017be.circuits.render.OszillographRenderer;
 import cd4017be.circuits.render.PotentiometerRenderer;
 import cd4017be.circuits.render.RSInterfaceRenderer;
@@ -68,7 +69,7 @@ public class ClientProxy extends CommonProxy {
 		BlockItemRegistry.registerRender(ITEM_VALVE);
 		BlockItemRegistry.registerRender(WIRELESS_CON, 0, 1);
 		ClientRegistry.bindTileEntitySpecialRenderer(MultiLever.class, new RSInterfaceRenderer());
-		ClientRegistry.bindTileEntitySpecialRenderer(Display8bit.class, new RSInterfaceRenderer());
+		ClientRegistry.bindTileEntitySpecialRenderer(Display8bit.class, new DisplayRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(Oszillograph.class, new OszillographRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(Potentiometer.class, new PotentiometerRenderer());
 		ClientRegistry.bindTileEntitySpecialRenderer(BitShifter.class, new BitShiftRenderer());
