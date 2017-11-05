@@ -1,3 +1,19 @@
+v5.1.1
+Changes:
+- added block: Item Valve
+- added circuit module: Fredkin-Gate
+- display color can be changed now
+- multiple displays can be connected with each other now (so you don't need the ugly digit skipping anymore)
+- CircuitDesigner shows less wires in total when not in "show all" mode
+- removed special sneak placement for some blocks (it was sometimes anoying)
+- fixed displays showing negative redstone signals incorrectly
+- fixed OpenComputers integration of Bit Splitter Wire
+- fixed switch module with single bit input causing circuit to go ERROR
+Dependencies:
+- for MC-1.11.2
+- forge-13.20.0.2315 (or newer)
+- CD4017BE_lib-5.1.1
+
 v5.1.0
 Changes:
 - moved Remote Block Connector over to mod Inductive Logistics
