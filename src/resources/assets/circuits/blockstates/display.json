@@ -1,16 +1,25 @@
 {
+	"forge_marker": 1,
+	"defaults": { "model": "circuits:display" },
     "variants": {
-        "orient=n": { "model": "circuits:display" },
-		"orient=e": { "model": "circuits:display" , "y": 90 },
-		"orient=s": { "model": "circuits:display" , "y": 180 },
-		"orient=w": { "model": "circuits:display" , "y": 270 },
-		"orient=bn": { "model": "circuits:display" , "x": 90 },
-		"orient=be": { "model": "circuits:display" , "x": 90 , "y": 90 },
-		"orient=bs": { "model": "circuits:display" , "x": 90 , "y": 180 },
-		"orient=bw": { "model": "circuits:display" , "x": 90 , "y": 270 },
-		"orient=tn": { "model": "circuits:display" , "x": 270 },
-		"orient=te": { "model": "circuits:display" , "x": 270 , "y": 90 },
-		"orient=ts": { "model": "circuits:display" , "x": 270 , "y": 180 },
-		"orient=tw": { "model": "circuits:display" , "x": 270 , "y": 270 }
+		"orient": {
+			"n": {},
+			"e": { "y": 90 },
+			"s": { "y": 180 },
+			"w": { "y": 270 },
+			"bn": { "x": 90 },
+			"be": { "x": 90 , "y": 90 },
+			"bs": { "x": 90 , "y": 180 },
+			"bw": { "x": 90 , "y": 270 },
+			"tn": { "x": 270 },
+			"te": { "x": 270 , "y": 90 },
+			"ts": { "x": 270 , "y": 180 },
+			"tw": { "x": 270 , "y": 270 }
+		},
+		"con": {
+			0: {},
+			1: { "submodel": "circuits:display_cr" },
+			2: { "submodel": "circuits:display_cl" }
+		}
     }
 }

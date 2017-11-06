@@ -258,7 +258,7 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 		} else {
 			if (selMod < 0)
 				for (selMod = 63; selMod >= 0 && modules[selMod] == null; selMod--);
-			selMod++;
+			if (++selMod >= 64) selMod = -1;
 			Module m = new Module(t);
 			m.setPos(selMod);
 			modified++;
@@ -305,7 +305,7 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 
 		public Module(ModuleType type) {
 			this.type = type;
-			this.size = 1;
+			this.size = type.size;
 			this.pos = -1;
 			this.cons = new Con[type.cons()];
 			for (int i = 0 ; i < cons.length; i++)
@@ -363,9 +363,10 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 		CST(0,0,1), IN(0,0,1), OR(4,0,6), NOR(4,0,6), AND(4,0,6), NAND(4,0,6), XOR(4,0,6), XNOR(4,0,6),
 		BUF(0,1,1), NOT(1,0,2), LS(0,2,0), NLS(0,2,0), EQ(0,2,0), NEQ(0,2,0), NEG(0,1,1), ABS(0,1,1),
 		ADD(0,2,1), SUB(0,2,1), MUL(0,2,1), DIV(0,2,1), MOD(0,2,1), MIN(0,2,1), MAX(0,2,1),
-		SWT(1,2,1), CNT1(2,0,1), CNT2(2,2,1), RNG(0,1,1), SQRT(0,1,1), BSL(0,2,1), BSR(0,2,1), COMB(8,0,6), OUT(0,1,0);
+		SWT(1,2,1), CNT1(2,0,1), CNT2(2,2,1), RNG(0,1,1), SQRT(0,1,1), BSL(0,2,1), BSR(0,2,1), COMB(8,0,6), FRG(3,0,0x22),
+		OUT(0,1,0);
 
-		public final int binCon, numCon, group;
+		public final int binCon, numCon, group, size;
 		public final boolean varInAm, can8bit, isNum;
 
 		private ModuleType(int bc, int nc, int type) {
@@ -375,6 +376,8 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 			isNum = (type & 1) != 0;
 			can8bit = (type & 2) != 0;
 			varInAm = (type & 4) != 0;
+			int s = type >> 4 & 15;
+			size = s == 0 ? 1 : s;
 		}
 
 		public static ModuleType get(int i) {
