@@ -1,3 +1,20 @@
+v6.0.2
+Changes:
+- added block: Item Valve
+- added circuit module: Fredkin-Gate
+- display color can be changed now
+- multiple displays can be connected with each other now (so you don't need the ugly digit skipping anymore)
+- CircuitDesigner shows less wires in total when not in "show all" mode
+- removed special sneak placement for some blocks (it was sometimes anoying)
+- fixed displays showing negative redstone signals incorrectly
+- fixed OpenComputers integration of Bit Splitter Wire
+- fixed switch module with single bit input causing circuit to go ERROR
+- fixed crash in CircuitDesigner when trying to add modules to an already full board
+Dependencies:
+- for MC-1.12.2
+- forge-14.23.0.2512 (or newer)
+- CD4017BE_lib-6.0.2
+
 v6.0.1
 Changes:
 - added a Bit Splitter Pipe
