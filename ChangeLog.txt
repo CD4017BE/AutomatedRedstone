@@ -1,3 +1,11 @@
+v5.1.2
+Changes:
+- fixed crash in CircuitDesigner when trying to add modules to an already full board 
+Dependencies:
+- for MC-1.11.2
+- forge-13.20.0.2315 (or newer)
+- CD4017BE_lib-5.1.2
+
 v5.1.1
 Changes:
 - added block: Item Valve
