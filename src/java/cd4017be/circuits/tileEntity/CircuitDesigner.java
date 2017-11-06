@@ -258,7 +258,7 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 		} else {
 			if (selMod < 0)
 				for (selMod = 63; selMod >= 0 && modules[selMod] == null; selMod--);
-			selMod++;
+			if (++selMod >= 64) selMod = -1;
 			Module m = new Module(t);
 			m.setPos(selMod);
 			modified++;
