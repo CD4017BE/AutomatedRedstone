@@ -16,6 +16,7 @@ import cd4017be.lib.BlockItemRegistry;
 import cd4017be.lib.render.SpecialModelLoader;
 import cd4017be.lib.render.model.MultipartModel;
 import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraft.util.BlockRenderLayer;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
@@ -41,6 +42,10 @@ public class ClientProxy extends CommonProxy {
 		BlockGuiHandler.registerGui(ENERGY_VALVE, GuiEnergyValve.class);
 		BlockGuiHandler.registerGui(ITEM_VALVE, GuiItemValve.class);
 		BlockGuiHandler.registerGui(RSP_SHIFT, GuiBitShiftPipe.class);
+		
+		RSP_BASIC.setBlockLayer(BlockRenderLayer.CUTOUT);
+		RSP_32BIT.setBlockLayer(BlockRenderLayer.CUTOUT);
+		RSP_SHIFT.setBlockLayer(BlockRenderLayer.CUTOUT);
 	}
 
 	@Override

@@ -23,6 +23,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemHandlerHelper;
 
 public class ItemValve extends BaseTileEntity implements INeighborAwareTile, IRedstoneTile, ITickable, IDirectionalRedstone, IGuiData, ClientPacketReceiver {
 
@@ -224,7 +225,7 @@ public class ItemValve extends BaseTileEntity implements INeighborAwareTile, IRe
 
 		@Override
 		public int getSlots() {
-			if (inRecursion) return 0;
+			if (inRecursion || ((mode & 12) != 0 && flow == 0)) return 0;
 			else try {
 				inRecursion = true;
 				return src.getSlots();
@@ -247,9 +248,14 @@ public class ItemValve extends BaseTileEntity implements INeighborAwareTile, IRe
 				inRecursion = true;
 				if ((mode & 12) != 0) {
 					if (flow >= 0) return stack;
-					if (-flow < stack.getCount()) {
+					int n = stack.getCount();
+					if (-flow < n) {
+						n += flow;
 						stack = stack.copy();
 						stack.setCount(-flow);
+						int ret = src.insertItem(slot, stack, simulate).getCount();
+						if (!simulate) flow += stack.getCount() - ret;
+						return ItemHandlerHelper.copyStackWithSize(stack, ret + n);
 					}
 				}
 				ItemStack ret = src.insertItem(slot, stack, simulate);
@@ -295,7 +301,7 @@ public class ItemValve extends BaseTileEntity implements INeighborAwareTile, IRe
 
 		@Override
 		public int getSlots() {
-			return 1;
+			return (mode & 12) != 0 && flow == 0 ? 0 : 1;
 		}
 
 		@Override
@@ -314,9 +320,14 @@ public class ItemValve extends BaseTileEntity implements INeighborAwareTile, IRe
 				inRecursion = true;
 				if ((mode & 12) != 0) {
 					if (flow >= 0) return stack;
-					if (-flow < stack.getCount()) {
+					int n = stack.getCount();
+					if (-flow < n) {
+						n += flow;
 						stack = stack.copy();
 						stack.setCount(-flow);
+						int ret = src.insertItem(slot, stack, simulate).getCount();
+						if (!simulate) flow += stack.getCount() - ret;
+						return ItemHandlerHelper.copyStackWithSize(stack, ret + n);
 					}
 				}
 				ItemStack ret = src.insertItem(slot, stack, simulate);
