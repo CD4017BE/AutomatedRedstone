@@ -5,8 +5,12 @@ import io.netty.buffer.Unpooled;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.List;
+
 import org.apache.logging.log4j.Level;
 
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Slot;
@@ -29,6 +33,7 @@ import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.Gui.SlotItemType;
 import cd4017be.lib.Gui.TileContainer;
 import cd4017be.lib.Gui.TileContainer.ISlotClickHandler;
+import cd4017be.lib.block.AdvancedBlock.ITilePlaceHarvest;
 import cd4017be.lib.capability.BasicInventory;
 import cd4017be.lib.tileentity.BaseTileEntity;
 import cd4017be.lib.util.Utils;
@@ -37,7 +42,7 @@ import cd4017be.lib.util.Utils;
  *
  * @author CD4017BE
  */
-public class Assembler extends BaseTileEntity implements ITickable, IGuiData, ISlotClickHandler, ClientPacketReceiver {
+public class Assembler extends BaseTileEntity implements ITickable, IGuiData, ISlotClickHandler, ClientPacketReceiver, ITilePlaceHarvest {
 
 	public static final String[] tagNames = {"IO", "Cap", "Gate", "Calc"};
 	public static final ItemStack[] materials = new ItemStack[4];
@@ -322,6 +327,17 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 				}
 			}
 		}
+	}
+
+	@Override
+	public void onPlaced(EntityLivingBase entity, ItemStack item) {
+	}
+
+	@Override
+	public List<ItemStack> dropItem(IBlockState state, int fortune) {
+		List<ItemStack> list = makeDefaultDrops(null);
+		inventory.addToList(list);
+		return list;
 	}
 
 }
