@@ -1,3 +1,13 @@
+v6.0.3
+Changes:
+- made cables coverable
+- fixed Assembler & Designer not dropping their inventory when broken
+- fixed a bug in Item Valve where items got lost during limited insertion
+Dependencies:
+- for MC-1.12.2
+- forge-14.23.0.2512 (or newer)
+- CD4017BE_lib-6.0.3
+
 v6.0.2
 Changes:
 - added block: Item Valve
