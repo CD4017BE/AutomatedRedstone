@@ -107,6 +107,7 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 				startIdx = 0;
 				name = TooltipUtil.translate("gui.cd4017be.circuit.error");
 			}
+			markDirty();
 		}
 	}
 
@@ -319,6 +320,7 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 			int i = data.readByte() & 0x3f;
 			if (i < startIdx) ram[i] = data.readByte();
 		}
+		markDirty();
 	}
 
 	private NBTTagCompound write(NBTTagCompound nbt) {
@@ -580,6 +582,7 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 					if (t >= nextUpdate) nextUpdate = t + 1L;
 				}
 			} else dir |= 4;
+			markDirty();
 		}
 	}
 

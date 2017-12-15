@@ -58,6 +58,7 @@ public class IntegerPipe extends PassiveMultiblockTile<IntegerComp, SharedIntege
 		if (newIn != comp.inputState) {
 			comp.inputState = newIn;
 			comp.network.markStateDirty();
+			markDirty();
 		}
 	}
 
@@ -106,12 +107,14 @@ public class IntegerPipe extends PassiveMultiblockTile<IntegerComp, SharedIntege
 					IntegerPipe pipe = (IntegerPipe)te;
 					pipe.comp.setConnect((byte)(s^1), con);
 					pipe.markUpdate();
+					pipe.markDirty();
 				}
 			} else {
 				s *= 2;
 				comp.network.setIO(comp, (short)((comp.rsIO & ~(3 << s)) | ((comp.rsIO >> s) + 1 & 3) << s));
 			}
 			this.markUpdate();
+			markDirty();
 			return true;
 		} else return false;
 	}

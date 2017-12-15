@@ -47,6 +47,7 @@ public class Display8bit extends BaseTileEntity implements INeighborAwareTile, I
 			state = nState;
 			if ((dspMode & 4) == 0)
 				this.markUpdate();
+			markDirty();
 		}
 	}
 
@@ -63,6 +64,7 @@ public class Display8bit extends BaseTileEntity implements INeighborAwareTile, I
 			dspMode &= 0xfff0;
 			dspMode |= data.readByte() & 7;
 			scanNeighbors(prev);
+			markDirty();
 			return;
 		case 1: format = data.readString(8); break;
 		case 2: text0 = data.readString(32); break;
@@ -73,6 +75,7 @@ public class Display8bit extends BaseTileEntity implements INeighborAwareTile, I
 			break;
 		}
 		this.markUpdate();
+		markDirty();
 	}
 
 	private void scanNeighbors(short prev) {
