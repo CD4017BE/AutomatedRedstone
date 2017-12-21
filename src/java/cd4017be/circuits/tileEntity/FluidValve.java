@@ -38,7 +38,13 @@ public class FluidValve extends BaseTileEntity implements INeighborAwareTile, IR
 			in = Utils.neighborTile(this, dir);
 			out = Utils.neighborTile(this, dir.getOpposite());
 		}
-		if (measure) flow += transferFluid(Integer.MAX_VALUE);
+		if (measure) {
+			int d = transferFluid(Integer.MAX_VALUE);
+			if (d != 0) {
+				flow += d;
+				markDirty();
+			}
+		}
 		if (world.getTotalWorldTime() % tickInt != 0) return;
 		if (measure) {
 			if (flow != state) {
@@ -49,6 +55,7 @@ public class FluidValve extends BaseTileEntity implements INeighborAwareTile, IR
 		} else if (state > 0) {
 			flow = transferFluid(state);
 		} else flow = 0;
+		markDirty();
 	}
 
 	private int transferFluid(int max) {
@@ -73,9 +80,11 @@ public class FluidValve extends BaseTileEntity implements INeighborAwareTile, IR
 	@Override
 	public void neighborBlockChange(Block b, BlockPos src) {
 		if (world.isRemote || measure) return;
+		int ls = state;
 		state = 0;
 		for (EnumFacing s : EnumFacing.VALUES)
 			state |= world.getRedstonePower(pos.offset(s), s);
+		if (state != ls) markDirty();
 	}
 
 	@Override
@@ -124,6 +133,7 @@ public class FluidValve extends BaseTileEntity implements INeighborAwareTile, IR
 			if (measure) flow = 0;
 			else neighborBlockChange(null, pos);
 		}
+		markDirty();
 	}
 
 	@Override

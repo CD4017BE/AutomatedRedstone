@@ -6,7 +6,7 @@ core(size) {
 
 con(size) {
 	Loc a = 8 - size/2, b = 8 + size/2;
-	Loc Q = [a,a,0, b,b,a]#, T = [0,a, a,b]#;
+	Loc Q = [a,a,-0.01, b,b,a]#, T = [0,a, a,b]#;
 	for(F:["-vu","+Vu","v-u","V+u"]) {add(rect(Q, T, F));}
 	add(rect(Q, [a,a, b,b]#, "uv-N"));
 }
@@ -21,7 +21,7 @@ full(size) {
 
 filter(w,d) {
 	Loc a = 8 - w/2, b = 8 + w/2;
-	Loc Q = [a,a,-0.01, b,b,d]#, T = [w,0, w+d,w]#;
+	Loc Q = [a,a,-0.02, b,b,d]#, T = [w,0, w+d,w]#;
 	for(F:["-vU","+vU","v-U","v+U"]) {add(rect(Q, T, F));}
 	T = [0,0, w,w]#;
 	add(rect(Q, T, "uv-N"), rect(Q, T, "Uv+"));

@@ -23,6 +23,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemHandlerHelper;
 
 public class ItemValve extends BaseTileEntity implements INeighborAwareTile, IRedstoneTile, ITickable, IDirectionalRedstone, IGuiData, ClientPacketReceiver {
 
@@ -57,6 +58,7 @@ public class ItemValve extends BaseTileEntity implements INeighborAwareTile, IRe
 		default:
 			emitRS(flow == 0 ? 0 : flow < 0 ? -1 : 1);
 		}
+		markDirty();
 	}
 
 	private int readAm() {
@@ -91,6 +93,7 @@ public class ItemValve extends BaseTileEntity implements INeighborAwareTile, IRe
 		if ((mode & 2) != 0) {
 			inventory.setSlot(input & 0xff);
 		}
+		markDirty();
 	}
 
 	@Override
@@ -170,6 +173,7 @@ public class ItemValve extends BaseTileEntity implements INeighborAwareTile, IRe
 			emitRS(output);
 			break;
 		}
+		markDirty();
 	}
 
 	@Override
@@ -224,7 +228,7 @@ public class ItemValve extends BaseTileEntity implements INeighborAwareTile, IRe
 
 		@Override
 		public int getSlots() {
-			if (inRecursion) return 0;
+			if (inRecursion || ((mode & 12) != 0 && flow == 0)) return 0;
 			else try {
 				inRecursion = true;
 				return src.getSlots();
@@ -247,13 +251,24 @@ public class ItemValve extends BaseTileEntity implements INeighborAwareTile, IRe
 				inRecursion = true;
 				if ((mode & 12) != 0) {
 					if (flow >= 0) return stack;
-					if (-flow < stack.getCount()) {
+					int n = stack.getCount();
+					if (-flow < n) {
+						n += flow;
 						stack = stack.copy();
 						stack.setCount(-flow);
+						int ret = src.insertItem(slot, stack, simulate).getCount();
+						if (!simulate) {
+							flow += stack.getCount() - ret;
+							markDirty();
+						}
+						return ItemHandlerHelper.copyStackWithSize(stack, ret + n);
 					}
 				}
 				ItemStack ret = src.insertItem(slot, stack, simulate);
-				if (!simulate) flow += stack.getCount() - ret.getCount();
+				if (!simulate) {
+					flow += stack.getCount() - ret.getCount();
+					markDirty();
+				}
 				return ret;
 			} finally {inRecursion = false;}
 		}
@@ -268,7 +283,10 @@ public class ItemValve extends BaseTileEntity implements INeighborAwareTile, IRe
 					if (flow < amount) amount = flow;
 				}
 				ItemStack ret = src.extractItem(slot, amount, simulate);
-				if (!simulate) flow -= ret.getCount();
+				if (!simulate) {
+					flow -= ret.getCount();
+					markDirty();
+				}
 				return ret;
 			} finally {inRecursion = false;}
 		}
@@ -295,7 +313,7 @@ public class ItemValve extends BaseTileEntity implements INeighborAwareTile, IRe
 
 		@Override
 		public int getSlots() {
-			return 1;
+			return (mode & 12) != 0 && flow == 0 ? 0 : 1;
 		}
 
 		@Override
@@ -314,13 +332,24 @@ public class ItemValve extends BaseTileEntity implements INeighborAwareTile, IRe
 				inRecursion = true;
 				if ((mode & 12) != 0) {
 					if (flow >= 0) return stack;
-					if (-flow < stack.getCount()) {
+					int n = stack.getCount();
+					if (-flow < n) {
+						n += flow;
 						stack = stack.copy();
 						stack.setCount(-flow);
+						int ret = src.insertItem(slot, stack, simulate).getCount();
+						if (!simulate) {
+							flow += stack.getCount() - ret;
+							markDirty();
+						}
+						return ItemHandlerHelper.copyStackWithSize(stack, ret + n);
 					}
 				}
 				ItemStack ret = src.insertItem(slot, stack, simulate);
-				if (!simulate) flow += stack.getCount() - ret.getCount();
+				if (!simulate) {
+					flow += stack.getCount() - ret.getCount();
+					markDirty();
+				}
 				return ret;
 			} finally {inRecursion = false;}
 		}
@@ -335,7 +364,10 @@ public class ItemValve extends BaseTileEntity implements INeighborAwareTile, IRe
 					if (flow < amount) amount = flow;
 				}
 				ItemStack ret = src.extractItem(slot, amount, simulate);
-				if (!simulate) flow -= ret.getCount();
+				if (!simulate) {
+					flow -= ret.getCount();
+					markDirty();
+				}
 				return ret;
 			} finally {inRecursion = false;}
 		}

@@ -45,6 +45,7 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 		if (newIn != comp.inputState) {
 			comp.inputState = newIn;
 			comp.network.markStateDirty();
+			markDirty();
 		}
 	}
 
@@ -65,7 +66,8 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 	@Override
 	public boolean onActivated(EntityPlayer player, EnumHand hand, ItemStack item, EnumFacing dir, float X, float Y, float Z) {
 		if (player.isSneaking()) return super.onActivated(player, hand, item, dir, X, Y, Z);
-		return false;
+		if (player.getHeldItemOffhand().isEmpty()) return false;
+		return world.isRemote || cover.interact(this, player, hand, item, dir, X, Y, Z);
 	}
 
 	@Override
@@ -123,6 +125,7 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 			internal = 0;
 			updateInput();
 		}
+		markDirty();
 	}
 
 	@Override

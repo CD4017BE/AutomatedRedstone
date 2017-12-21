@@ -45,6 +45,7 @@ public class WirelessConnector extends BaseTileEntity implements INeighborAwareT
 				linkDim = linkTile.world.provider.getDimension();
 				if (!tileEntityInvalid && conTile instanceof INeighborAwareTile && !conTile.isInvalid())
 					((INeighborAwareTile)conTile).neighborTileChange(pos);
+				markDirty();
 			} else if (conTile != null && !conTile.isInvalid()) {
 				IntegerComp c = conTile.getCapability(Objects.RS_INTEGER_CAPABILITY, getOrientation().front.getOpposite());
 				if (c != null) c.network.markDirty();

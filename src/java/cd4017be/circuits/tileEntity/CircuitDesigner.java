@@ -5,9 +5,12 @@ import io.netty.buffer.Unpooled;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 import com.mojang.authlib.GameProfile;
 
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -24,10 +27,11 @@ import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.capability.LinkedInventory;
 import cd4017be.lib.Gui.TileContainer;
+import cd4017be.lib.block.AdvancedBlock.ITilePlaceHarvest;
 import cd4017be.lib.tileentity.BaseTileEntity;
 import cd4017be.lib.util.Utils;
 
-public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientPacketReceiver {
+public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientPacketReceiver, ITilePlaceHarvest {
 
 	public ItemStack dataItem = ItemStack.EMPTY;
 	private GameProfile lastPlayer;
@@ -121,12 +125,13 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 			}
 			break;
 		}
+		markDirty();
 	}
 
 	@Override
 	public void initContainer(DataContainer container) {
 		TileContainer cont = (TileContainer)container;
-		cont.addItemSlot(new SlotItemHandler(new LinkedInventory(1, 1, (i) -> dataItem, (item, i) -> dataItem = item), 0, 202, 232));
+		cont.addItemSlot(new SlotItemHandler(new LinkedInventory(1, 1, (i) -> dataItem, (item, i) -> {dataItem = item; markDirty();}), 0, 202, 232));
 		cont.addPlayerInventory(8, 174);
 		if (world.isRemote) {
 			modified = 0;
@@ -421,6 +426,17 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 
 	@Override
 	public void setSyncVariable(int i, int v) {
+	}
+
+	@Override
+	public void onPlaced(EntityLivingBase entity, ItemStack item) {
+	}
+
+	@Override
+	public List<ItemStack> dropItem(IBlockState state, int fortune) {
+		List<ItemStack> list = makeDefaultDrops(null);
+		if (!dataItem.isEmpty()) list.add(dataItem);
+		return list;
 	}
 
 }

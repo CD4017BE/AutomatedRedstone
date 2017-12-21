@@ -65,6 +65,7 @@ public class Oszillograph extends BaseTileEntity implements ITilePlaceHarvest, I
 			points[i][idx] = Float.floatToIntBits(Math.min(0.5F, Math.max(-0.5F, (float)nstate - 0.5F)));
 		}
 		markUpdate();
+		markDirty();
 	}
 
 	private double getRedstone(int cfg) {
@@ -119,6 +120,7 @@ public class Oszillograph extends BaseTileEntity implements ITilePlaceHarvest, I
 			}
 		}
 		markUpdate();
+		markDirty();
 	}
 
 	@Override

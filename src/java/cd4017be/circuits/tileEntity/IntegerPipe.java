@@ -8,6 +8,7 @@ import cd4017be.lib.block.AdvancedBlock.IInteractiveTile;
 import cd4017be.lib.block.AdvancedBlock.IRedstoneTile;
 import cd4017be.lib.block.AdvancedBlock.ITilePlaceHarvest;
 import cd4017be.lib.block.MultipartBlock.IModularTile;
+import cd4017be.lib.templates.Cover;
 import cd4017be.lib.tileentity.PassiveMultiblockTile;
 import cd4017be.lib.util.Utils;
 import multiblock.IntegerComp;
@@ -33,6 +34,8 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
  */
 public class IntegerPipe extends PassiveMultiblockTile<IntegerComp, SharedInteger> implements ITilePlaceHarvest, IRedstoneTile, IInteractiveTile, IModularTile, IQuickRedstoneHandler {
 
+	protected Cover cover = new Cover();
+
 	public IntegerPipe() {
 		comp = new IntegerComp(this, bitSize());
 		new SharedInteger(comp);
@@ -55,6 +58,7 @@ public class IntegerPipe extends PassiveMultiblockTile<IntegerComp, SharedIntege
 		if (newIn != comp.inputState) {
 			comp.inputState = newIn;
 			comp.network.markStateDirty();
+			markDirty();
 		}
 	}
 
@@ -90,8 +94,9 @@ public class IntegerPipe extends PassiveMultiblockTile<IntegerComp, SharedIntege
 
 	@Override
 	public boolean onActivated(EntityPlayer player, EnumHand hand, ItemStack item, EnumFacing dir, float X, float Y, float Z) {
+		if (world.isRemote) return true;
+		if (cover.interact(this, player, hand, item, dir, X, Y, Z)) return true;
 		if (item.isEmpty()) {
-			if (world.isRemote) return true;
 			dir = Utils.hitSide(X, Y, Z);
 			byte s = (byte)dir.getIndex();
 			if (player.isSneaking()) {
@@ -102,18 +107,21 @@ public class IntegerPipe extends PassiveMultiblockTile<IntegerComp, SharedIntege
 					IntegerPipe pipe = (IntegerPipe)te;
 					pipe.comp.setConnect((byte)(s^1), con);
 					pipe.markUpdate();
+					pipe.markDirty();
 				}
 			} else {
 				s *= 2;
 				comp.network.setIO(comp, (short)((comp.rsIO & ~(3 << s)) | ((comp.rsIO >> s) + 1 & 3) << s));
 			}
 			this.markUpdate();
+			markDirty();
 			return true;
 		} else return false;
 	}
 
 	@Override
 	public void onClicked(EntityPlayer player) {
+		if (!world.isRemote) cover.hit(this, player);
 	}
 
 	@Override
@@ -129,6 +137,7 @@ public class IntegerPipe extends PassiveMultiblockTile<IntegerComp, SharedIntege
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 		comp.writeToNBT(nbt);
+		cover.writeNBT(nbt, "cover", false);
 		return super.writeToNBT(nbt);
 	}
 
@@ -136,11 +145,13 @@ public class IntegerPipe extends PassiveMultiblockTile<IntegerComp, SharedIntege
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
 		comp.readFromNBT(nbt);
+		cover.readNBT(nbt, "cover", null);
 	}
 
 	@Override
 	public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
 		comp.readFromNBT(pkt.getNbtCompound());
+		cover.readNBT(pkt.getNbtCompound(), "cv", this);
 		this.markUpdate();
 	}
 
@@ -148,18 +159,21 @@ public class IntegerPipe extends PassiveMultiblockTile<IntegerComp, SharedIntege
 	public SPacketUpdateTileEntity getUpdatePacket() {
 		NBTTagCompound nbt = new NBTTagCompound();
 		comp.writeToNBT(nbt);
+		cover.writeNBT(nbt, "cv", true);
 		return new SPacketUpdateTileEntity(pos, -1, nbt);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getModuleState(int m) {
+		if (m == 6) return cover.module();
 		int c = comp.rsIO >> (m * 2) & 3;
 		return (T)Byte.valueOf(c != 0 ? (byte)c : isModulePresent(m) ? 0 : (byte)-1);
 	}
 
 	@Override
 	public boolean isModulePresent(int m) {
+		if (m == 6) return cover.state != null;
 		if ((comp.rsIO >> (m * 2) & 3) != 0) return true;
 		if (!comp.canConnect((byte)m)) return false;
 		EnumFacing dir = EnumFacing.VALUES[m];
@@ -169,7 +183,9 @@ public class IntegerPipe extends PassiveMultiblockTile<IntegerComp, SharedIntege
 
 	@Override
 	public List<ItemStack> dropItem(IBlockState state, int fortune) {
-		return makeDefaultDrops(null);
+		List<ItemStack> list = makeDefaultDrops(null);
+		if (cover.stack != null) list.add(cover.stack);
+		return list;
 	}
 
 }
