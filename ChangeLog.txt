@@ -1,3 +1,12 @@
+v6.0.4
+Changes:
+- fixed #7 (Z-fighting issue with covered pipes)
+- fixed TileEntity states not being saved due to missing chunk notification
+Dependencies:
+- for MC-1.12.2
+- forge-14.23.0.2512 (or newer)
+- CD4017BE_lib-6.0.7
+
 v6.0.3
 Changes:
 - made cables coverable
