@@ -290,6 +290,7 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 
 	public void onSetSlot(ItemStack item, int s) {
 		recompile |= s == 7;
+		markDirty();
 	}
 
 	@Override
@@ -321,6 +322,7 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 					if (item.getItem() == Objects.circuit_plan) {
 						inventory.setStackInSlot(7, dsg.dataItem);
 						dsg.dataItem = item;
+						dsg.markDirty();
 					}
 					BlockGuiHandler.openBlockGui(sender, world, pos.offset(side));
 					return;

@@ -58,6 +58,7 @@ public class ItemValve extends BaseTileEntity implements INeighborAwareTile, IRe
 		default:
 			emitRS(flow == 0 ? 0 : flow < 0 ? -1 : 1);
 		}
+		markDirty();
 	}
 
 	private int readAm() {
@@ -92,6 +93,7 @@ public class ItemValve extends BaseTileEntity implements INeighborAwareTile, IRe
 		if ((mode & 2) != 0) {
 			inventory.setSlot(input & 0xff);
 		}
+		markDirty();
 	}
 
 	@Override
@@ -171,6 +173,7 @@ public class ItemValve extends BaseTileEntity implements INeighborAwareTile, IRe
 			emitRS(output);
 			break;
 		}
+		markDirty();
 	}
 
 	@Override
@@ -254,12 +257,18 @@ public class ItemValve extends BaseTileEntity implements INeighborAwareTile, IRe
 						stack = stack.copy();
 						stack.setCount(-flow);
 						int ret = src.insertItem(slot, stack, simulate).getCount();
-						if (!simulate) flow += stack.getCount() - ret;
+						if (!simulate) {
+							flow += stack.getCount() - ret;
+							markDirty();
+						}
 						return ItemHandlerHelper.copyStackWithSize(stack, ret + n);
 					}
 				}
 				ItemStack ret = src.insertItem(slot, stack, simulate);
-				if (!simulate) flow += stack.getCount() - ret.getCount();
+				if (!simulate) {
+					flow += stack.getCount() - ret.getCount();
+					markDirty();
+				}
 				return ret;
 			} finally {inRecursion = false;}
 		}
@@ -274,7 +283,10 @@ public class ItemValve extends BaseTileEntity implements INeighborAwareTile, IRe
 					if (flow < amount) amount = flow;
 				}
 				ItemStack ret = src.extractItem(slot, amount, simulate);
-				if (!simulate) flow -= ret.getCount();
+				if (!simulate) {
+					flow -= ret.getCount();
+					markDirty();
+				}
 				return ret;
 			} finally {inRecursion = false;}
 		}
@@ -326,12 +338,18 @@ public class ItemValve extends BaseTileEntity implements INeighborAwareTile, IRe
 						stack = stack.copy();
 						stack.setCount(-flow);
 						int ret = src.insertItem(slot, stack, simulate).getCount();
-						if (!simulate) flow += stack.getCount() - ret;
+						if (!simulate) {
+							flow += stack.getCount() - ret;
+							markDirty();
+						}
 						return ItemHandlerHelper.copyStackWithSize(stack, ret + n);
 					}
 				}
 				ItemStack ret = src.insertItem(slot, stack, simulate);
-				if (!simulate) flow += stack.getCount() - ret.getCount();
+				if (!simulate) {
+					flow += stack.getCount() - ret.getCount();
+					markDirty();
+				}
 				return ret;
 			} finally {inRecursion = false;}
 		}
@@ -346,7 +364,10 @@ public class ItemValve extends BaseTileEntity implements INeighborAwareTile, IRe
 					if (flow < amount) amount = flow;
 				}
 				ItemStack ret = src.extractItem(slot, amount, simulate);
-				if (!simulate) flow -= ret.getCount();
+				if (!simulate) {
+					flow -= ret.getCount();
+					markDirty();
+				}
 				return ret;
 			} finally {inRecursion = false;}
 		}

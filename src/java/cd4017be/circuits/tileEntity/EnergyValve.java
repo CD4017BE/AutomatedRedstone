@@ -48,14 +48,17 @@ public class EnergyValve extends BaseTileEntity implements INeighborAwareTile, I
 		} else if (state > 0) {
 			flow = state;
 		} else flow = 0;
+		markDirty();
 	}
 
 	@Override
 	public void neighborBlockChange(Block b, BlockPos src) {
 		if (world.isRemote || measure) return;
+		int ls = state;
 		state = 0;
 		for (EnumFacing s : EnumFacing.VALUES)
 			state |= world.getRedstonePower(pos.offset(s), s);
+		if (state != ls) markDirty();
 	}
 
 	@Override
@@ -104,6 +107,7 @@ public class EnergyValve extends BaseTileEntity implements INeighborAwareTile, I
 			if (measure) flow = 0;
 			else neighborBlockChange(null, pos);
 		}
+		markDirty();
 	}
 
 	@Override
@@ -144,7 +148,10 @@ public class EnergyValve extends BaseTileEntity implements INeighborAwareTile, I
 		IEnergyStorage stor;
 		if (am > 0 && out != null && !out.isInvalid() && (stor = out.getCapability(CapabilityEnergy.ENERGY, getOrientation().front)) != null) {
 			am = stor.receiveEnergy(am, sim);
-			if (!sim) flow -= am;
+			if (!sim) {
+				flow -= am;
+				markDirty();
+			}
 			return am;
 		}
 		return 0;

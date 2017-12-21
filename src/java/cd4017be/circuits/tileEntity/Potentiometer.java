@@ -50,6 +50,7 @@ public class Potentiometer extends BaseTileEntity implements IInteractiveTile, I
 			cur = state;
 			world.notifyNeighborsOfStateChange(pos, Blocks.REDSTONE_TORCH, false);
 			markUpdate();
+			markDirty();
 		}
 		return true;
 	}
@@ -88,6 +89,7 @@ public class Potentiometer extends BaseTileEntity implements IInteractiveTile, I
 			world.notifyNeighborsOfStateChange(pos, Blocks.REDSTONE_TORCH, false);
 		}
 		markUpdate();
+		markDirty();
 	}
 
 	@Override

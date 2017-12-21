@@ -125,12 +125,13 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 			}
 			break;
 		}
+		markDirty();
 	}
 
 	@Override
 	public void initContainer(DataContainer container) {
 		TileContainer cont = (TileContainer)container;
-		cont.addItemSlot(new SlotItemHandler(new LinkedInventory(1, 1, (i) -> dataItem, (item, i) -> dataItem = item), 0, 202, 232));
+		cont.addItemSlot(new SlotItemHandler(new LinkedInventory(1, 1, (i) -> dataItem, (item, i) -> {dataItem = item; markDirty();}), 0, 202, 232));
 		cont.addPlayerInventory(8, 174);
 		if (world.isRemote) {
 			modified = 0;

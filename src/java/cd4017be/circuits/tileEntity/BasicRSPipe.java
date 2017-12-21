@@ -56,9 +56,11 @@ public class BasicRSPipe extends IntegerPipe {
 					pipe.comp.setConnect((byte)(s^1), con);
 					pipe.checkCons();
 					pipe.markUpdate();
+					pipe.markDirty();
 				}
 				checkCons();
 				this.markUpdate();
+				markDirty();
 			}
 			return true;
 		} else return false;

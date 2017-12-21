@@ -45,6 +45,7 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 		if (newIn != comp.inputState) {
 			comp.inputState = newIn;
 			comp.network.markStateDirty();
+			markDirty();
 		}
 	}
 
@@ -124,6 +125,7 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 			internal = 0;
 			updateInput();
 		}
+		markDirty();
 	}
 
 	@Override

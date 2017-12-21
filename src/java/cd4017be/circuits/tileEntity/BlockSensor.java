@@ -41,6 +41,7 @@ public class BlockSensor extends BaseTileEntity implements ITilePlaceHarvest, IR
 		if (output != nstate) {
 			output = nstate;
 			Utils.updateRedstoneOnSide(this, nstate, getOrientation().front);
+			markDirty();
 		}
 	}
 
@@ -74,6 +75,7 @@ public class BlockSensor extends BaseTileEntity implements ITilePlaceHarvest, IR
 			if (tickInt < 1) tickInt = 1;
 			else if (tickInt > 1200) tickInt = 1200;
 		}
+		markDirty();
 	}
 
 	@Override
@@ -94,7 +96,7 @@ public class BlockSensor extends BaseTileEntity implements ITilePlaceHarvest, IR
 	@Override
 	public void initContainer(DataContainer container) {
 		TileContainer cont = (TileContainer)container;
-		cont.addItemSlot(new SlotItemHandler(new LinkedInventory(1, 1, (i) -> sensor, (item, i) -> sensor = item), 0, 62, 16));
+		cont.addItemSlot(new SlotItemHandler(new LinkedInventory(1, 1, (i) -> sensor, (item, i) -> {sensor = item; markDirty();}), 0, 62, 16));
 		cont.addPlayerInventory(8, 50);
 	}
 

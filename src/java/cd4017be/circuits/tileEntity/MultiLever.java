@@ -35,6 +35,7 @@ public class MultiLever extends BaseTileEntity implements IRedstoneTile, IIntera
 			offset &= 3;
 			world.notifyNeighborsOfStateChange(pos, Blocks.REDSTONE_TORCH, false);
 			player.sendMessage(new TextComponentString(TooltipUtil.format("tile.cd4017be.multilever.click" + offset)));
+			markDirty();
 			return true;
 		} else if (s == o.front) {
 			Vec3d vec = o.reverse().rotate(new Vec3d(X - 0.5, Y - 0.5, Z - 0.5));
@@ -43,6 +44,7 @@ public class MultiLever extends BaseTileEntity implements IRedstoneTile, IIntera
 			state ^= 1 << i;
 			world.notifyNeighborsOfStateChange(pos, Blocks.REDSTONE_TORCH, false);
 			this.markUpdate();
+			markDirty();
 			return true;
 		} else return false;
 	}
