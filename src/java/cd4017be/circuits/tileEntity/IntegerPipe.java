@@ -126,7 +126,7 @@ public class IntegerPipe extends PassiveMultiblockTile<IntegerComp, SharedIntege
 
 	@Override
 	public int redstoneLevel(EnumFacing side, boolean strong) {
-		return !strong && (comp.rsIO >> (side.ordinal() * 2) & 2) != 0 ? convertSignal(comp.network.outputState) : 0;
+		return !strong && (comp.rsIO >> (side.ordinal() * 2) & 2) != 0 && !comp.invalid() ? convertSignal(comp.network.outputState) : 0;
 	}
 
 	@Override

@@ -31,7 +31,7 @@ public class IntegerComp extends MultiblockComp<IntegerComp, SharedInteger> {
 		if (network != null) {
 			network.components.remove(0L);
 			network.components.put(uid, this);
-		}
+		} else new SharedInteger(this);
 		network.setIO(this, rsIO);
 	}
 
