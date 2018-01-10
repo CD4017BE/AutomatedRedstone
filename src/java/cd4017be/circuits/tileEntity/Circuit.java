@@ -84,6 +84,7 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 	public byte[] ram = new byte[0];
 	public int tickInt = ClockSpeed[0];
 	private long nextUpdate = 0;
+	public long usedAddr;
 	public byte mode = 0;
 	public int startIdx;
 	private int readIdx;
@@ -330,6 +331,7 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 		nbt.setByte("Calc", (byte)(var >> 24));
 		nbt.setByteArray("data", Arrays.copyOf(ram, ram.length));//Don't let other things use the same reference to this array
 		nbt.setString("name", name);
+		nbt.setLong("used", usedAddr);
 		NBTTagList list = new NBTTagList();
 		for (IOcfg cfg : iocfg) list.appendTag(cfg.write());
 		nbt.setTag("io", list);
@@ -343,6 +345,7 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 			| (nbt.getByte("Calc") & 0xff) << 24;
 		ram = nbt.getByteArray("data");
 		name = nbt.getString("name");
+		usedAddr = nbt.getLong("used");
 		NBTTagList list = nbt.getTagList("io", 10);
 		Arrays.fill(ioacc, null);
 		iocfg = new IOcfg[list.tagCount()];
@@ -354,6 +357,9 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 			acc.dir |= cfg.dir ? 2 : 1;
 		}
 		startIdx = Math.min((var >> 8 & 0xff), ram.length);
+		//backward compatibility:
+		if (Long.bitCount(usedAddr) != startIdx)
+			usedAddr = startIdx == 0 ? 0L : 0xffffffffffffffffL >>> (64 - startIdx);
 	}
 
 	@Override

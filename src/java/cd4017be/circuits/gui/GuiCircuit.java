@@ -103,10 +103,13 @@ public class GuiCircuit extends AdvancedGui {
 		public void drawOverlay(int mx, int my) {
 			mc.renderEngine.bindTexture(MAIN_TEX);
 			IOcfg cfg = get.get();
-			int s = cfg.addr & 0x3f;
+			int s = cfg.addr & 0x3f, i = 0;
+			for (int j = s; j >= 0 && i < 64; i++)
+				if ((tile.usedAddr >> i & 1) != 0) j--;
+			i--;
 			int l = Math.min(s + (cfg.addr >> 6 & 3) + 1, tile.ram.length);
-			for (int i = s; i < l; i++) {
-				int val = tile.ram[i] & 0xff;
+			for (; s < l; i++, s++) {
+				int val = tile.ram[s] & 0xff;
 				drawTexturedModalRect(guiLeft + 7 + (i & 7) * 4, guiTop + 24 + (i >> 3) * 8, 192 + (val & 15) * 4, 128 + (val >> 4) * 8, 4, 8);
 			}
 		}
@@ -125,22 +128,31 @@ public class GuiCircuit extends AdvancedGui {
 		@Override
 		public void draw() {
 			mc.renderEngine.bindTexture(MAIN_TEX);
-			for (int i = 0; i < tile.startIdx; i++) {
-				int val = tile.ram[i] & 0xff;
-				drawTexturedModalRect(px + (i & 7) * 4, py + (i >> 3) * 8, 192 + (val & 15) * 4, (val >> 4) * 8, 4, 8);
-			}
+			for (int i = 0, j = 0; j < tile.startIdx && i < 64; i++)
+				if ((tile.usedAddr >> i & 1) != 0) {
+					int val = tile.ram[j++] & 0xff;
+					drawTexturedModalRect(px + (i & 7) * 4, py + (i >> 3) * 8, 192 + (val & 15) * 4, (val >> 4) * 8, 4, 8);
+				}
 		}
 
 		@Override
 		public void drawOverlay(int mx, int my) {
 			int i = (mx - px) / 4 + (my - py) / 8 * 8;
-			int l = tile.startIdx;
 			if (i >= 0) {
+				int j = Long.bitCount(tile.usedAddr << (63 - i)) - 1;
+				int r = (int) (tile.usedAddr >> i);
 				ArrayList<String> list = new ArrayList<String>(4);
-				if (i < l)list.add(String.format("8: %02x %d", tile.ram[i] & 0xff, tile.getNum(i)));
-				if (i + 1 < l)list.add(String.format("16: %d", tile.getNum(i | 0x40)));
-				if (i + 2 < l)list.add(String.format("24: %d", tile.getNum(i | 0x80)));
-				if (i + 3 < l)list.add(String.format("32: %d", tile.getNum(i | 0xc0)));
+				if ((r & 1) != 0) {
+					list.add(String.format("8: %02x %d", tile.ram[j] & 0xff, tile.getNum(j)));
+					if ((r & 2) != 0) {
+						list.add(String.format("16: %d", tile.getNum(j | 0x40)));
+						if ((r & 4) != 0) {
+							list.add(String.format("24: %d", tile.getNum(j | 0x80)));
+							if ((r & 8) != 0)
+								list.add(String.format("32: %d", tile.getNum(j | 0xc0)));
+						}
+					}
+				}
 				drawHoveringText(list, mx, my);
 			}
 		}
@@ -148,17 +160,18 @@ public class GuiCircuit extends AdvancedGui {
 		@Override
 		public boolean mouseIn(int x, int y, int b, int d) {
 			int i = (x - px) / 4 + (y - py) / 8 * 8;
-			if (i < 0 || i >= tile.startIdx) return false;
+			if (i < 0 || (tile.usedAddr >> i & 1) == 0) return false;
+			int j = Long.bitCount(tile.usedAddr << (63 - i)) - 1;
 			byte val;
 			if (d == 0) {
 				if (b == 0) val = -1;
 				else if (b == 1) val = 0;
 				else return false;
 			} else if (d == 3) {
-				val = (byte)(tile.ram[i] + b * (isShiftKeyDown() ? 16 : 1));
+				val = (byte)(tile.ram[j] + b * (isShiftKeyDown() ? 16 : 1));
 			} else return false;
 			PacketBuffer data = BlockGuiHandler.getPacketTargetData(tile.pos());
-			data.writeByte(4).writeByte(i).writeByte(val);
+			data.writeByte(4).writeByte(j).writeByte(val);
 			BlockGuiHandler.sendPacketToServer(data);
 			return true;
 		}

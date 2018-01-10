@@ -178,6 +178,30 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 	}
 
 	public ByteBuf serialize() {
+		for (Module m : modules)
+			if (m != null)
+				for (Con c : m.cons) 
+					if (c != null){
+						int a = c.getAddr(), n = a < 0 ? 0 : c.type < 4 ? c.type + 1 : 1;
+						Module cst = null;
+						while(n > 0 && a < 64) {
+							Module m1 = find(a);
+							if (m1 != null) {
+								int i = m1.pos + m1.size - a;
+								a += i;
+								n -= i;
+								cst = m1.type == ModuleType.CST && m1.label.equals("0") ? m1 : null;
+								continue;
+							} else if (cst == null || cst.size >= 4) {
+								cst = new Module(ModuleType.CST);
+								cst.pos = a;
+								modules[a] = cst;
+							} else cst.size++;
+							if (c.mod == null || modules[c.mod.pos] != c.mod) c.setAddr(cst, c.getAddr());
+							a++;
+							n--;
+						}
+					}
 		ByteBuf dos = Unpooled.buffer();
 		int n = 0, p = dos.writerIndex();
 		dos.writeByte(n);
