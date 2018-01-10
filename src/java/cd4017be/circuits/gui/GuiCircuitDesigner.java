@@ -64,7 +64,7 @@ public class GuiCircuitDesigner extends AdvancedGui {
 		guiComps.add(new TextField(7, 184, 188, 52, 7, 10).color(0xffc0c000, 0xffff0000).setTooltip("designer.label"));
 		guiComps.add(new Button(8, 153, 144, 47, 11, -1).setTooltip("designer.addOut"));
 		guiComps.add(new Text<>(9, 153, 147, 84, 8, "designer.mods"));
-		guiComps.add(new Slider(10, 228, 22, 116, 52, 144, 8, 12, false).scroll(ScrollSize).setTooltip("designer.scroll"));
+		guiComps.add(new Slider(10, 228, 22, 116, 52, 144, 8, 12, false).scroll(ScrollSize));
 		guiComps.add(new ModuleList(11, 202, 16).setTooltip("designer.mod"));
 		guiComps.add(new WorkPane(12, 8, 16, 8));
 		guiComps.add(new InfoTab(13, 7, 6, 7, 8, "designer.info"));
@@ -188,9 +188,7 @@ public class GuiCircuitDesigner extends AdvancedGui {
 
 	@Override
 	protected void keyTyped(char c, int k) throws IOException {
-		if (k == Keyboard.KEY_PRIOR && scroll > 0) scroll--;
-		else if (k == Keyboard.KEY_NEXT && scroll < 1F / ScrollSize) scroll++;
-		else if (k == Keyboard.KEY_DELETE) setDisplVar(6, null, false);
+		if (k == Keyboard.KEY_DELETE) setDisplVar(6, null, false);
 		super.keyTyped(c, k);
 	}
 
@@ -367,10 +365,11 @@ public class GuiCircuitDesigner extends AdvancedGui {
 			for (Module m : tile.modules)
 				if (m != null)
 					drawModuleCons(m);
-			if (targetPos >= 0) {
+			if (targetPos >= 0 && targetPos < tile.modules.length) {
 				int x1 = px + (targetPos & 7) * 24;
 				int y1 = py + (targetPos >> 3) * 16;
-				drawTexturedModalRect(x1, y1, 120, 128, 24, 16);
+				boolean valid = targetPos >= 64 ^ tile.selMod < 64;
+				drawTexturedModalRect(x1, y1, valid ? 120 : 144, 128, 24, 16);
 			}
 		}
 
@@ -385,10 +384,13 @@ public class GuiCircuitDesigner extends AdvancedGui {
 			for (int i = 0; i < m.cons.length; i++) {
 				Con c = m.cons[i];
 				if (c == null || c.addr < 0) continue;
-				g = m.pos == tile.selMod && i == m.selCon ? 0xc0 : 0;
 				if (c.type < 4) {r = 0; b = 0xff;}
 				else {r = 0xff; b = 0;}
 				int addr = c.getAddr(), x2 = x1 + m.type.conRenderX(i) + 2, y2 = y1 + m.type.conRenderY(i) + 2;
+				g = addr >= m.pos ? 0x7f : 0;
+				if (m.pos == tile.selMod && i == m.selCon) {
+					r |= 0x80; g |= 0x80; b |= 0x80;
+				}
 				for (int n = full && c.type < 4 ? c.type : 0; n >= 0; n--, addr++) {
 					vb.pos(x2, y2, zLevel).color(r,g,b,a).endVertex();
 					vb.pos(px + (addr & 7) * 24 + 22, (double)(py + (addr >> 3) * 16) + 8.5, zLevel).color(r,g,b,a).endVertex();
@@ -416,7 +418,7 @@ public class GuiCircuitDesigner extends AdvancedGui {
 			}
 			int mp = (x - px) / 24 + (y - py) / 16 * 8;
 			if (d == 1 && b == 0 && selMod != null) {
-				targetPos = targetPos >= 0 || mp == tile.selMod ? mp : -1;
+				targetPos = targetPos >= 0 && targetPos < tile.modules.length || mp == tile.selMod ? mp : -1;
 				return true;
 			} else if (d == 2 && b == 0) setFocus(-1);
 			targetPos = -1;
