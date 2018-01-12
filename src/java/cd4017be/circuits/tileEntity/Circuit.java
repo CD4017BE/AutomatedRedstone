@@ -508,7 +508,7 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 		if (chng1 != 0) {
 			dos.writeLong(chng1);
 			chng |= 128;
-			for (int i = 0; chng1 != 0; i++, chng1 >>= 1)
+			for (int i = 0; chng1 != 0; i++, chng1 >>>= 1)
 				if ((chng1 & 1) != 0) dos.writeByte(ls.ram[i] = ram[i]);
 		}
 		if (chng == 0) return false;
@@ -532,7 +532,7 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 			}
 		if ((chng & 128) != 0) {
 			long chng1 = dis.readLong();
-			for (int i = 0; chng1 != 0 && i < ram.length; i++, chng1 >>= 1)
+			for (int i = 0; chng1 != 0 && i < ram.length; i++, chng1 >>>= 1)
 				if ((chng1 & 1) != 0) ram[i] = dis.readByte();
 		}
 	}
@@ -600,7 +600,7 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 					if (t instanceof IQuickRedstoneHandler) te = (IQuickRedstoneHandler)t;
 				}
 				if (te != null) te.onRedstoneStateChange(side.getOpposite(), state, Circuit.this);
-				else world.neighborChanged(pos.offset(side), blockType, pos);
+				else world.neighborChanged(pos.offset(side), getBlockType(), pos);
 			}
 			if ((dir & 4) != 0) {
 				state = world.getRedstonePower(pos.offset(side), side);
