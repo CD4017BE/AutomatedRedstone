@@ -178,30 +178,7 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 	}
 
 	public ByteBuf serialize() {
-		for (Module m : modules)
-			if (m != null)
-				for (Con c : m.cons) 
-					if (c != null){
-						int a = c.getAddr(), n = a < 0 ? 0 : c.type < 4 ? c.type + 1 : 1;
-						Module cst = null;
-						while(n > 0 && a < 64) {
-							Module m1 = find(a);
-							if (m1 != null) {
-								int i = m1.pos + m1.size - a;
-								a += i;
-								n -= i;
-								cst = m1.type == ModuleType.CST && m1.label.equals("0") ? m1 : null;
-								continue;
-							} else if (cst == null || cst.size >= 4) {
-								cst = new Module(ModuleType.CST);
-								cst.pos = a;
-								modules[a] = cst;
-							} else cst.size++;
-							if (c.mod == null || modules[c.mod.pos] != c.mod) c.setAddr(cst, c.getAddr());
-							a++;
-							n--;
-						}
-					}
+		addMissingConsts();
 		ByteBuf dos = Unpooled.buffer();
 		int n = 0, p = dos.writerIndex();
 		dos.writeByte(n);
@@ -258,6 +235,69 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 				m.setPos(p);
 				p += m.size;
 			}
+		}
+	}
+
+	private void addMissingConsts() {
+		for (Module m : modules) {
+			if (m == null) continue;
+			boolean mem = m.type == ModuleType.RD || m.type == ModuleType.WR;
+			for (Con c : m.cons)
+				if (mem) {
+					mem = false;
+					int a = c.getAddr();
+					if (a < 0) {
+						c.setAddr(m, m.pos);
+						continue;
+					}
+					Module m1 = find(a);
+					if (m1 != null) continue;
+					int n = m.size;
+					int i0 = m.pos, i1 = (a - i0 - (a > i0 ? n - 1 : 0)) / n * n + i0;
+					if (i0 > i1) {
+						i0 = i1;
+						i1 = m.pos;
+						a = i0;
+					} else {
+						a = i1 + n - 1;
+					}
+					for (; i0 <= i1; i0 += n) {
+						int i = m1 == null ? 0 : m1.pos + m1.size - i0;
+						if (i <= 0) {m1 = null; i = 0;}
+						Module cst = null;
+						for (; i < n; i++) {
+							m1 = modules[i + i0];
+							if (m1 != null) {
+								cst = m1.type == ModuleType.CST ? m1 : null;
+								i += m1.size - 1;
+								continue;
+							}
+							if (cst != null && cst.size < 4) cst.size++;
+							else modules[i + i0] = cst = new Module(ModuleType.CST);
+						}
+					}
+					c.setAddr(find(a), a);
+				} else if (c != null) {
+					int a = c.getAddr(), n = a < 0 ? 0 : c.type < 4 ? c.type + 1 : 1;
+					Module cst = null;
+					while(n > 0 && a < 64) {
+						Module m1 = find(a);
+						if (m1 != null) {
+							int i = m1.pos + m1.size - a;
+							a += i;
+							n -= i;
+							cst = m1.type == ModuleType.CST && m1.label.equals("0") ? m1 : null;
+							continue;
+						} else if (cst == null || cst.size >= 4) {
+							cst = new Module(ModuleType.CST);
+							cst.pos = a;
+							modules[a] = cst;
+						} else cst.size++;
+						if (c.mod == null || modules[c.mod.pos] != c.mod) c.setAddr(cst, c.getAddr());
+						a++;
+						n--;
+					}
+				}
 		}
 	}
 
@@ -393,10 +433,11 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 		BUF(0,1,1), NOT(1,0,2), LS(0,2,0), NLS(0,2,0), EQ(0,2,0), NEQ(0,2,0), NEG(0,1,1), ABS(0,1,1),
 		ADD(0,2,1), SUB(0,2,1), MUL(0,2,1), DIV(0,2,1), MOD(0,2,1), MIN(0,2,1), MAX(0,2,1),
 		SWT(1,2,1), CNT1(2,0,1), CNT2(2,2,1), RNG(0,1,1), SQRT(0,1,1), BSL(0,2,1), BSR(0,2,1), COMB(8,0,6), FRG(3,0,0x22),
+		RD(2,0,11), WR(2,1,11),
 		OUT(0,1,0);
 
 		public final int binCon, numCon, group, size;
-		public final boolean varInAm, can8bit, isNum;
+		public final boolean varInAm, can8bit, isNum, lockMode;
 
 		private ModuleType(int bc, int nc, int type) {
 			binCon = bc;
@@ -405,6 +446,7 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 			isNum = (type & 1) != 0;
 			can8bit = (type & 2) != 0;
 			varInAm = (type & 4) != 0;
+			lockMode = (type & 8) != 0;
 			int s = type >> 4 & 15;
 			size = s == 0 ? 1 : s;
 		}
@@ -416,7 +458,7 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 		}
 
 		public int cons() {return binCon + numCon;}
-		public byte conType(int i) {return i >= binCon ? (byte)0 : (byte)4;}
+		public byte conType(int i) {return i >= binCon ? (byte)0 : can8bit && lockMode ? (byte)5 : (byte)4;}
 		public int id() {return this == OUT ? 63 : ordinal();}
 
 		@SideOnly(Side.CLIENT)

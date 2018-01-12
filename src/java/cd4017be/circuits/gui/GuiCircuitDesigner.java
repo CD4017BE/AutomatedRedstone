@@ -147,7 +147,8 @@ public class GuiCircuitDesigner extends AdvancedGui {
 			if (c == null) break;
 			if (c.type < 4) {
 				c.type = (byte)((c.type + ((Integer)obj == 0 ? 1 : 3)) % 4);
-			} else {
+			} else if (m.type.lockMode) break;
+			else {
 				boolean back = (Integer)obj != 0;
 				c.type = (byte)((c.type + (back ? 5 : 7)) % 10 + 4);
 				if (c.type == 5 && !m.type.can8bit) c.type += back ? -1 : 1;

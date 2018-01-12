@@ -150,14 +150,14 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 						sz--;
 					}
 				} else {
-					while (nCst > 0) {
-						if (nCst >= 4) {
-							out.writeByte(0xc0);
-							nCst -= 4;
+					if (nCst > 0) {
+						if (nCst > 4) {
+							out.writeByte(Circuit.C_SKIP);
+							out.writeByte(nCst);
 						} else {
 							out.writeByte((nCst - 1) << 6);
-							nCst = 0;
 						}
+						nCst = 0;
 					}
 					out.writeByte(t);
 					if (mt == ModuleType.IN) {
@@ -246,6 +246,7 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 		case SWT: case MIN: case MAX: return (sz + 1) / 2 + 1;
 		case CNT1: case COMB: case FRG: return 1;
 		case CNT2: return 2;
+		case RD: case WR: return 8;
 		default: return 0;
 		}
 	}

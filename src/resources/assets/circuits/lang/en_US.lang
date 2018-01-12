@@ -239,7 +239,9 @@ gui.cd4017be.designer.mod28=Bit right-shift\n§7Emits the §9upper input§7 valu
 gui.cd4017be.designer.mod29=Bit left-shift\n§7Emits the §9upper input§7 value left-shifted in its\n§7binary representation by the §1lower input§7 value\n§7amount of bits. (out = §9U§7 * 2^§1L§7)
 gui.cd4017be.designer.mod30=Bit combiner\n§7Emits a 8-bit value which binary representation\n§7is based on the 8 logic input signals.
 gui.cd4017be.designer.mod31=Fredkin-Gate\n§7Swaps the upper two inputs when lower input\n§7is active, otherwise emits them unchanged.
-gui.cd4017be.designer.mod32=Redstone Output\n§7Sets the value of an outgoing Redstone signal.\n§7The side configuration is later done in the\n§6Circuit Casing§7 UI, so it's recommended to name these\n§7in the Label text field when having more than one.
+gui.cd4017be.designer.mod32=Array reader\n§7Emits the value stored at the index given by the lower input or 0 if out of range. The array elements all have the same size as this module and are arranged between this module (exclusive) and the the position where the upper input is connected to (inclusive).
+gui.cd4017be.designer.mod33=Array writer\n§7Overrides the value stored at the index given by the middle input (if in valid range) by the value received from the lower input. The array elements all have the same size as this module and are arranged between this module (inclusive) and the the position where the upper input is connected to (inclusive). This module's output acts like a 'constant' (initialized with 0).
+gui.cd4017be.designer.mod34=Redstone Output\n§7Sets the value of an outgoing Redstone signal.\n§7The side configuration is later done in the\n§6Circuit Casing§7 UI, so it's recommended to name these\n§7in the Label text field when having more than one.
 gui.cd4017be.designer.del=Delete sel Component\nShortcut:§aDELETE
 gui.cd4017be.designer.out0=Settings of sel. Component
 gui.cd4017be.designer.out1=8-bit Output\n(-128 to +127)

@@ -74,7 +74,10 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 		C_BSR = 28,	//>> operator
 		C_BSL = 29,	//<< operator
 		C_COMB = 30,//bit combiner
-		C_FRG = 31;	//Fredkin gate
+		C_FRG = 31,	//Fredkin gate
+		C_RD = 32,	//mem reader
+		C_WR = 33,	//mem writer
+		C_SKIP = 63;//large padding
 
 	public String name = "";
 	/** var[0-7]: IO, var[8-15]: cap, var[16-23]: gates, var[24-31]: calc */
@@ -201,6 +204,32 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 				ram[n++] = (byte) (a ^ c);
 				ram[n++] = (byte) (b ^ c);
 			} continue;
+			case C_RD: {
+				s++;
+				int i, i1 = ram[++readIdx] & 0x3f;
+				if (i1 < n) {i = i1; i1 = n - s;}
+				else {i = n + s; i1 -= s - 1;}
+				i += (ram[ram[++readIdx] & 0x3f] & 0x7f) * s;
+				if (i <= i1)
+					for (; s > 0; s--)
+						ram[n++] = ram[i++];
+				else
+					for (; s > 0; s--)
+						ram[n++] = 0;
+			} continue;
+			case C_WR: {
+				s++;
+				int i, i1 = ram[++readIdx] & 0x3f;
+				if (i1 < n) {i = i1; i1 = n;}
+				else {i = n; i1 -= s - 1;}
+				i += (ram[ram[++readIdx] & 0x3f] & 0xff) * s;
+				readIdx++;
+				if (i <= i1)
+					for (x = getNum(ram[readIdx]); s > 0; s--, x >>= 8)
+						ram[i++] = (byte)x;
+				n += s;
+			} continue;
+			case C_SKIP: n += ram[++readIdx] & 0x3f; continue;
 			default: throw new IllegalArgumentException("invalid command byte:" + cmd);
 			}
 			for (; s > 0; s--, x >>= 8) ram[n++] = (byte)x;
