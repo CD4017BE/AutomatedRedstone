@@ -32,10 +32,21 @@ import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.util.TooltipUtil;
 import cd4017be.lib.Gui.AdvancedGui;
 import cd4017be.lib.Gui.TileContainer;
+import static cd4017be.circuits.tileEntity.CircuitDesigner.ModuleType.*;
 
 public class GuiCircuitDesigner extends AdvancedGui {
 
-	private static final float ScrollSize = 1F / (float)(CircuitDesigner.ModuleType.values().length - 8);
+	private static final ModuleType[] LIST_ORDER = {
+		CST, IN, //data sources
+		BUF, NOT, OR, NOR, AND, NAND, XOR, XNOR, //Logic operators
+		EQ, NEQ, LS, NLS, //Comparison operators
+		NEG, ADD, SUB, MUL, DIV, MOD, //Arithmetic operators
+		ABS, MIN, MAX, RNG, SQRT, //Special math functions
+		BSL, BSR, COMB, //Bit manipulators
+		CNT1, CNT2, FRG, SWT, RD, WR, //Special control devices
+		OUT, //output
+	};
+	private static final float ScrollSize = 1F / (float)(LIST_ORDER.length - 8);
 	private static final ResourceLocation BG_TEX = new ResourceLocation("circuits", "textures/gui/circuit_designer.png");
 	private final CircuitDesigner tile;
 	private int scroll;
@@ -174,14 +185,14 @@ public class GuiCircuitDesigner extends AdvancedGui {
 		case 7:
 			if (tile.selMod < 0 || (m = tile.modules[tile.selMod]) == null) break;
 			m.label = (String)obj;
-			if (m.type == ModuleType.CST) try {
+			if (m.type == CST) try {
 				int s = 32 - m.size * 8;
 				m.label = Integer.toString((Integer.parseInt(m.label) << s) >> s);
 			} catch(NumberFormatException e) {m.label = "0";}
 			tile.modified++;
 			break;
 		case 10: scroll = (int)((Float)obj / ScrollSize); break;
-		case 8: obj = ModuleType.OUT;
+		case 8: obj = OUT;
 		case 11: tile.add((ModuleType)obj); break;
 		case 14: sendCommand(8); break;
 		}
@@ -285,10 +296,10 @@ public class GuiCircuitDesigner extends AdvancedGui {
 		@Override
 		public void drawOverlay(int mx, int my) {
 			int i = (my - py) / 16 + scroll;
-			if (i < 0 || i >= ModuleType.values().length) return;
+			if (i < 0 || i >= LIST_ORDER.length) return;
+			ModuleType mt = LIST_ORDER[i];
 			ArrayList<String> list = new ArrayList<String>();
-			for (String s : TooltipUtil.translate("gui.cd4017be."+ tooltip + i).split("\n")) list.add(s);
-			ModuleType mt = ModuleType.values()[i];
+			for (String s : TooltipUtil.translate("gui.cd4017be."+ tooltip + mt.name()).split("\n")) list.add(s);
 			int j = Assembler.logicCost(mt, 1), k = Assembler.logicCost(mt, 4);
 			String l = j == k ? Integer.toString(j) : Integer.toString(j) + "-" + Integer.toString(k);
 			j = Assembler.calcCost(mt, 1); k = Assembler.calcCost(mt, 4);
@@ -301,7 +312,7 @@ public class GuiCircuitDesigner extends AdvancedGui {
 		public void draw() {
 			mc.renderEngine.bindTexture(MAIN_TEX);
 			for (int i = 0; i < 8; i++) {
-				int j = scroll + i;
+				int j = LIST_ORDER[scroll + i].ordinal();
 				drawTexturedModalRect(px, py + i * 16, (j >> 3) * 24, (j & 7) * 16, 24, 16);
 			}
 		}
@@ -311,8 +322,8 @@ public class GuiCircuitDesigner extends AdvancedGui {
 			if (d == 3) guiComps.get(10).mouseIn(x, y, b, d);
 			if (d != 0) return false;
 			int i = (y - py) / 16 + scroll;
-			if (i >= 0 && i < ModuleType.values().length) {
-				set.accept(ModuleType.values()[i]);
+			if (i >= 0 && i < LIST_ORDER.length) {
+				set.accept(LIST_ORDER[i]);
 				return true;
 			} else return false;
 		}
@@ -345,12 +356,12 @@ public class GuiCircuitDesigner extends AdvancedGui {
 							if (mod.cons[j] == null)
 								drawTexturedModalRect(x1 + mod.type.conRenderX(j), y1 + mod.type.conRenderY(j), 0, 128, 4, 4);
 					}
-					if (mod.type == ModuleType.CST)
+					if (mod.type == CST)
 						drawSmallNum(x1 + 3, y1 + 9, mod.label, 4);
-					else if (mod.type == ModuleType.IN) {
+					else if (mod.type == IN) {
 						drawScaledString(x1 + 2, y1 + 10, 20, 7, mod.label, 0xffffffff);
 						mc.renderEngine.bindTexture(MAIN_TEX);
-					} else if (mod.type == ModuleType.OUT) {
+					} else if (mod.type == OUT) {
 						drawScaledString(x1 + 2, y1 + 7, 20, 4, mod.label, 0xffffffff);
 						mc.renderEngine.bindTexture(MAIN_TEX);
 					}
@@ -381,7 +392,7 @@ public class GuiCircuitDesigner extends AdvancedGui {
 			VertexBuffer vb = Tessellator.getInstance().getBuffer();
 			vb.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
 			boolean full = tile.renderAll || m.pos == tile.selMod;
-			int r, g, b, a = full ? 0xff : 0x60;
+			int r, g, b, a;
 			for (int i = 0; i < m.cons.length; i++) {
 				Con c = m.cons[i];
 				if (c == null || c.addr < 0) continue;
@@ -392,6 +403,7 @@ public class GuiCircuitDesigner extends AdvancedGui {
 				if (m.pos == tile.selMod && i == m.selCon) {
 					r |= 0x80; g |= 0x80; b |= 0x80;
 				}
+				a = full || addr == tile.selMod ? 0xff : 0x60;
 				for (int n = full && c.type < 4 ? c.type : 0; n >= 0; n--, addr++) {
 					vb.pos(x2, y2, zLevel).color(r,g,b,a).endVertex();
 					vb.pos(px + (addr & 7) * 24 + 22, (double)(py + (addr >> 3) * 16) + 8.5, zLevel).color(r,g,b,a).endVertex();
