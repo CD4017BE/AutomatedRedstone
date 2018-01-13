@@ -65,7 +65,7 @@ public class GuiCircuitDesigner extends AdvancedGui {
 		ySize = 256;
 		super.initGui();
 		this.titleX = xSize / 4;
-		guiComps.add(new TextField(0, 118, 4, 109, 8, 16).setTooltip("designer.Pname"));
+		guiComps.add(new TextField(0, 118, 4, 109, 8, 20).setTooltip("designer.Pname"));
 		guiComps.add(new Button(1, 184, 232, 16, 16, -1).setTooltip("designer.save"));
 		guiComps.add(new Button(2, 220, 232, 16, 16, -1).setTooltip("designer.load"));
 		guiComps.add(new Button(3, 220, 214, 16, 16, 0).texture(36, 144).setTooltip("designer.wire#"));

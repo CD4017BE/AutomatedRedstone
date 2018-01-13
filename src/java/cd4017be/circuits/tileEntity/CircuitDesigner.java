@@ -104,7 +104,7 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 			lastPlayer = null;
 			break;
 		case 3:
-			name = dis.readString(16);
+			name = dis.readString(32);
 			break;
 		case 6: renderAll = false; break;
 		case 7: renderAll = true; break;
@@ -173,7 +173,7 @@ public class CircuitDesigner extends BaseTileEntity implements IGuiData, ClientP
 			fixCons();
 			modified = 0;
 		}
-		if ((chng & 2) != 0) name = dis.readString(16);
+		if ((chng & 2) != 0) name = dis.readString(32);
 		if ((chng & 12) != 0) renderAll = (chng & 8) != 0;
 	}
 
