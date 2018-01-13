@@ -312,6 +312,7 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 				IOacc acc = ioacc[side];
 				if (acc == null) ioacc[side] = acc = new IOacc(side);
 				acc.dir |= cfg.dir ? 2 : 1;
+				neighborBlockChange(blockType, pos);
 			}
 			byte ofs = data.readByte();
 			if (ofs < 0) cfg.ofs = 0;
@@ -348,7 +349,14 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 			}
 		} else if (cmd == 4) {
 			int i = data.readByte() & 0x3f;
-			if (i < startIdx) ram[i] = data.readByte();
+			if (i < startIdx) {
+				ram[i] = data.readByte();
+				long t = world.getTotalWorldTime();
+				if (t > nextUpdate && mode > 1) {
+					nextUpdate += tickInt + 1;
+					if (t >= nextUpdate) nextUpdate = t + 1L;
+				}
+			}
 		}
 		markDirty();
 	}
