@@ -1,3 +1,18 @@
+v6.1.0
+Changes:
+- added new circuit modules: array reader and writer
+- increased maximum schematic name size to 20 characters
+- manual state or side configuration changes now also cause interrupts
+- changed the order of the module palette in Designer-GUI
+- the output section in Circuit Designer is more clearly separated now (#10)
+- unused cells no longer increase circuit cost and won't be shown as filled anymore in Circuit GUI
+- fixed synchronisation packet errors when last module slot is used
+- hot fixed a strange (and probably rare) crash on reading redstone output (#8)
+Dependencies:
+- for MC-1.12.2
+- forge-14.23.0.2512 (or newer)
+- CD4017BE_lib-6.0.8
+
 v6.0.4
 Changes:
 - fixed #7 (Z-fighting issue with covered pipes)
