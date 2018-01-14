@@ -74,7 +74,10 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 		C_BSR = 28,	//>> operator
 		C_BSL = 29,	//<< operator
 		C_COMB = 30,//bit combiner
-		C_FRG = 31;	//Fredkin gate
+		C_FRG = 31,	//Fredkin gate
+		C_RD = 32,	//mem reader
+		C_WR = 33,	//mem writer
+		C_SKIP = 63;//large padding
 
 	public String name = "";
 	/** var[0-7]: IO, var[8-15]: cap, var[16-23]: gates, var[24-31]: calc */
@@ -84,6 +87,7 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 	public byte[] ram = new byte[0];
 	public int tickInt = ClockSpeed[0];
 	private long nextUpdate = 0;
+	public long usedAddr;
 	public byte mode = 0;
 	public int startIdx;
 	private int readIdx;
@@ -200,6 +204,32 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 				ram[n++] = (byte) (a ^ c);
 				ram[n++] = (byte) (b ^ c);
 			} continue;
+			case C_RD: {
+				s++;
+				int i, i1 = ram[++readIdx] & 0x3f;
+				if (i1 < n) {i = i1; i1 = n - s;}
+				else {i = n + s; i1 -= s - 1;}
+				i += (ram[ram[++readIdx] & 0x3f] & 0x7f) * s;
+				if (i <= i1)
+					for (; s > 0; s--)
+						ram[n++] = ram[i++];
+				else
+					for (; s > 0; s--)
+						ram[n++] = 0;
+			} continue;
+			case C_WR: {
+				s++;
+				int i, i1 = ram[++readIdx] & 0x3f;
+				if (i1 < n) {i = i1; i1 = n;}
+				else {i = n; i1 -= s - 1;}
+				i += (ram[ram[++readIdx] & 0x3f] & 0xff) * s;
+				readIdx++;
+				if (i <= i1)
+					for (x = getNum(ram[readIdx]); s > 0; s--, x >>= 8)
+						ram[i++] = (byte)x;
+				n += s;
+			} continue;
+			case C_SKIP: n += ram[++readIdx] & 0x3f; continue;
 			default: throw new IllegalArgumentException("invalid command byte:" + cmd);
 			}
 			for (; s > 0; s--, x >>= 8) ram[n++] = (byte)x;
@@ -282,6 +312,7 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 				IOacc acc = ioacc[side];
 				if (acc == null) ioacc[side] = acc = new IOacc(side);
 				acc.dir |= cfg.dir ? 2 : 1;
+				neighborBlockChange(blockType, pos);
 			}
 			byte ofs = data.readByte();
 			if (ofs < 0) cfg.ofs = 0;
@@ -318,7 +349,14 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 			}
 		} else if (cmd == 4) {
 			int i = data.readByte() & 0x3f;
-			if (i < startIdx) ram[i] = data.readByte();
+			if (i < startIdx) {
+				ram[i] = data.readByte();
+				long t = world.getTotalWorldTime();
+				if (t > nextUpdate && mode > 1) {
+					nextUpdate += tickInt + 1;
+					if (t >= nextUpdate) nextUpdate = t + 1L;
+				}
+			}
 		}
 		markDirty();
 	}
@@ -330,6 +368,7 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 		nbt.setByte("Calc", (byte)(var >> 24));
 		nbt.setByteArray("data", Arrays.copyOf(ram, ram.length));//Don't let other things use the same reference to this array
 		nbt.setString("name", name);
+		nbt.setLong("used", usedAddr);
 		NBTTagList list = new NBTTagList();
 		for (IOcfg cfg : iocfg) list.appendTag(cfg.write());
 		nbt.setTag("io", list);
@@ -343,6 +382,7 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 			| (nbt.getByte("Calc") & 0xff) << 24;
 		ram = nbt.getByteArray("data");
 		name = nbt.getString("name");
+		usedAddr = nbt.getLong("used");
 		NBTTagList list = nbt.getTagList("io", 10);
 		Arrays.fill(ioacc, null);
 		iocfg = new IOcfg[list.tagCount()];
@@ -354,6 +394,9 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 			acc.dir |= cfg.dir ? 2 : 1;
 		}
 		startIdx = Math.min((var >> 8 & 0xff), ram.length);
+		//backward compatibility:
+		if (Long.bitCount(usedAddr) != startIdx)
+			usedAddr = startIdx == 0 ? 0L : 0xffffffffffffffffL >>> (64 - startIdx);
 	}
 
 	@Override
@@ -473,7 +516,7 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 		if (chng1 != 0) {
 			dos.writeLong(chng1);
 			chng |= 128;
-			for (int i = 0; chng1 != 0; i++, chng1 >>= 1)
+			for (int i = 0; chng1 != 0; i++, chng1 >>>= 1)
 				if ((chng1 & 1) != 0) dos.writeByte(ls.ram[i] = ram[i]);
 		}
 		if (chng == 0) return false;
@@ -497,7 +540,7 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 			}
 		if ((chng & 128) != 0) {
 			long chng1 = dis.readLong();
-			for (int i = 0; chng1 != 0 && i < ram.length; i++, chng1 >>= 1)
+			for (int i = 0; chng1 != 0 && i < ram.length; i++, chng1 >>>= 1)
 				if ((chng1 & 1) != 0) ram[i] = dis.readByte();
 		}
 	}
@@ -565,7 +608,7 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 					if (t instanceof IQuickRedstoneHandler) te = (IQuickRedstoneHandler)t;
 				}
 				if (te != null) te.onRedstoneStateChange(side.getOpposite(), state, Circuit.this);
-				else world.neighborChanged(pos.offset(side), blockType, pos);
+				else world.neighborChanged(pos.offset(side), getBlockType(), pos);
 			}
 			if ((dir & 4) != 0) {
 				state = world.getRedstonePower(pos.offset(side), side);
