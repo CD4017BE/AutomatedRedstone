@@ -32,10 +32,21 @@ import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.util.TooltipUtil;
 import cd4017be.lib.Gui.AdvancedGui;
 import cd4017be.lib.Gui.TileContainer;
+import static cd4017be.circuits.tileEntity.CircuitDesigner.ModuleType.*;
 
 public class GuiCircuitDesigner extends AdvancedGui {
 
-	private static final float ScrollSize = 1F / (float)(CircuitDesigner.ModuleType.values().length - 8);
+	private static final ModuleType[] LIST_ORDER = {
+		CST, IN, //data sources
+		BUF, NOT, OR, NOR, AND, NAND, XOR, XNOR, //Logic operators
+		EQ, NEQ, LS, NLS, //Comparison operators
+		NEG, ADD, SUB, MUL, DIV, MOD, //Arithmetic operators
+		ABS, MIN, MAX, RNG, SQRT, //Special math functions
+		BSL, BSR, COMB, //Bit manipulators
+		CNT1, CNT2, FRG, SWT, RD, WR, //Special control devices
+		OUT, //output
+	};
+	private static final float ScrollSize = 1F / (float)(LIST_ORDER.length - 8);
 	private static final ResourceLocation BG_TEX = new ResourceLocation("circuits", "textures/gui/circuit_designer.png");
 	private final CircuitDesigner tile;
 	private int scroll;
@@ -54,7 +65,7 @@ public class GuiCircuitDesigner extends AdvancedGui {
 		ySize = 256;
 		super.initGui();
 		this.titleX = xSize / 4;
-		guiComps.add(new TextField(0, 118, 4, 109, 8, 16).setTooltip("designer.Pname"));
+		guiComps.add(new TextField(0, 118, 4, 109, 8, 20).setTooltip("designer.Pname"));
 		guiComps.add(new Button(1, 184, 232, 16, 16, -1).setTooltip("designer.save"));
 		guiComps.add(new Button(2, 220, 232, 16, 16, -1).setTooltip("designer.load"));
 		guiComps.add(new Button(3, 220, 214, 16, 16, 0).texture(36, 144).setTooltip("designer.wire#"));
@@ -64,7 +75,7 @@ public class GuiCircuitDesigner extends AdvancedGui {
 		guiComps.add(new TextField(7, 184, 188, 52, 7, 10).color(0xffc0c000, 0xffff0000).setTooltip("designer.label"));
 		guiComps.add(new Button(8, 153, 144, 47, 11, -1).setTooltip("designer.addOut"));
 		guiComps.add(new Text<>(9, 153, 147, 84, 8, "designer.mods"));
-		guiComps.add(new Slider(10, 228, 22, 116, 52, 144, 8, 12, false).scroll(ScrollSize).setTooltip("designer.scroll"));
+		guiComps.add(new Slider(10, 228, 22, 116, 52, 144, 8, 12, false).scroll(ScrollSize));
 		guiComps.add(new ModuleList(11, 202, 16).setTooltip("designer.mod"));
 		guiComps.add(new WorkPane(12, 8, 16, 8));
 		guiComps.add(new InfoTab(13, 7, 6, 7, 8, "designer.info"));
@@ -147,7 +158,8 @@ public class GuiCircuitDesigner extends AdvancedGui {
 			if (c == null) break;
 			if (c.type < 4) {
 				c.type = (byte)((c.type + ((Integer)obj == 0 ? 1 : 3)) % 4);
-			} else {
+			} else if (m.type.lockMode) break;
+			else {
 				boolean back = (Integer)obj != 0;
 				c.type = (byte)((c.type + (back ? 5 : 7)) % 10 + 4);
 				if (c.type == 5 && !m.type.can8bit) c.type += back ? -1 : 1;
@@ -173,14 +185,14 @@ public class GuiCircuitDesigner extends AdvancedGui {
 		case 7:
 			if (tile.selMod < 0 || (m = tile.modules[tile.selMod]) == null) break;
 			m.label = (String)obj;
-			if (m.type == ModuleType.CST) try {
+			if (m.type == CST) try {
 				int s = 32 - m.size * 8;
 				m.label = Integer.toString((Integer.parseInt(m.label) << s) >> s);
 			} catch(NumberFormatException e) {m.label = "0";}
 			tile.modified++;
 			break;
 		case 10: scroll = (int)((Float)obj / ScrollSize); break;
-		case 8: obj = ModuleType.OUT;
+		case 8: obj = OUT;
 		case 11: tile.add((ModuleType)obj); break;
 		case 14: sendCommand(8); break;
 		}
@@ -188,9 +200,7 @@ public class GuiCircuitDesigner extends AdvancedGui {
 
 	@Override
 	protected void keyTyped(char c, int k) throws IOException {
-		if (k == Keyboard.KEY_PRIOR && scroll > 0) scroll--;
-		else if (k == Keyboard.KEY_NEXT && scroll < 1F / ScrollSize) scroll++;
-		else if (k == Keyboard.KEY_DELETE) setDisplVar(6, null, false);
+		if (k == Keyboard.KEY_DELETE) setDisplVar(6, null, false);
 		super.keyTyped(c, k);
 	}
 
@@ -286,10 +296,10 @@ public class GuiCircuitDesigner extends AdvancedGui {
 		@Override
 		public void drawOverlay(int mx, int my) {
 			int i = (my - py) / 16 + scroll;
-			if (i < 0 || i >= ModuleType.values().length) return;
+			if (i < 0 || i >= LIST_ORDER.length) return;
+			ModuleType mt = LIST_ORDER[i];
 			ArrayList<String> list = new ArrayList<String>();
-			for (String s : TooltipUtil.translate("gui.cd4017be."+ tooltip + i).split("\n")) list.add(s);
-			ModuleType mt = ModuleType.values()[i];
+			for (String s : TooltipUtil.translate("gui.cd4017be."+ tooltip + mt.name()).split("\n")) list.add(s);
 			int j = Assembler.logicCost(mt, 1), k = Assembler.logicCost(mt, 4);
 			String l = j == k ? Integer.toString(j) : Integer.toString(j) + "-" + Integer.toString(k);
 			j = Assembler.calcCost(mt, 1); k = Assembler.calcCost(mt, 4);
@@ -302,7 +312,7 @@ public class GuiCircuitDesigner extends AdvancedGui {
 		public void draw() {
 			mc.renderEngine.bindTexture(MAIN_TEX);
 			for (int i = 0; i < 8; i++) {
-				int j = scroll + i;
+				int j = LIST_ORDER[scroll + i].ordinal();
 				drawTexturedModalRect(px, py + i * 16, (j >> 3) * 24, (j & 7) * 16, 24, 16);
 			}
 		}
@@ -312,8 +322,8 @@ public class GuiCircuitDesigner extends AdvancedGui {
 			if (d == 3) guiComps.get(10).mouseIn(x, y, b, d);
 			if (d != 0) return false;
 			int i = (y - py) / 16 + scroll;
-			if (i >= 0 && i < ModuleType.values().length) {
-				set.accept(ModuleType.values()[i]);
+			if (i >= 0 && i < LIST_ORDER.length) {
+				set.accept(LIST_ORDER[i]);
 				return true;
 			} else return false;
 		}
@@ -346,12 +356,12 @@ public class GuiCircuitDesigner extends AdvancedGui {
 							if (mod.cons[j] == null)
 								drawTexturedModalRect(x1 + mod.type.conRenderX(j), y1 + mod.type.conRenderY(j), 0, 128, 4, 4);
 					}
-					if (mod.type == ModuleType.CST)
+					if (mod.type == CST)
 						drawSmallNum(x1 + 3, y1 + 9, mod.label, 4);
-					else if (mod.type == ModuleType.IN) {
+					else if (mod.type == IN) {
 						drawScaledString(x1 + 2, y1 + 10, 20, 7, mod.label, 0xffffffff);
 						mc.renderEngine.bindTexture(MAIN_TEX);
-					} else if (mod.type == ModuleType.OUT) {
+					} else if (mod.type == OUT) {
 						drawScaledString(x1 + 2, y1 + 7, 20, 4, mod.label, 0xffffffff);
 						mc.renderEngine.bindTexture(MAIN_TEX);
 					}
@@ -367,10 +377,11 @@ public class GuiCircuitDesigner extends AdvancedGui {
 			for (Module m : tile.modules)
 				if (m != null)
 					drawModuleCons(m);
-			if (targetPos >= 0) {
+			if (targetPos >= 0 && targetPos < tile.modules.length) {
 				int x1 = px + (targetPos & 7) * 24;
 				int y1 = py + (targetPos >> 3) * 16;
-				drawTexturedModalRect(x1, y1, 120, 128, 24, 16);
+				boolean valid = targetPos >= 64 ^ tile.selMod < 64;
+				drawTexturedModalRect(x1, y1, valid ? 120 : 144, 128, 24, 16);
 			}
 		}
 
@@ -381,14 +392,18 @@ public class GuiCircuitDesigner extends AdvancedGui {
 			VertexBuffer vb = Tessellator.getInstance().getBuffer();
 			vb.begin(GL11.GL_LINES, DefaultVertexFormats.POSITION_COLOR);
 			boolean full = tile.renderAll || m.pos == tile.selMod;
-			int r, g, b, a = full ? 0xff : 0x60;
+			int r, g, b, a;
 			for (int i = 0; i < m.cons.length; i++) {
 				Con c = m.cons[i];
 				if (c == null || c.addr < 0) continue;
-				g = m.pos == tile.selMod && i == m.selCon ? 0xc0 : 0;
 				if (c.type < 4) {r = 0; b = 0xff;}
 				else {r = 0xff; b = 0;}
 				int addr = c.getAddr(), x2 = x1 + m.type.conRenderX(i) + 2, y2 = y1 + m.type.conRenderY(i) + 2;
+				g = addr >= m.pos ? 0x7f : 0;
+				if (m.pos == tile.selMod && i == m.selCon) {
+					r |= 0x80; g |= 0x80; b |= 0x80;
+				}
+				a = full || addr == tile.selMod ? 0xff : 0x60;
 				for (int n = full && c.type < 4 ? c.type : 0; n >= 0; n--, addr++) {
 					vb.pos(x2, y2, zLevel).color(r,g,b,a).endVertex();
 					vb.pos(px + (addr & 7) * 24 + 22, (double)(py + (addr >> 3) * 16) + 8.5, zLevel).color(r,g,b,a).endVertex();
@@ -416,7 +431,7 @@ public class GuiCircuitDesigner extends AdvancedGui {
 			}
 			int mp = (x - px) / 24 + (y - py) / 16 * 8;
 			if (d == 1 && b == 0 && selMod != null) {
-				targetPos = targetPos >= 0 || mp == tile.selMod ? mp : -1;
+				targetPos = targetPos >= 0 && targetPos < tile.modules.length || mp == tile.selMod ? mp : -1;
 				return true;
 			} else if (d == 2 && b == 0) setFocus(-1);
 			targetPos = -1;
