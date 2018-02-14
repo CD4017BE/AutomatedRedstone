@@ -224,10 +224,10 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 				else {i = n; i1 -= s - 1;}
 				i += (ram[ram[++readIdx] & 0x3f] & 0xff) * s;
 				readIdx++;
+				n += s;
 				if (i <= i1)
 					for (x = getNum(ram[readIdx]); s > 0; s--, x >>= 8)
 						ram[i++] = (byte)x;
-				n += s;
 			} continue;
 			case C_SKIP: n += ram[++readIdx] & 0x3f; continue;
 			default: throw new IllegalArgumentException("invalid command byte:" + cmd);
