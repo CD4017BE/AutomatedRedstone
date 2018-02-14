@@ -71,6 +71,9 @@ public class SharedInteger extends SharedNetwork<IntegerComp, SharedInteger> imp
 		if ((con & AllOut) != 0) outputs.add(c);
 		else outputs.remove(c);
 		c.rsIO = con;
+		for (int i = 0; i < 6; i++)
+			if ((con >> (i << 1) & 3) != 0 && (c.con >> i & 1) != 0)
+				c.setConnect((byte)i, false);
 		markStateDirty();
 	}
 

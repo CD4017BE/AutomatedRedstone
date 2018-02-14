@@ -96,6 +96,7 @@ public class Objects {
 	public static final ItemFluidSensor fluid_sensor = null;
 	public static final ItemEnergySensor energy_sensor = null;
 	public static final ItemTimeSensor time_sensor = null;
+	public static final ItemRedstoneSensor remote_comp = null;
 
 	/** creates and registers them all */
 	public static void init() {
@@ -105,14 +106,16 @@ public class Objects {
 
 	public static void initConstants(ConfigConstants c) {
 		c.getVect("circuit_ticks", Circuit.ClockSpeed);
-		item_sensor.RangeSQ = c.getNumber("itemSensor_rangeSQ", 20);
+		item_sensor.RangeSQ = c.getNumber("itemSensor_range", 20);
 		item_sensor.RangeSQ *= item_sensor.RangeSQ;
-		fluid_sensor.RangeSQ = c.getNumber("fluidSensor_rangeSQ", 20);
+		fluid_sensor.RangeSQ = c.getNumber("fluidSensor_range", 20);
 		fluid_sensor.RangeSQ *= fluid_sensor.RangeSQ;
-		energy_sensor.RangeSQ = c.getNumber("energySensor_rangeSQ", 20);
+		energy_sensor.RangeSQ = c.getNumber("energySensor_range", 20);
 		energy_sensor.RangeSQ *= energy_sensor.RangeSQ;
-		time_sensor.RangeSQ = c.getNumber("timeSensor_rangeSQ", 20);
+		time_sensor.RangeSQ = c.getNumber("timeSensor_range", 20);
 		time_sensor.RangeSQ *= time_sensor.RangeSQ;
+		remote_comp.RangeSQ = c.getNumber("remoteComp_range", 20);
+		remote_comp.RangeSQ *= remote_comp.RangeSQ;
 		Assembler.materials[0] = BlockItemRegistry.stack("m.io_relay", 1);
 		Assembler.materials[1] = BlockItemRegistry.stack("m.ram_plate", 1);
 		Assembler.materials[2] = BlockItemRegistry.stack("m.logic_prc", 1);
@@ -164,7 +167,8 @@ public class Objects {
 			new ItemItemSensor("item_sensor").setCreativeTab(tabCircuits),
 			new ItemFluidSensor("fluid_sensor").setCreativeTab(tabCircuits),
 			new ItemEnergySensor("energy_sensor").setCreativeTab(tabCircuits),
-			new ItemTimeSensor("time_sensor").setCreativeTab(tabCircuits)
+			new ItemTimeSensor("time_sensor").setCreativeTab(tabCircuits),
+			new ItemRedstoneSensor("remote_comp").setCreativeTab(tabCircuits)
 		);
 	}
 
