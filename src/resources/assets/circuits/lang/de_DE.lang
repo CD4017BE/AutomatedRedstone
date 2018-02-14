@@ -72,6 +72,9 @@ item.cd4017be.energy_sensor.name=Energiesensor §e(%.0fkJ)
 item.cd4017be.energy_sensor.tip=§6Sensor§7modul zum messen von Energie.\nUnterstützt: §3kJ§7[x1], §3Tesla/RF§7[x0.1], §3EU§7[x0.4]\nInteragiere geduckt um Block zuzuweisen (\\<energySensor_range>m Reichweite).
 item.cd4017be.time_sensor.name=Zeitsensormodul
 item.cd4017be.time_sensor.tip=§6Sensor§7modul für Zeitmessungen [in s].\nBenutzt §3Server-Ticks§7, §3Spielweltzeit§7 oder §3Echtzeit§7.\nInteragiere normal zur konfiguration oder geduckt um\nBlock als Signalquelle zuzuweisen (\\<timeSensor_range>m Reichweite).
+item.cd4017be.remote_comp.name=Fernkomparator §e(%.0f)
+item.cd4017be.remote_comp.tip=§6Sensor§7modul um den Komparatorwert eines\nverknüpften Blocks auszulesen (üblicherweise 0-15).\n§4Liest keine normalen Redstone-Signale!\nInteragiere geduckt um Block zuzuweisen (\\<remoteComp_range>m Reichweite).
+
 
 # GUI
 gui.cd4017be.tickInt=%.2fs

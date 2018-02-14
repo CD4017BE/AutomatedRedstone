@@ -68,6 +68,7 @@ public class ClientProxy extends CommonProxy {
 		BlockItemRegistry.registerRender(fluid_sensor);
 		BlockItemRegistry.registerRender(energy_sensor);
 		BlockItemRegistry.registerRender(time_sensor);
+		BlockItemRegistry.registerRender(remote_comp);
 		BlockItemRegistry.registerRender(OSZILLOGRAPH);
 		BlockItemRegistry.registerRender(FLUID_VALVE);
 		BlockItemRegistry.registerRender(ENERGY_VALVE);
