@@ -53,7 +53,9 @@ public class EnergyValve extends BaseTileEntity implements INeighborAwareTile, I
 
 	@Override
 	public void neighborBlockChange(Block b, BlockPos src) {
-		if (world.isRemote || measure) return;
+		if (world.isRemote) return;
+		if (!update && (out == null || out.isInvalid()) && pos.offset(getOrientation().front).equals(src)) update = true;
+		if (measure) return;
 		int ls = state;
 		state = 0;
 		for (EnumFacing s : EnumFacing.VALUES)
