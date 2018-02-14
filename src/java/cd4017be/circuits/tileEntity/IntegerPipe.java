@@ -32,7 +32,7 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
  *
  * @author CD4017BE
  */
-public class IntegerPipe extends PassiveMultiblockTile<IntegerComp, SharedInteger> implements ITilePlaceHarvest, IRedstoneTile, IInteractiveTile, IModularTile, IQuickRedstoneHandler {
+public class IntegerPipe extends PassiveMultiblockTile<IntegerComp, SharedInteger> implements ITilePlaceHarvest, IRedstoneTile, IInteractiveTile, IModularTile, IQuickRedstoneHandler, IDirectionalRedstone {
 
 	protected Cover cover = new Cover();
 
@@ -101,22 +101,40 @@ public class IntegerPipe extends PassiveMultiblockTile<IntegerComp, SharedIntege
 			byte s = (byte)dir.getIndex();
 			if (player.isSneaking()) {
 				boolean con = !comp.canConnect(s);
-				comp.setConnect(s, con);
-				ICapabilityProvider te = this.getTileOnSide(dir);
+				ICapabilityProvider te = Utils.neighborTile(this, dir);
 				if (te != null && te instanceof IntegerPipe) {
 					IntegerPipe pipe = (IntegerPipe)te;
-					pipe.comp.setConnect((byte)(s^1), con);
-					pipe.markUpdate();
-					pipe.markDirty();
+					if (pipe.getRSDirection(dir.getOpposite()) != 0) con = false;
+					else {
+						pipe.comp.setConnect((byte)(s^1), con);
+						pipe.markUpdate();
+						pipe.markDirty();
+					}
 				}
+				comp.setConnect(s, con);
 			} else {
-				s *= 2;
-				comp.network.setIO(comp, (short)((comp.rsIO & ~(3 << s)) | ((comp.rsIO >> s) + 1 & 3) << s));
+				setIO(dir, (comp.rsIO >> (s<<1)) + 1);
 			}
-			this.markUpdate();
+			markUpdate();
 			markDirty();
 			return true;
 		} else return false;
+	}
+
+	public void setIO(EnumFacing side, int io) {
+		io &= 3;
+		int s = side.getIndex() << 1;
+		comp.network.setIO(comp, (short)((comp.rsIO & ~(3 << s)) | io << s));
+		ICapabilityProvider te = Utils.neighborTile(this, side);
+		if (te != null && te instanceof IntegerPipe) {
+			IntegerPipe pipe = (IntegerPipe)te;
+			pipe.comp.setConnect((byte)(side.ordinal()^1), false);
+			io = (io << 1 | io >> 1) & 3;
+			s ^= 2;
+			pipe.comp.network.setIO(pipe.comp, (short)((pipe.comp.rsIO & ~(3 << s)) | io << s));
+			pipe.markUpdate();
+			pipe.markDirty();
+		}
 	}
 
 	@Override
@@ -186,6 +204,11 @@ public class IntegerPipe extends PassiveMultiblockTile<IntegerComp, SharedIntege
 		List<ItemStack> list = makeDefaultDrops(null);
 		if (cover.stack != null) list.add(cover.stack);
 		return list;
+	}
+
+	@Override
+	public byte getRSDirection(EnumFacing s) {
+		return (byte)(comp.rsIO >> (s.getIndex() << 1) & 3);
 	}
 
 }
