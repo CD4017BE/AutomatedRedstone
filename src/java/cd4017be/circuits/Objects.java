@@ -106,13 +106,13 @@ public class Objects {
 
 	public static void initConstants(ConfigConstants c) {
 		c.getVect("circuit_ticks", Circuit.ClockSpeed);
-		item_sensor.RangeSQ = c.getNumber("itemSensor_rangeSQ", 20);
+		item_sensor.RangeSQ = c.getNumber("itemSensor_range", 20);
 		item_sensor.RangeSQ *= item_sensor.RangeSQ;
-		fluid_sensor.RangeSQ = c.getNumber("fluidSensor_rangeSQ", 20);
+		fluid_sensor.RangeSQ = c.getNumber("fluidSensor_range", 20);
 		fluid_sensor.RangeSQ *= fluid_sensor.RangeSQ;
-		energy_sensor.RangeSQ = c.getNumber("energySensor_rangeSQ", 20);
+		energy_sensor.RangeSQ = c.getNumber("energySensor_range", 20);
 		energy_sensor.RangeSQ *= energy_sensor.RangeSQ;
-		time_sensor.RangeSQ = c.getNumber("timeSensor_rangeSQ", 20);
+		time_sensor.RangeSQ = c.getNumber("timeSensor_range", 20);
 		time_sensor.RangeSQ *= time_sensor.RangeSQ;
 		Assembler.materials[0] = BlockItemRegistry.stack("m.io_relay", 1);
 		Assembler.materials[1] = BlockItemRegistry.stack("m.ram_plate", 1);
