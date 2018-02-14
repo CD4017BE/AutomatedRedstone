@@ -1,3 +1,11 @@
+v5.2.2
+Changes:
+- fixed #17 array writer shifting output indices of its following components
+Dependencies:
+- for MC-1.11.2
+- forge-13.20.0.2315 (or newer)
+- CD4017BE_lib-5.2.0
+
 v5.2.1
 Changes:
 - added new sensor module: Remote Comparator
