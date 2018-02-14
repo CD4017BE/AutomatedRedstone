@@ -40,8 +40,8 @@ public class ClientProxy extends CommonProxy {
 		BlockGuiHandler.registerGui(ITEM_VALVE, GuiItemValve.class);
 		BlockGuiHandler.registerGui(RSP_SHIFT, GuiBitShiftPipe.class);
 		
-		RSP_BASIC.setBlockLayer(BlockRenderLayer.CUTOUT);
-		RSP_32BIT.setBlockLayer(BlockRenderLayer.CUTOUT);
+		RSP_BASIC.setBlockLayer(BlockRenderLayer.TRANSLUCENT);
+		RSP_32BIT.setBlockLayer(BlockRenderLayer.TRANSLUCENT);
 		RSP_SHIFT.setBlockLayer(BlockRenderLayer.CUTOUT);
 		
 		SpecialModelLoader.setMod("circuits");
@@ -68,6 +68,7 @@ public class ClientProxy extends CommonProxy {
 		BlockItemRegistry.registerRender(fluid_sensor);
 		BlockItemRegistry.registerRender(energy_sensor);
 		BlockItemRegistry.registerRender(time_sensor);
+		BlockItemRegistry.registerRender(remote_comp);
 		BlockItemRegistry.registerRender(OSZILLOGRAPH);
 		BlockItemRegistry.registerRender(FLUID_VALVE);
 		BlockItemRegistry.registerRender(ENERGY_VALVE);

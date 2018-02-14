@@ -1,50 +1,50 @@
 #PARSE_ESCAPES
 itemGroup.circuits=Redstone Automatisierung
-# Block Namen
+# Block Namen & Beschreibungen
 tile.cd4017be.assembler.name=Schaltkreismontage
-tile.cd4017be.circuit\:0.name=Schaltgehäuse §7standart
-tile.cd4017be.circuit\:1.name=Schaltgehäuse §3leicht übertaktet
-tile.cd4017be.circuit\:2.name=Schaltgehäuse §9extrem übertaktet
-tile.cd4017be.rsp_32bit.name=32-bit Signalleiter
-tile.cd4017be.rsp_basic\:0.name=solider Redstone-Leiter
-tile.cd4017be.rsp_basic\:1.name=Redstone Aufnahmeleiter
-tile.cd4017be.rsp_basic\:2.name=Redstone Abgabeleiter
-tile.cd4017be.bit_shifter.name=Signal Bit-Schieber
-tile.cd4017be.multilever.name=8-bit Schaltpult
-tile.cd4017be.potentiometer.name=Redstone Potentiometer
-tile.cd4017be.display.name=LED-Signalanzeige
-tile.cd4017be.sensor_reader.name=Sensorausleser
-tile.cd4017be.oszillograph.name=Oszilloskop
-tile.cd4017be.designer.name=Schaltkreisplaner
-tile.cd4017be.fluid_valve.name=Flüssigkeitsventil
-tile.cd4017be.energy_valve.name=Energieflussregler
-tile.cd4017be.item_valve.name=Itemflussregler
-tile.cd4017be.wireless_con\:0.name=drahtlos Signalverbinder
-tile.cd4017be.wireless_con\:1.name=§bverschränkter§f drahtlos Signalverbinder
-tile.cd4017be.rsp_shift.name=Bit Verteiler Kabel
-# tooltips
-tile.cd4017be.designer.tip=zum konstruieren von §6Schaltplänen§7,\ndie in der §6Schaltkreismontage§7 aufgebaut werden.
 tile.cd4017be.assembler.tip=baut nach §6Schaltplan§7 Komponenten in\nein §6Schaltgehäuse§7 ein (oder aus).
+tile.cd4017be.circuit\:0.name=Schaltgehäuse §7standart
 tile.cd4017be.circuit\:0.tip=kompaktes Gehäuse für komplexe Redstone-Logik\nEinbau von Komponenten mit der §6Schaltkreismontage§7.\nMax \\<circuit_speed:0> Rechenzyklus/Sekunde
+tile.cd4017be.circuit\:1.name=Schaltgehäuse §3leicht übertaktet
 tile.cd4017be.circuit\:1.tip=Max \\<circuit_speed:1> Rechenzyklen/Sekunde
+tile.cd4017be.circuit\:2.name=Schaltgehäuse §9extrem übertaktet
 tile.cd4017be.circuit\:2.tip=Max \\<circuit_speed:2> Rechenzyklen/Sekunde
-tile.cd4017be.rsp_32bit.tip=verlustfreie sofortige omnidirektionale\nÜbertragung von 32-bit Redstone-Signalen.\nInteragiere auf Blockseiten zum ändern der Verbindung.\nInteragiere geduckt zur Verbindungstrennung.\nInteragiere mit Block in der linked Hand zum abdecken.
+tile.cd4017be.rsp_32bit.name=32-bit Signalleiter
+tile.cd4017be.rsp_32bit.tip=verlustfreie sofortige omnidirektionale\nÜbertragung von 32-bit Redstone-Signalen.\n(kombiniert signale bitweise mit "oder")\nInteragiere auf Blockseiten zum ändern der Verbindung.\nInteragiere geduckt zur Verbindungstrennung.\nInteragiere mit Block in der linked Hand zum abdecken.
+tile.cd4017be.rsp_basic\:0.name=solider Redstone-Leiter
 tile.cd4017be.rsp_basic\:0.tip=verlustfreie sofortige Signalübertragung\nvon §6Aufnahme§7- zu §6Abgabeleiter§7n\nInteragiere geduckt zur Verbindungstrennung.\nInteragiere mit Block in der linked Hand zum abdecken.
-tile.cd4017be.rsp_basic\:1.tip=Gibt Redstone-Signale mit Intensitäten im Breich 0-255 ab.
-tile.cd4017be.rsp_basic\:2.tip=Nimmt Redstone-Signale mit Intensitäten im Breich 0-255 auf.
+tile.cd4017be.rsp_basic\:1.name=Redstone Aufnahmeleiter
+tile.cd4017be.rsp_basic\:1.tip=Nimmt Redstone-Signale mit Intensitäten im Breich 0-255 auf.\n(bitweise "oder"-Verknüpfung)
+tile.cd4017be.rsp_basic\:2.name=Redstone Abgabeleiter
+tile.cd4017be.rsp_basic\:2.tip=Gibt Redstone-Signale mit Intensitäten im Breich 0-255 ab.
+tile.cd4017be.bit_shifter.name=Signal Bit-Schieber
 tile.cd4017be.bit_shifter.tip=Verschiebt die Stellen der Binärdarstellung von Singalen,\nwas Übertragung vieler Signale durch eine Leitung erlaubt.\nInteragiere mit Seiten zum einstellen der §1Eingangs-§7/§2Ausgangs§7verschiebung.\nFüge zum vergrößern der Bandbreite (Anzahl Binärstellen) §6E/A Relais§7 ein.\nInteragiere geduckt zum entfernen eingebauter §6E/A Relais§7.
+tile.cd4017be.multilever.name=8-bit Schaltpult
 tile.cd4017be.multilever.tip=Gibt ein Signal mit (entsprechend der Binär-\ndarstellung der 8 Schalter) regelbarer Intensität ab. 
+tile.cd4017be.potentiometer.name=Redstone Potentiometer
 tile.cd4017be.potentiometer.tip=Gibt ein Signal mit regelbarer Intensität ab,\ndie mit dem Schieberegler eingestellt wird.\nInteragiere mit +/- Pfeilen zum erhöhen/verringern\nin logarithmisch von Zielposition abhängigen Stufen.\nInteragiere mit sonstiger Blockseite zum einstellen des Wertebereichs.
+tile.cd4017be.display.name=LED-Signalanzeige
 tile.cd4017be.display.tip=Zeigt den Intensitätswert von Redstone-Signalen an.\nUnterstützt einen 32-bit Wertebereich von +/- 2.147.483.648
+tile.cd4017be.sensor_reader.name=Sensorausleser
 tile.cd4017be.sensor_reader.tip=Gibt den Messwert eines §6Sensor§7moduls als Redstone-Signal aus.
+tile.cd4017be.oszillograph.name=Oszilloskop
 tile.cd4017be.oszillograph.tip=Plottet den zeitlichen verlauf von bis zu 4 Eingangswerten grafisch.\nDiese können Redstone-Signale oder Messwerte von §6Sensor§7en sein.
+tile.cd4017be.designer.name=Schaltkreisplaner
+tile.cd4017be.designer.tip=zum konstruieren von §6Schaltplänen§7,\ndie in der §6Schaltkreismontage§7 aufgebaut werden.
+tile.cd4017be.fluid_valve.name=Flüssigkeitsventil
 tile.cd4017be.fluid_valve.tip=Misst oder begrenzt Flüssigkeitsfluss mit Redstone-Signalen.\n(zählt in Einheiten von 1mB)
+tile.cd4017be.energy_valve.name=Energieflussregler
 tile.cd4017be.energy_valve.tip=Misst oder begrenzt Energiefluss mit Redstone-Signalen.\nUnterstützt §3RF§7 und §3Tesla§7 (gezählt in RF Einheiten).
+tile.cd4017be.item_valve.name=Itemflussregler
 tile.cd4017be.item_valve.tip=Misst oder begrenzt Item-transport mit Redstone-Signalen.\n(spiegelt das angeschlossene Inventar wieder)
+tile.cd4017be.wireless_con\:0.name=drahtlos Signalverbinder
 tile.cd4017be.wireless_con\:0.tip=Verbindet §6solide Redstone§7- oder §632-bit Signalleiter\nüber beliebige Entfernungen (auch zwischen Dimensionen).\nDen zweiten Verbinder erhälst du beim plazieren des ersten.
+tile.cd4017be.wireless_con\:1.name=§bverschränkter§f drahtlos Signalverbinder
 tile.cd4017be.wireless_con\:1.tip=Plaziere zum verbinden mit verschränktem Block.\nHinweis: Es muss stets einer der beiden Verbinder\nplaziert sein um die Verschränkung zu erhalten.\nInteragiere geduckt zum gleichzeitigen abbauen beider\nVerbinder, um wieder den unverschränkten zu erhalten.
+tile.cd4017be.rsp_shift.name=Bit Verteiler Kabel
 tile.cd4017be.rsp_shift.tip=Erlaubt es, durch aufteilung der Bandbreite, mehrere Signale über die selbe Leitung zu übertragen.\nInteragiere geduckt zur Verbindungstrennung bzw. normal zum GUI öffnen.\n(kompatibel mit §9OpenComputers§7 und §9TIS-3D§7)\nInteragiere mit Block in der linked Hand zum abdecken.
 
+# Chat Hinweise
 tile.cd4017be.multilever.click0=Ausgabe über Bits 0-7 [1-128]
 tile.cd4017be.multilever.click1=Ausgabe über Bits 8-15 [256-32768]
 tile.cd4017be.multilever.click2=Ausgabe über Bits 16-23 [65536-8388608]
@@ -56,24 +56,25 @@ msg.cd4017be.wireless3=Verschränkt mit [%d, %d, %d] in Dim %d
 msg.cd4017be.wireless4=§2Beide verschränkten Verbinder entfernt.
 msg.cd4017be.wireless5=§4Kann anderen Verbinder nicht finden!
 
-# Items
-# names
+# Item Namen & Beschreibungen
 item.cd4017be.m\:empty_sensor.name=Sensormodul Grundkomponente
 item.cd4017be.m\:io_relay.name=E/A Relais
 item.cd4017be.m\:ram_plate.name=8-bit Speicherplatine
 item.cd4017be.m\:logic_prc.name=Logik-Bauteil
 item.cd4017be.m\:calc_prc.name=Arithmetik-Bauteil
 item.cd4017be.circuit_plan.name=Schaltplan
-item.cd4017be.item_sensor.name=Itemsensor §e(%.0f)
-item.cd4017be.fluid_sensor.name=Flüssigkeitssensor §e(%.0fmB)
-item.cd4017be.energy_sensor.name=Energiesensor §e(%.0fkJ)
-item.cd4017be.time_sensor.name=Zeitsensormodul
-# tooltips
 item.cd4017be.circuit_plan.tip=Enthält die Konstruktionsanweisungen für eine Schaltung.\nKann im §6Schaltkreisplaner§7 beschrieben werden\num dann in der §6Schaltkreismontage§7 verwendet zu werden.
+item.cd4017be.item_sensor.name=Itemsensor §e(%.0f)
 item.cd4017be.item_sensor.tip=§6Sensor§7modul zum zählen von Items in Inventaren\noder auf dem Boden liegende Items, wenn Block kein Inventar.\nInteragiere normal zum einstellen des Filters oder\ngeduckt um Block zuzuweisen (\\<itemSensor_range>m Reichweite).
+item.cd4017be.fluid_sensor.name=Flüssigkeitssensor §e(%.0fmB)
 item.cd4017be.fluid_sensor.tip=§6Sensor§7modul zum messen von Flüssigkeitsmengen\nin Tanks oder Flüssigkeitsblöcken.\nInteragiere normal zum einstellen des Filters oder\ngeduckt um Block zuzuweisen (\\<fluidSensor_range>m Reichweite).
+item.cd4017be.energy_sensor.name=Energiesensor §e(%.0fkJ)
 item.cd4017be.energy_sensor.tip=§6Sensor§7modul zum messen von Energie.\nUnterstützt: §3kJ§7[x1], §3Tesla/RF§7[x0.1], §3EU§7[x0.4]\nInteragiere geduckt um Block zuzuweisen (\\<energySensor_range>m Reichweite).
+item.cd4017be.time_sensor.name=Zeitsensormodul
 item.cd4017be.time_sensor.tip=§6Sensor§7modul für Zeitmessungen [in s].\nBenutzt §3Server-Ticks§7, §3Spielweltzeit§7 oder §3Echtzeit§7.\nInteragiere normal zur konfiguration oder geduckt um\nBlock als Signalquelle zuzuweisen (\\<timeSensor_range>m Reichweite).
+item.cd4017be.remote_comp.name=Fernkomparator §e(%.0f)
+item.cd4017be.remote_comp.tip=§6Sensor§7modul um den Komparatorwert eines\nverknüpften Blocks auszulesen (üblicherweise 0-15).\n§4Liest keine normalen Redstone-Signale!\nInteragiere geduckt um Block zuzuweisen (\\<remoteComp_range>m Reichweite).
+
 
 # GUI
 gui.cd4017be.tickInt=%.2fs

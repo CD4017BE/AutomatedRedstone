@@ -112,10 +112,10 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 			if (s >= 0) {
 				byte b = (byte) (32 - v);
 				if (shifts[s] > b) shifts[s] = b;
-				s *= 2;
-				if (cmd < 12) s++;
-				if ((comp.rsIO >> s & 1) != 0 ^ v > 0) {
-					comp.network.setIO(comp, (short)(comp.rsIO ^ 1 << s));
+				s <<= 1;
+				int t = cmd < 12 ? 1 : 0;
+				if ((comp.rsIO >> (s+t) & 1) != 0 ^ v > 0) {
+					setIO(EnumFacing.VALUES[s >> 1], comp.rsIO >> s ^ 1 << t);
 					markUpdate();
 				}
 			}
