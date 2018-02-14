@@ -1,3 +1,16 @@
+v5.2.1
+Changes:
+- added new sensor module: Remote Comparator
+- made cables render in transparent mode to support semi-transparent cover blocks
+- made Energy Valve more reliable with changing TileEntities, (un)loading chunks, etc.
+- fixed swapped Redstone wire tool-tips (#12)
+- fixed #16 wires not being automatically disconnecting when set to Redstone-I/O
+- fixed sensor ranges not being read from the correct config variable
+Dependencies:
+- for MC-1.11.2
+- forge-13.20.0.2315 (or newer)
+- CD4017BE_lib-5.0.6
+
 v5.2.0
 Changes:
 - added new circuit modules: array reader and writer
