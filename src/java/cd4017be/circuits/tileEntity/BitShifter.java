@@ -102,7 +102,7 @@ public class BitShifter extends BaseTileEntity implements IInteractiveTile, INei
 	}
 
 	@Override
-	public void neighborTileChange(BlockPos src) {
+	public void neighborTileChange(TileEntity te, EnumFacing side) {
 	}
 
 	@Override

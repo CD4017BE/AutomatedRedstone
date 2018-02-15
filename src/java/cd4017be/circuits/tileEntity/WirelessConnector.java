@@ -43,12 +43,11 @@ public class WirelessConnector extends BaseTileEntity implements INeighborAwareT
 			if (linkTile != null) {
 				linkPos = linkTile.pos;
 				linkDim = linkTile.world.provider.getDimension();
-				if (!tileEntityInvalid && conTile instanceof INeighborAwareTile && !conTile.isInvalid())
-					((INeighborAwareTile)conTile).neighborTileChange(pos);
+				if (!invalid()) onConTileChange();
 				markDirty();
 			} else if (conTile != null && !conTile.isInvalid()) {
 				IntegerComp c = conTile.getCapability(Objects.RS_INTEGER_CAPABILITY, getOrientation().front.getOpposite());
-				if (c != null) c.network.markDirty();
+				if (c != null && c.network != null) c.network.markDirty();
 			}
 		}
 		updateLink = false;
@@ -76,10 +75,15 @@ public class WirelessConnector extends BaseTileEntity implements INeighborAwareT
 			if (te instanceof WirelessConnector) te = null;
 			if (te != conTile) {
 				conTile = te;
-				if (linkTile != null && linkTile.conTile instanceof INeighborAwareTile && !linkTile.conTile.isInvalid()) ((INeighborAwareTile)linkTile.conTile).neighborTileChange(linkTile.pos);
+				if (linkTile != null) linkTile.onConTileChange();
 			}
 			updateCon = false;
 		}
+	}
+
+	private void onConTileChange() {
+		if (conTile instanceof INeighborAwareTile && !conTile.isInvalid())
+			((INeighborAwareTile)conTile).neighborTileChange(this, getOrientation().front.getOpposite());
 	}
 
 	@Override
@@ -99,37 +103,34 @@ public class WirelessConnector extends BaseTileEntity implements INeighborAwareT
 	}
 
 	@Override
-	public void invalidate() {
-		if (linkTile != null && linkTile.linkTile == this) linkTile.link(null);
-		linkTile = null;
-		conTile = null;
-		super.invalidate();
-	}
-
-	@Override
-	public void onChunkUnload() {
-		if (linkTile != null && linkTile.linkTile == this) linkTile.link(null);
-		linkTile = null;
-		conTile = null;
-		super.onChunkUnload();
-	}
-
-	@Override
-	public void validate() {
+	protected void setupData() {
 		updateLink = updateCon = true;
 		if (!world.isRemote) TickRegistry.instance.updates.add(this);
-		super.validate();
+	}
+
+	@Override
+	protected void clearData() {
+		if (linkTile != null && linkTile.linkTile == this) linkTile.link(null);
+		linkTile = null;
+		conTile = null;
 	}
 
 	@Override
 	public void neighborBlockChange(Block b, BlockPos src) {
+		if (!updateCon && pos.offset(getOrientation().front).equals(src)) {
+			updateCon = true;
+			TickRegistry.instance.updates.add(this);
+		}
 	}
 
 	@Override
-	public void neighborTileChange(BlockPos src) {
-		if (!updateCon) {
-			updateCon = true;
-			TickRegistry.instance.updates.add(this);
+	public void neighborTileChange(TileEntity te, EnumFacing side) {
+		if (side == getOrientation().front) {
+			if (te instanceof WirelessConnector) te = null;
+			if (te != conTile) {
+				conTile = te;
+				if (linkTile != null) linkTile.onConTileChange();
+			}
 		}
 	}
 
@@ -141,8 +142,11 @@ public class WirelessConnector extends BaseTileEntity implements INeighborAwareT
 	@Override
 	public <T> T getCapability(Capability<T> cap, EnumFacing facing) {
 		return cap == Objects.RS_INTEGER_CAPABILITY && facing == getOrientation().front
-			&& linkTile != null && linkTile.conTile != null ?
-			linkTile.conTile.getCapability(cap, linkTile.getOrientation().front.getOpposite()) : null;
+			&& linkTile != null ? linkTile.getRemoteCap(cap) : null;
+	}
+
+	private <T> T getRemoteCap(Capability<T> cap) {
+		return conTile != null ? conTile.getCapability(cap, getOrientation().front.getOpposite()) : null;
 	}
 
 	@Override
