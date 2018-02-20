@@ -195,8 +195,8 @@ public class IntegerPipe extends PassiveMultiblockTile<IntegerComp, SharedIntege
 		if ((comp.rsIO >> (m * 2) & 3) != 0) return true;
 		if (!comp.canConnect((byte)m)) return false;
 		EnumFacing dir = EnumFacing.VALUES[m];
-		ICapabilityProvider te = getTileOnSide(dir);
-		return te != null && te.hasCapability(comp.getCap(), dir.getOpposite());
+		IntegerComp c = Utils.neighborCapability(this, dir, comp.getCap());
+		return c != null && c.mask == comp.mask;
 	}
 
 	@Override

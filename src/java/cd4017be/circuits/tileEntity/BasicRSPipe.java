@@ -26,8 +26,8 @@ public class BasicRSPipe extends IntegerPipe {
 		for (EnumFacing s : EnumFacing.VALUES) {
 			if (!comp.canConnect((byte)s.ordinal())) continue;
 			if ((te = getTileOnSide(s)) != null) {
-				if (te instanceof IntegerPipe) continue;
-				if (te instanceof IDirectionalRedstone && (d = ((IDirectionalRedstone)te).getRSDirection(s.getOpposite())) >= 0 && d < 3) {
+				if (te instanceof BasicRSPipe) continue;
+				if (te instanceof IDirectionalRedstone && (d = ((IDirectionalRedstone)te).getRSDirection(s.getOpposite())) > 0 && d < 3) {
 					io |= (d == 1 ? 2 : 1) << (s.ordinal() * 2);
 					continue;
 				}
