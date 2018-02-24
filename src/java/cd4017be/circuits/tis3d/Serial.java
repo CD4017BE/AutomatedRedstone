@@ -20,7 +20,7 @@ public class Serial implements SerialInterface {
 	}
 
 	public boolean valid() {
-		return !this.adapter.isInvalid();
+		return !this.adapter.invalid();
 	}
 
 	@Override

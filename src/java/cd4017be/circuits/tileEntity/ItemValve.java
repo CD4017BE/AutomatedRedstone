@@ -37,13 +37,7 @@ public class ItemValve extends BaseTileEntity implements INeighborAwareTile, IRe
 
 	@Override
 	public void update() {
-		if (world.isRemote) return;
-		if (update) {
-			EnumFacing dir = getOrientation().front;
-			target = Utils.neighborTile(this, dir);
-			update = false;
-		}
-		if (world.getTotalWorldTime() % tickInt != 0) return;
+		if (world.isRemote || world.getTotalWorldTime() % tickInt != 0) return;
 		switch (mode & 12) {
 		case 0:
 			emitRS(flow);
@@ -77,7 +71,9 @@ public class ItemValve extends BaseTileEntity implements INeighborAwareTile, IRe
 
 	@Override
 	public void neighborBlockChange(Block b, BlockPos src) {
-		if (world.isRemote || (mode & 14) == 0) return;
+		if (world.isRemote) return;
+		update |= pos.offset(getOrientation().front).equals(src);
+		if ((mode & 14) == 0) return;
 		int li = input;
 		input = 0;
 		for (EnumFacing s : EnumFacing.VALUES)
@@ -97,8 +93,11 @@ public class ItemValve extends BaseTileEntity implements INeighborAwareTile, IRe
 	}
 
 	@Override
-	public void neighborTileChange(BlockPos src) {
-		update = true;
+	public void neighborTileChange(TileEntity te, EnumFacing side) {
+		if (side == getOrientation().front) {
+			target = te;
+			update = false;
+		}
 	}
 
 	@Override
@@ -120,7 +119,10 @@ public class ItemValve extends BaseTileEntity implements INeighborAwareTile, IRe
 	@Override
 	public <T> T getCapability(Capability<T> cap, EnumFacing facing) {
 		if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY && facing != getOrientation().front) {
-			if (target != null && target.isInvalid()) {target = null; update = true;}
+			if (update || target != null && target.isInvalid()) {
+				target = Utils.neighborTile(this, getOrientation().front);
+				update = false;
+			}
 			inventory.setItemHandler(target);
 			return (T) inventory;
 		} else return null;
