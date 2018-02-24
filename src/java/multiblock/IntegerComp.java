@@ -56,6 +56,12 @@ public class IntegerComp extends MultiblockComp<IntegerComp, SharedInteger> {
 		}
 	}
 
+	@Override
+	public IntegerComp getNeighbor(byte side) {
+		IntegerComp c = super.getNeighbor(side);
+		return c == null || c.mask != mask ? null : c;
+	}
+
 	public void readFromNBT(NBTTagCompound nbt) {
 		con = nbt.getByte("con");
 		rsIO = nbt.getShort("io");

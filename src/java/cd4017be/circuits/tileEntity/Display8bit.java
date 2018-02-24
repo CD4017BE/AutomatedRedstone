@@ -52,7 +52,7 @@ public class Display8bit extends BaseTileEntity implements INeighborAwareTile, I
 	}
 
 	@Override
-	public void neighborTileChange(BlockPos src) {
+	public void neighborTileChange(TileEntity te, EnumFacing side) {
 	}
 
 	@Override

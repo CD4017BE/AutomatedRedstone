@@ -477,7 +477,7 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 	}
 
 	@Override
-	public void neighborTileChange(BlockPos src) {
+	public void neighborTileChange(TileEntity te, EnumFacing side) {
 	}
 
 	@Override

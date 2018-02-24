@@ -33,11 +33,6 @@ public class FluidValve extends BaseTileEntity implements INeighborAwareTile, IR
 	@Override
 	public void update() {
 		if (world.isRemote) return;
-		if (update) {
-			EnumFacing dir = getOrientation().front;
-			in = Utils.neighborTile(this, dir);
-			out = Utils.neighborTile(this, dir.getOpposite());
-		}
 		if (measure) {
 			int d = transferFluid(Integer.MAX_VALUE);
 			if (d != 0) {
@@ -59,12 +54,13 @@ public class FluidValve extends BaseTileEntity implements INeighborAwareTile, IR
 	}
 
 	private int transferFluid(int max) {
-		if (in == null || out == null) return 0;
-		if (in.isInvalid() || out.isInvalid()) {
-			in = out = null;
-			update = true;
-			return 0;
+		if (update || in != null && in.isInvalid() || out != null && out.isInvalid()) {
+			EnumFacing dir = getOrientation().front;
+			in = Utils.neighborTile(this, dir);
+			out = Utils.neighborTile(this, dir.getOpposite());
+			update = false;
 		}
+		if (in == null || out == null) return 0;
 		EnumFacing dir = getOrientation().front;
 		IFluidHandler accIn = in.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, dir.getOpposite());
 		if (accIn == null) return 0;
@@ -79,7 +75,10 @@ public class FluidValve extends BaseTileEntity implements INeighborAwareTile, IR
 
 	@Override
 	public void neighborBlockChange(Block b, BlockPos src) {
-		if (world.isRemote || measure) return;
+		if (world.isRemote) return;
+		EnumFacing dir = getOrientation().front;
+		update |= pos.offset(dir).equals(src) || pos.offset(dir, -1).equals(src);
+		if (measure) return;
 		int ls = state;
 		state = 0;
 		for (EnumFacing s : EnumFacing.VALUES)
@@ -88,8 +87,10 @@ public class FluidValve extends BaseTileEntity implements INeighborAwareTile, IR
 	}
 
 	@Override
-	public void neighborTileChange(BlockPos src) {
-		update = true;
+	public void neighborTileChange(TileEntity te, EnumFacing side) {
+		EnumFacing dir = getOrientation().front;
+		if (side == dir) in = te;
+		else if (side == dir.getOpposite()) out = te;
 	}
 
 	@Override

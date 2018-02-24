@@ -32,12 +32,7 @@ public class EnergyValve extends BaseTileEntity implements INeighborAwareTile, I
 
 	@Override
 	public void update() {
-		if (world.isRemote) return;
-		if (update) {
-			EnumFacing dir = getOrientation().front;
-			out = Utils.neighborTile(this, dir.getOpposite());
-		}
-		if (world.getTotalWorldTime() % tickInt != 0) return;
+		if (world.isRemote || world.getTotalWorldTime() % tickInt != 0) return;
 		if (measure) {
 			flow = Integer.MAX_VALUE - flow;
 			if (flow != state) {
@@ -54,7 +49,7 @@ public class EnergyValve extends BaseTileEntity implements INeighborAwareTile, I
 	@Override
 	public void neighborBlockChange(Block b, BlockPos src) {
 		if (world.isRemote) return;
-		if (!update && (out == null || out.isInvalid()) && pos.offset(getOrientation().front).equals(src)) update = true;
+		update |= pos.offset(getOrientation().front).equals(src);
 		if (measure) return;
 		int ls = state;
 		state = 0;
@@ -64,8 +59,11 @@ public class EnergyValve extends BaseTileEntity implements INeighborAwareTile, I
 	}
 
 	@Override
-	public void neighborTileChange(BlockPos src) {
-		update = true;
+	public void neighborTileChange(TileEntity te, EnumFacing side) {
+		if (side == getOrientation().front) {
+			out = te;
+			update = false;
+		}
 	}
 
 	@Override
@@ -144,11 +142,19 @@ public class EnergyValve extends BaseTileEntity implements INeighborAwareTile, I
 		return null;
 	}
 
+	private IEnergyStorage getOutput() {
+		if (update || out != null && out.isInvalid()) {
+			out = Utils.neighborTile(this, getOrientation().front.getOpposite());
+			update = false;
+		}
+		return out != null ? out.getCapability(CapabilityEnergy.ENERGY, getOrientation().front) : null;
+	}
+
 	@Override
 	public int receiveEnergy(int am, boolean sim) {
 		if (am > flow) am = flow;
 		IEnergyStorage stor;
-		if (am > 0 && out != null && !out.isInvalid() && (stor = out.getCapability(CapabilityEnergy.ENERGY, getOrientation().front)) != null) {
+		if (am > 0 && (stor = getOutput()) != null) {
 			am = stor.receiveEnergy(am, sim);
 			if (!sim) {
 				flow -= am;
