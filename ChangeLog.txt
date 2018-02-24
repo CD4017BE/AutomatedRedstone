@@ -1,3 +1,12 @@
+v5.2.3
+Changes:
+- fixed #19 automatically disconnecting cables that actually shouldn't do so
+- fixed #8 & #18 solid redstone cables having problems with forge's dormant chunk caching
+Dependencies:
+- for MC-1.11.2
+- forge-13.20.0.2315 (or newer)
+- CD4017BE_lib-5.3.0
+
 v5.2.2
 Changes:
 - fixed #17 array writer shifting output indices of its following components
