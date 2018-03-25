@@ -335,14 +335,21 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 			}
 		} else if (cmd == 3) {
 			for (int i = startIdx, j = 0; i < ram.length; i++) {
+				//get op
 				byte b = ram[i];
+				if (b == C_SKIP) {
+					j += ram[++i] & 0x3f;
+					continue;
+				}
 				ModuleType mt = ModuleType.values()[b & 0x3f];
+				//skip extra data
 				int w = mt.varInAm ? ((b >> 6 & 3) + 1) * mt.group : mt.cons();
 				for (int k = 0; k < w; k++)
 					if (Assembler.extraByte(ram[++i], mt.conType(k))) i++;
+				//get size
 				int k = mt.isNum ? j + (b >> 6 & 3) : j + mt.size - 1;
-				if (mt.cons() == 0) j = k + 1;
-				else {
+				if (mt.cons() == 0) j = k + 1; //don't reset constants
+				else {//reset bytes
 					if (k >= startIdx) k = startIdx - 1;
 					while (j <= k) ram[j++] = 0;
 				}
