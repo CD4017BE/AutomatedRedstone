@@ -1,3 +1,16 @@
+v6.1.3
+Changes:
+- fixed bit shift instructions to now use unsigned inputs
+- fixed circuit casing upgrade recipe deleting module arrangement data
+- made recipes of some circuit components slightly cheaper
+- fixed circuit state reset button sometimes fail and print out errors in log
+- fixed #22(maybe) cables being in bad state when its TileEntity is reused after unload
+should also fix signal transmission bugs after chunk reloads.
+Dependencies:
+- for MC-1.12.2
+- forge-14.23.0.2512 (or newer)
+- CD4017BE_lib-6.2.2
+
 v6.1.2
 Changes:
 - fixed #19 automatically disconnecting cables that actually shouldn't do so
