@@ -26,12 +26,8 @@ public class IntegerComp extends MultiblockComp<IntegerComp, SharedInteger> {
 	public short rsIO;
 
 	public void setUID(long uid) {
-		if (this.uid != 0) return;
-		this.uid = uid;
-		if (network != null) {
-			network.components.remove(0L);
-			network.components.put(uid, this);
-		} else new SharedInteger(this);
+		super.setUID(uid);
+		if (network == null) new SharedInteger(this);
 		network.setIO(this, rsIO);
 	}
 
@@ -65,7 +61,7 @@ public class IntegerComp extends MultiblockComp<IntegerComp, SharedInteger> {
 	public void readFromNBT(NBTTagCompound nbt) {
 		con = nbt.getByte("con");
 		rsIO = nbt.getShort("io");
-		if (uid != 0) network.setIO(this, rsIO);
+		if (network != null) network.setIO(this, rsIO);
 		inputState = nbt.getInteger("state");
 	}
 

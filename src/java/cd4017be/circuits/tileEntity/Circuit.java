@@ -193,8 +193,8 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 				int a = getNum(ram[++readIdx]);
 				x = a >= 0 ? sqrt(a) : -sqrt(-a);
 			} break;
-			case C_BSR: x = getNum(ram[++readIdx]) >>> getNum(ram[++readIdx]); break;
-			case C_BSL: x = getNum(ram[++readIdx]) << getNum(ram[++readIdx]); break;
+			case C_BSR: x = getNumU(ram[++readIdx]) >>> getNum(ram[++readIdx]); break;
+			case C_BSL: x = getNumU(ram[++readIdx]) << getNum(ram[++readIdx]); break;
 			case C_COMB: x = 0; s = s * 2 + 1;
 				for (int mask = 1; s >= 0; s--, mask <<= 1) x |= read8bit() & mask;
 				ram[n++] = (byte)x;
@@ -291,6 +291,16 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 		}
 	}
 
+	public int getNumU(int idx) {
+		int p = idx & 0x3f;
+		switch(idx & 0xc0) {
+		case 0x00: return ram[p] & 0xff;
+		case 0x40: return ram[p] & 0xff | ram[++p] << 8 & 0xff00;
+		case 0x80: return ram[p] & 0xff | ram[++p] << 8 & 0xff00 | ram[++p] << 16 & 0xff0000;
+		default: return ram[p] & 0xff | ram[++p] << 8 & 0xff00 | ram[++p] << 16 & 0xff0000 | ram[++p] << 24;
+		}
+	}
+
 	public int getMinInterval() {
 		return ClockSpeed[getBlockMetadata() % ClockSpeed.length];
 	}
@@ -335,14 +345,21 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 			}
 		} else if (cmd == 3) {
 			for (int i = startIdx, j = 0; i < ram.length; i++) {
+				//get op
 				byte b = ram[i];
+				if (b == C_SKIP) {
+					j += ram[++i] & 0x3f;
+					continue;
+				}
 				ModuleType mt = ModuleType.values()[b & 0x3f];
+				//skip extra data
 				int w = mt.varInAm ? ((b >> 6 & 3) + 1) * mt.group : mt.cons();
 				for (int k = 0; k < w; k++)
 					if (Assembler.extraByte(ram[++i], mt.conType(k))) i++;
+				//get size
 				int k = mt.isNum ? j + (b >> 6 & 3) : j + mt.size - 1;
-				if (mt.cons() == 0) j = k + 1;
-				else {
+				if (mt.cons() == 0) j = k + 1; //don't reset constants
+				else {//reset bytes
 					if (k >= startIdx) k = startIdx - 1;
 					while (j <= k) ram[j++] = 0;
 				}
