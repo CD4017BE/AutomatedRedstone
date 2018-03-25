@@ -193,8 +193,8 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 				int a = getNum(ram[++readIdx]);
 				x = a >= 0 ? sqrt(a) : -sqrt(-a);
 			} break;
-			case C_BSR: x = getNum(ram[++readIdx]) >>> getNum(ram[++readIdx]); break;
-			case C_BSL: x = getNum(ram[++readIdx]) << getNum(ram[++readIdx]); break;
+			case C_BSR: x = getNumU(ram[++readIdx]) >>> getNum(ram[++readIdx]); break;
+			case C_BSL: x = getNumU(ram[++readIdx]) << getNum(ram[++readIdx]); break;
 			case C_COMB: x = 0; s = s * 2 + 1;
 				for (int mask = 1; s >= 0; s--, mask <<= 1) x |= read8bit() & mask;
 				ram[n++] = (byte)x;
@@ -287,6 +287,16 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 		case 0x00: return ram[p];
 		case 0x40: return ram[p] & 0xff | ram[++p] << 8;
 		case 0x80: return ram[p] & 0xff | ram[++p] << 8 & 0xff00 | ram[++p] << 16;
+		default: return ram[p] & 0xff | ram[++p] << 8 & 0xff00 | ram[++p] << 16 & 0xff0000 | ram[++p] << 24;
+		}
+	}
+
+	public int getNumU(int idx) {
+		int p = idx & 0x3f;
+		switch(idx & 0xc0) {
+		case 0x00: return ram[p] & 0xff;
+		case 0x40: return ram[p] & 0xff | ram[++p] << 8 & 0xff00;
+		case 0x80: return ram[p] & 0xff | ram[++p] << 8 & 0xff00 | ram[++p] << 16 & 0xff0000;
 		default: return ram[p] & 0xff | ram[++p] << 8 & 0xff00 | ram[++p] << 16 & 0xff0000 | ram[++p] << 24;
 		}
 	}
