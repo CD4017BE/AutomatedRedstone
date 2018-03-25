@@ -3,7 +3,7 @@
   "modid": "circuits",
   "name": "Automated Redstone",
   "description": "Better redstone cables, programmable circuits and fancy measurement and display devices",
-  "version": "5.2.3",
+  "version": "5.2.4",
   "acceptableRemoteVersions": "[5.2.0,5.3.0)",
   "acceptableSaveVersions": "[5.1.0,5.3.0)",
   "acceptedMinecraftVersions": "[1.11.2,1.12)",
@@ -14,7 +14,7 @@
   "logoFile": "",
   "screenshots": [],
   "useDependencyInformation": true,
-  "requiredMods": ["cd4017be_lib@[5.3.0,5.4.0)"],
-  "dependencies": ["cd4017be_lib@[5.3.0,5.4.0)"]
+  "requiredMods": ["cd4017be_lib@[5.3.2,5.4.0)"],
+  "dependencies": ["cd4017be_lib@[5.3.2,5.4.0)"]
 }
 ]
