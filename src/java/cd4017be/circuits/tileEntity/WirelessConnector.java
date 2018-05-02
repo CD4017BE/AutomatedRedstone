@@ -3,6 +3,7 @@ package cd4017be.circuits.tileEntity;
 import java.util.Arrays;
 import java.util.List;
 
+import multiblock.ICableConnector;
 import multiblock.IntegerComp;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -29,7 +30,7 @@ import cd4017be.lib.tileentity.BaseTileEntity;
 import cd4017be.lib.util.TooltipUtil;
 import cd4017be.lib.util.Utils;
 
-public class WirelessConnector extends BaseTileEntity implements INeighborAwareTile, IInteractiveTile, ITilePlaceHarvest, IUpdatable {
+public class WirelessConnector extends BaseTileEntity implements INeighborAwareTile, IInteractiveTile, ITilePlaceHarvest, IUpdatable, ICableConnector {
 
 	protected BlockPos linkPos = BlockPos.ORIGIN;
 	protected int linkDim;
@@ -205,6 +206,11 @@ public class WirelessConnector extends BaseTileEntity implements INeighborAwareT
 		nbt.setInteger("ld", linkDim);
 		item.setTagCompound(nbt);
 		return Arrays.asList(item);
+	}
+
+	@Override
+	public boolean canConnect(EnumFacing side, int signalMask) {
+		return side == getOrientation().front;
 	}
 
 }

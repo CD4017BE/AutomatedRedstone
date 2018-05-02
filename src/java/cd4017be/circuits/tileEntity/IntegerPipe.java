@@ -11,6 +11,7 @@ import cd4017be.lib.block.MultipartBlock.IModularTile;
 import cd4017be.lib.templates.Cover;
 import cd4017be.lib.tileentity.PassiveMultiblockTile;
 import cd4017be.lib.util.Utils;
+import multiblock.ICableConnector;
 import multiblock.IntegerComp;
 import multiblock.SharedInteger;
 import net.minecraft.block.Block;
@@ -32,7 +33,7 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
  *
  * @author CD4017BE
  */
-public class IntegerPipe extends PassiveMultiblockTile<IntegerComp, SharedInteger> implements ITilePlaceHarvest, IRedstoneTile, IInteractiveTile, IModularTile, IQuickRedstoneHandler, IDirectionalRedstone {
+public class IntegerPipe extends PassiveMultiblockTile<IntegerComp, SharedInteger> implements ITilePlaceHarvest, IRedstoneTile, IInteractiveTile, IModularTile, IQuickRedstoneHandler, IDirectionalRedstone, ICableConnector {
 
 	protected Cover cover = new Cover();
 
@@ -195,8 +196,8 @@ public class IntegerPipe extends PassiveMultiblockTile<IntegerComp, SharedIntege
 		if ((comp.rsIO >> (m * 2) & 3) != 0) return true;
 		if (!comp.canConnect((byte)m)) return false;
 		EnumFacing dir = EnumFacing.VALUES[m];
-		IntegerComp c = Utils.neighborCapability(this, dir, comp.getCap());
-		return c != null && c.mask == comp.mask;
+		TileEntity te = Utils.neighborTile(this, dir);
+		return te instanceof ICableConnector && ((ICableConnector)te).canConnect(dir.getOpposite(), comp.mask);
 	}
 
 	@Override
@@ -209,6 +210,11 @@ public class IntegerPipe extends PassiveMultiblockTile<IntegerComp, SharedIntege
 	@Override
 	public byte getRSDirection(EnumFacing s) {
 		return (byte)(comp.rsIO >> (s.getIndex() << 1) & 3);
+	}
+
+	@Override
+	public boolean canConnect(EnumFacing side, int mask) {
+		return (mask == comp.mask) && comp.canConnect((byte)side.ordinal());
 	}
 
 }
