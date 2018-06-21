@@ -2,10 +2,12 @@ package cd4017be.circuits.tileEntity;
 
 import java.io.IOException;
 
+import cd4017be.api.circuits.IDirectionalRedstone;
 import cd4017be.api.computers.ComputerAPI;
 import cd4017be.lib.BlockGuiHandler.ClientPacketReceiver;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
+import cd4017be.lib.util.Utils;
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
@@ -19,6 +21,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ITickable;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fml.common.Optional.*;
 
 /**
@@ -49,16 +52,23 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 
 	@Override
 	protected void checkCon(EnumFacing side) {
-		short pre = comp.rsIO;
-		super.checkCon(side);
-		pre ^= comp.rsIO;
-		if (pre != 0) {
-			int j = side.ordinal(), i = j << 1;
-			if ((pre >> i & 1) != 0 && shifts[j + 18] <= 0)
-				shifts[j + 18] = (byte)(32 - shifts[j + 12]);
-			i |= 1;
-			if ((pre >> i & 1) != 0 && shifts[j + 6] <= 0)
-				shifts[j + 6] = (byte)(32 - shifts[j]);
+		int i = side.ordinal();
+		if (comp.canConnect((byte)i) && (comp.rsIO >> (i << 1) & 3) == 0) {
+			ICapabilityProvider te = Utils.neighborTile(this, side);
+			byte d;
+			if (te instanceof IDirectionalRedstone && (d = ((IDirectionalRedstone)te).getRSDirection(side.getOpposite())) != 0) {
+				short io = (short)(comp.rsIO | ((d & 1) << 1 | (d & 2) >> 1) << (side.ordinal() * 2));
+				comp.network.setIO(comp, io);
+				this.markUpdate();
+				
+				if (d == 1 || d == 3) {
+					if (shifts[i + 6] <= 0) shifts[i + 6] = (byte)(32 - shifts[i]);
+					if (comp.network.outputState != 0)
+						world.neighborChanged(pos.offset(side), blockType, pos);
+				}
+				if ((d == 2 || d == 3) && shifts[i + 18] <= 0)
+					shifts[i + 18] = (byte)(32 - shifts[i + 12]);
+			}
 		}
 	}
 

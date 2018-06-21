@@ -42,6 +42,8 @@ public class IntegerPipe extends RedstonePipe implements IInteractiveTile {
 				short io = (short)(comp.rsIO | ((d & 1) << 1 | (d & 2) >> 1) << (side.ordinal() * 2));
 				comp.network.setIO(comp, io);
 				this.markUpdate();
+				if ((d == 1 || d == 3) && comp.network.outputState != 0)
+					world.neighborChanged(pos.offset(side), blockType, pos);
 			}
 		}
 	}
