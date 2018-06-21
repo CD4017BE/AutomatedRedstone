@@ -3,8 +3,6 @@ package cd4017be.circuits.tileEntity;
 import java.util.Arrays;
 import java.util.List;
 
-import multiblock.ICableConnector;
-import multiblock.IntegerComp;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
@@ -21,6 +19,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.common.capabilities.Capability;
 import cd4017be.circuits.Objects;
+import cd4017be.circuits.multiblock.ICableConnector;
+import cd4017be.circuits.multiblock.RedstoneNode;
 import cd4017be.lib.TickRegistry;
 import cd4017be.lib.TickRegistry.IUpdatable;
 import cd4017be.lib.block.AdvancedBlock.IInteractiveTile;
@@ -30,6 +30,10 @@ import cd4017be.lib.tileentity.BaseTileEntity;
 import cd4017be.lib.util.TooltipUtil;
 import cd4017be.lib.util.Utils;
 
+/**
+ * 
+ * @author CD4017BE
+ */
 public class WirelessConnector extends BaseTileEntity implements INeighborAwareTile, IInteractiveTile, ITilePlaceHarvest, IUpdatable, ICableConnector {
 
 	protected BlockPos linkPos = BlockPos.ORIGIN;
@@ -47,7 +51,7 @@ public class WirelessConnector extends BaseTileEntity implements INeighborAwareT
 				if (!invalid()) onConTileChange();
 				markDirty();
 			} else if (conTile != null && !conTile.isInvalid()) {
-				IntegerComp c = conTile.getCapability(Objects.RS_INTEGER_CAPABILITY, getOrientation().front.getOpposite());
+				RedstoneNode c = conTile.getCapability(Objects.RS_INTEGER_CAPABILITY, getOrientation().front.getOpposite());
 				if (c != null && c.network != null) c.network.markDirty();
 			}
 		}
@@ -209,7 +213,7 @@ public class WirelessConnector extends BaseTileEntity implements INeighborAwareT
 	}
 
 	@Override
-	public boolean canConnect(EnumFacing side, int signalMask) {
+	public boolean canConnect(EnumFacing side, boolean digital) {
 		return side == getOrientation().front;
 	}
 

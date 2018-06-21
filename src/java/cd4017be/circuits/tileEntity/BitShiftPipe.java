@@ -35,31 +35,30 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 	public int internal;
 
 	@Override
-	protected void updateInput() {
-		int newIn = internal;
-		for (EnumFacing s : EnumFacing.values()) {
-			int i = s.ordinal(), k = shifts[i + 18];
-			if (k > 0)
-				newIn |= (world.getRedstonePower(pos.offset(s), s) & 0xffffffff >>> (32 - k)) << shifts[i + 12];
-		}
-		if (newIn != comp.inputState) {
-			comp.inputState = newIn;
+	protected void combineInputs() {
+		int value = internal;
+		for (int i = 0, k; i < 6; i++)
+			if ((k = shifts[i + 18]) > 0)
+				value |= (inputs[i] & 0xffffffff >>> (32 - k)) << shifts[i + 12];
+		if (value != comp.inputState) {
+			comp.inputState = value;
 			comp.network.markStateDirty();
 			markDirty();
 		}
 	}
 
 	@Override
-	protected void checkCons() {
+	protected void checkCon(EnumFacing side) {
 		short pre = comp.rsIO;
-		super.checkCons();
+		super.checkCon(side);
 		pre ^= comp.rsIO;
 		if (pre != 0) {
-			for (int i = 0; i < 12 ; i++)
-				if ((pre >> i & 1) != 0) {
-					int j = i / 2 - (i & 1) * 12 + 18;
-					if (shifts[j] <= 0) shifts[j] = (byte)(32 - shifts[j - 6]);
-				}
+			int j = side.ordinal(), i = j << 1;
+			if ((pre >> i & 1) != 0 && shifts[j + 18] <= 0)
+				shifts[j + 18] = (byte)(32 - shifts[j + 12]);
+			i |= 1;
+			if ((pre >> i & 1) != 0 && shifts[j + 6] <= 0)
+				shifts[j + 6] = (byte)(32 - shifts[j]);
 		}
 	}
 
@@ -120,10 +119,10 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 				}
 			}
 			if (cmd < 12) comp.onStateChange();
-			else updateInput();
+			else combineInputs();
 		} else {
 			internal = 0;
-			updateInput();
+			combineInputs();
 		}
 		markDirty();
 	}
@@ -192,7 +191,7 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 	@Callback
 	public Object[] write(Context context, Arguments args) throws Exception {
 		internal = args.checkInteger(0);
-		updateInput();
+		combineInputs();
 		return null;
 	}
 
@@ -201,7 +200,7 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 		int mask = 0xffffffff >>> (32 - shifts[i + 6]) << o;
 		internal &= ~mask;
 		internal |= v << o & mask;
-		updateInput();
+		combineInputs();
 	}
 
 }

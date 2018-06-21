@@ -1,4 +1,4 @@
-package multiblock;
+package cd4017be.circuits.multiblock;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,19 +11,19 @@ import cd4017be.lib.templates.SharedNetwork;
  * 
  * @author CD4017BE
  */
-public class SharedInteger extends SharedNetwork<IntegerComp, SharedInteger> implements IUpdatable {
+public class RedstoneNetwork extends SharedNetwork<RedstoneNode, RedstoneNetwork> implements IUpdatable {
 
-	private static final short AllIn = 0x5555, AllOut = (short)0xaaaa;
-	public HashSet<IntegerComp> inputs = new HashSet<IntegerComp>();
-	public HashSet<IntegerComp> outputs = new HashSet<IntegerComp>();
+	public static final short AllIn = 0x5555, AllOut = (short)0xaaaa;
+	public HashSet<RedstoneNode> inputs = new HashSet<RedstoneNode>();
+	public HashSet<RedstoneNode> outputs = new HashSet<RedstoneNode>();
 	public int outputState = 0;
 	public boolean updateState;
 
-	protected SharedInteger(HashMap<Long, IntegerComp> comps) {
+	protected RedstoneNetwork(HashMap<Long, RedstoneNode> comps) {
 		super(comps);
 	}
 
-	public SharedInteger(IntegerComp comp) {
+	public RedstoneNetwork(RedstoneNode comp) {
 		super(comp);
 		if ((comp.rsIO & AllIn) != 0) inputs.add(comp);
 		if ((comp.rsIO & AllOut) != 0) outputs.add(comp);
@@ -31,7 +31,7 @@ public class SharedInteger extends SharedNetwork<IntegerComp, SharedInteger> imp
 	}
 
 	@Override
-	public void onMerged(SharedInteger network) {
+	public void onMerged(RedstoneNetwork network) {
 		super.onMerged(network);
 		outputState &= network.outputState;
 		markStateDirty();
@@ -40,17 +40,17 @@ public class SharedInteger extends SharedNetwork<IntegerComp, SharedInteger> imp
 	}
 
 	@Override
-	public void remove(IntegerComp comp) {
+	public void remove(RedstoneNode comp) {
 		super.remove(comp);
 		if (inputs.remove(comp)) markStateDirty();
 		outputs.remove(comp);
 	}
 
 	@Override
-	public SharedInteger onSplit(HashMap<Long, IntegerComp> comps) {
-		SharedInteger si = new SharedInteger(comps);
+	public RedstoneNetwork onSplit(HashMap<Long, RedstoneNode> comps) {
+		RedstoneNetwork si = new RedstoneNetwork(comps);
 		si.outputState = outputState;
-		for (IntegerComp c : comps.values()) {
+		for (RedstoneNode c : comps.values()) {
 			this.inputs.remove(c);
 			if ((c.rsIO & AllIn) != 0) {
 				si.inputs.add(c);
@@ -65,13 +65,13 @@ public class SharedInteger extends SharedNetwork<IntegerComp, SharedInteger> imp
 		return si;
 	}
 
-	public void setIO(IntegerComp c, short con) {
+	public void setIO(RedstoneNode c, short con) {
 		if ((con & AllIn) != 0) inputs.add(c);
 		else inputs.remove(c);
 		if ((con & AllOut) != 0) outputs.add(c);
 		else outputs.remove(c);
 		c.rsIO = con;
-		if (c.mask == -1)
+		if (c.digital)
 			for (int i = 0; i < 6; i++)
 				if ((con >> (i << 1) & 3) != 0 && (c.con >> i & 1) != 0)
 					c.setConnect((byte)i, false);
@@ -81,11 +81,13 @@ public class SharedInteger extends SharedNetwork<IntegerComp, SharedInteger> imp
 	@Override
 	protected void updatePhysics() {
 		if (updateState) { 
-			int newState = 0;
-			for (IntegerComp c : inputs) newState |= c.inputState;
+			int newState = 0, s;
+			for (RedstoneNode c : inputs)
+				if (c.digital) newState |= c.inputState;
+				else if ((s = c.inputState) > newState) newState = s;
 			if (newState != outputState) {
 				outputState = newState;
-				for (IntegerComp c : outputs) c.onStateChange();
+				for (RedstoneNode c : outputs) c.onStateChange();
 			}
 			updateState = false;
 		}
@@ -110,7 +112,7 @@ public class SharedInteger extends SharedNetwork<IntegerComp, SharedInteger> imp
 	public void process() {
 		if (update) {
 			if (core == null)
-				for (IntegerComp c : components.values()) { core = c; break; }
+				for (RedstoneNode c : components.values()) { core = c; break; }
 			reassembleNetwork();
 			update = false;
 		}

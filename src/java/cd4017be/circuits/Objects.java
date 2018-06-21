@@ -1,6 +1,5 @@
 package cd4017be.circuits;
 
-import multiblock.IntegerComp;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -17,6 +16,7 @@ import cd4017be.api.Capabilities;
 import cd4017be.api.recipes.RecipeScriptContext.ConfigConstants;
 import cd4017be.circuits.block.*;
 import cd4017be.circuits.item.*;
+import cd4017be.circuits.multiblock.RedstoneNode;
 import cd4017be.circuits.tileEntity.Assembler;
 import cd4017be.circuits.tileEntity.BasicRSPipe;
 import cd4017be.circuits.tileEntity.BitShiftPipe;
@@ -48,8 +48,8 @@ import cd4017be.lib.templates.TabMaterials;
 public class Objects {
 
 	//Capabilities
-	@CapabilityInject(IntegerComp.class)
-	public static Capability<IntegerComp> RS_INTEGER_CAPABILITY = null;
+	@CapabilityInject(RedstoneNode.class)
+	public static Capability<RedstoneNode> RS_INTEGER_CAPABILITY = null;
 
 	//Creative Tabs
 	public static TabMaterials tabCircuits = new TabMaterials(RedstoneCircuits.ID);
@@ -100,7 +100,7 @@ public class Objects {
 
 	/** creates and registers them all */
 	public static void init() {
-		Capabilities.registerIntern(IntegerComp.class);
+		Capabilities.registerIntern(RedstoneNode.class);
 		tabCircuits.item = new ItemStack(circuit);
 	}
 
