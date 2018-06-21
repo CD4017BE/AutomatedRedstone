@@ -319,11 +319,10 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 				for (IOcfg c : iocfg)
 					if (c.side == prev)
 						dir |= c.dir ? 2 : 1;
-				if (dir == 0) ioacc[prev] = null;
-				else ioacc[prev].dir &= dir | 4;
+				ioacc[prev].setDir(dir);
 				IOacc acc = ioacc[side];
 				if (acc == null) ioacc[side] = acc = new IOacc(side);
-				acc.dir |= cfg.dir ? 2 : 1;
+				acc.setDir(cfg.dir ? 2 : 1);
 				neighborBlockChange(blockType, pos);
 			}
 			byte ofs = data.readByte();
@@ -366,6 +365,8 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 					while (j <= k) ram[j++] = 0;
 				}
 			}
+			for (IOacc acc : ioacc)
+				if (acc != null) acc.update(0);
 		} else if (cmd == 4) {
 			int i = data.readByte() & 0x3f;
 			if (i < startIdx) {
@@ -660,6 +661,13 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 				}
 			} else dir |= 4;
 			markDirty();
+		}
+		void setDir(int ndir) {
+			ndir ^= dir & 3;
+			if (ndir == 0) return;
+			dir ^= ndir;
+			if ((dir & 3) == 0) ioacc[side.ordinal()] = null;
+			world.neighborChanged(pos.offset(side), blockType, pos);
 		}
 	}
 
