@@ -24,7 +24,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.network.NetworkManager;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
@@ -463,7 +465,22 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 
 	@Override
 	public void onPlaced(EntityLivingBase entity, ItemStack item) {
-		if (item.hasTagCompound()) read(item.getTagCompound());
+		if (!world.isRemote && item.hasTagCompound()) {
+			read(item.getTagCompound());
+			markUpdate();
+		}
+	}
+
+	@Override
+	public SPacketUpdateTileEntity getUpdatePacket() {
+		NBTTagCompound nbt = new NBTTagCompound();
+		write(nbt);
+		return new SPacketUpdateTileEntity(pos, -1, nbt);
+	}
+
+	@Override
+	public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
+		read(pkt.getNbtCompound());
 	}
 
 	@Override
