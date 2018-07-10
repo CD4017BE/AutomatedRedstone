@@ -24,9 +24,9 @@ public class BasicRSPipe extends RedstonePipe implements IInteractiveTile {
 	@Override
 	protected void combineInputs() {
 		int value = 0;
-		for (int s : inputs)
-			if (s > value) value = s;
+		for (int s : inputs) value += s;
 		if (value > 255) value = 255;
+		else if (value < 0) value = 0;
 		if (value != comp.inputState) {
 			comp.inputState = value;
 			comp.network.markStateDirty();

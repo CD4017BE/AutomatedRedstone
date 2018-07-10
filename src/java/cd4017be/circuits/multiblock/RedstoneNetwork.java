@@ -81,10 +81,13 @@ public class RedstoneNetwork extends SharedNetwork<RedstoneNode, RedstoneNetwork
 	@Override
 	protected void updatePhysics() {
 		if (updateState) { 
-			int newState = 0, s;
+			int newState = 0;
 			for (RedstoneNode c : inputs)
 				if (c.digital) newState |= c.inputState;
-				else if ((s = c.inputState) > newState) newState = s;
+				else if ((newState += c.inputState) >= 255) {
+					newState = 255;
+					break;
+				}
 			if (newState != outputState) {
 				outputState = newState;
 				for (RedstoneNode c : outputs) c.onStateChange();
