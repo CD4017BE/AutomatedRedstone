@@ -1,5 +1,10 @@
 #Minecraft run directories
-/run/
+run/*
+#but exclude circuit schematics directory
+!run/client/
+run/client/*
+!run/client/circuitSchematics/
+
 #Build directories
 /build
 /bin
