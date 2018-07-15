@@ -8,6 +8,7 @@ This directory contains some example schematics for various useful circuits. The
 To get ingame access to these schematics, just download the files, put them into your circuitSchematics folder and follow the above steps (no game restart required).
 
 ###List of circuits:
+- `SimpleClock`: Has a single output that emits a square wave signal that switches between ON and OFF every cycle.
 
 ###Test Circuits
 It is highly recommended that you try to build these circuits your self as kind of puzzle exercise before just using the provided solutions.
