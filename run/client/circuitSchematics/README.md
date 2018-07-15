@@ -10,6 +10,7 @@ To get ingame access to these schematics, just download the files, put them into
 ###List of circuits:
 - `SimpleClock`: Has a single output that emits a square wave signal that switches between ON and OFF every cycle.
 - `RS_Latch`: Has two inputs and one output that turns ON when receiving an ON signal on the one input and turns OFF(0) when receiving an ON signal on the other input. While no input is ON the output state remains constant. When both inputs are ON at the same time the output may be either On or OFF depending on implementation.
+- `3tDelayline`: Has one input and one output that always emits the value the input received 3 cycles ago. (easily expendable to any N-cycle delay line)
 
 ###Test Circuits
 It is highly recommended that you try to build these circuits your self as kind of puzzle exercise before just using the provided solutions.
