@@ -337,7 +337,8 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 
 	@Override
 	public void onPacketFromClient(PacketBuffer data, EntityPlayer sender) throws IOException {
-		if (data.readByte() == 0) {
+		byte cmd = data.readByte();
+		if (cmd == 0) { //switch gui
 			for (EnumFacing side : EnumFacing.HORIZONTALS) {
 				TileEntity te = Utils.neighborTile(this, side);
 				if (te instanceof CircuitDesigner) {
@@ -352,6 +353,9 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 					return;
 				}
 			}
+		} else if (cmd == 1 && sender.isCreative() && N[8] == 0) { //quick cheat assembled circuit
+			if (inventory.items[1].isEmpty()) inventory.items[1] = new ItemStack(Objects.circuit, 1, 2);
+			for (int i = 0; i < 4; i++) N[i + 4] = N[i];
 		}
 	}
 

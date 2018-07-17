@@ -129,6 +129,7 @@ gui.cd4017be.assembler.cmp1=§6Speicher Platine§fn für Modulkapazität.
 gui.cd4017be.assembler.cmp2=§6Logik Prozessor§fen für logische Operationen.
 gui.cd4017be.assembler.cmp3=§6Arithmetik Prozessor§fen für nummerische Operationen.
 gui.cd4017be.assembler.swap=Zum Schaltkreisplaner wechseln\n(falls einer in der Nähe)
+gui.cd4017be.assembler.cheat=Fertige Schaltung ercheaten\n(nur im Kreativmodus möglich)
 gui.cd4017be.assembler.info=Schaltungen erstellen\nMaterial wiederverwertung
 gui.cd4017be.assembler.info0=§7Zunächst muss der im §6Schaltkreisplaner§7 beschriebene §6Schaltplan§7 im mittleren Slot plaziert werden.\n§7Danach muss ein §6Schaltgehäuse§7 in den oberen rechten Slot gelegt und über die 4 Slots links alle benötigten Bauteile zugeführt werden.\n§7Wenn alle Fortschrittsbalken gefüllt sind, kann die fertige Schaltung aus dem unteren rechten Slot entnommen werden.
 gui.cd4017be.assembler.info1=§7Bereits zusammen gesetzte Schaltungen können wiederverwertet werden. In dem Fall werden entsprechend nur die noch fehlenden Bauteile benötigt und alle überschüssigen Bauteile erhält man zurück.
