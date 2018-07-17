@@ -13,6 +13,7 @@ To get ingame access to these schematics, just download the files, put them into
 - `3tDelayline`: Has one input and one output that always emits the value the input received 3 cycles ago. (easily expendable to any N-cycle delay line)
 - `R-EdgeDetector`: Emits a one cycle long ON pulse though its output on every rising edge of the input signal (transition from OFF to ON), otherwise the output is OFF. (A falling edge detector would be very similar)
 - `PulseCounter`: Emits a one cycle long ON pulse though its output after every 5-th rising edge in its input signal, otherwise the output is OFF. (counts incoming pulses and resets at 5)
+- `MemoryCell`: Has a (8-bit numeric) state input and a control input. When control input is ON, the output changes to the value of the state input otherwise it stays the same (ignoring the state input).
 
 ###Test Circuits
 It is highly recommended that you try to build these circuits your self as kind of puzzle exercise before just using the provided solutions.
