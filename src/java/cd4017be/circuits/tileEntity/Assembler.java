@@ -6,6 +6,8 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.logging.log4j.Level;
 
@@ -44,6 +46,8 @@ import cd4017be.lib.util.Utils;
  */
 public class Assembler extends BaseTileEntity implements ITickable, IGuiData, ISlotClickHandler, ClientPacketReceiver, ITilePlaceHarvest {
 
+	public static final Pattern HEX_NUMBER = Pattern.compile("0?[xX]([0-9a-fA-F]{1,8})");
+	public static final Pattern BIN_NUMBER = Pattern.compile("0?[bB]([01]{1,8})");
 	public static final String[] tagNames = {"IO", "Cap", "Gate", "Calc"};
 	public static final ItemStack[] materials = new ItemStack[4];
 	/**0-3:needed 4-7: provided 8:errCode{-1:clear 0:successful 1:outOfBounds 2:tooManyConstants 3:tooManyIO 4:dataSyntaxErr} */
@@ -141,7 +145,7 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 				if (mt == ModuleType.CST) {
 					byte[] str = new byte[data.get()];
 					data.get(str);
-					int c = Integer.parseInt(new String(str));
+					int c = parseNum(new String(str));
 					nCst += sz;
 					while(sz > 0) {
 						defined |= 1L << p++;
@@ -222,6 +226,15 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 		nbt.setTag("io", list);
 		nbt.setString("name", name);
 		nbt.setLong("used", defined);
+	}
+
+	private static int parseNum(String s) {
+		Matcher m = HEX_NUMBER.matcher(s);
+		if (m.matches()) return Integer.parseInt(m.group(1), 16);
+		m = BIN_NUMBER.matcher(s);
+		if (m.matches()) return Integer.parseInt(m.group(1), 2);
+		if (s.charAt(0) == '+') return Integer.parseUnsignedInt(s);
+		return Integer.parseInt(s);
 	}
 
 	public static boolean extraByte(byte val, byte ct) {

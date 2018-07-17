@@ -10,7 +10,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-
+import java.util.regex.Matcher;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.GL11;
 
@@ -33,6 +33,7 @@ import cd4017be.lib.util.TooltipUtil;
 import cd4017be.lib.Gui.AdvancedGui;
 import cd4017be.lib.Gui.TileContainer;
 import static cd4017be.circuits.tileEntity.CircuitDesigner.ModuleType.*;
+import static cd4017be.circuits.tileEntity.Assembler.*;
 
 public class GuiCircuitDesigner extends AdvancedGui {
 
@@ -187,7 +188,14 @@ public class GuiCircuitDesigner extends AdvancedGui {
 			m.label = (String)obj;
 			if (m.type == CST) try {
 				int s = 32 - m.size * 8;
-				m.label = Integer.toString((Integer.parseInt(m.label) << s) >> s);
+				Matcher mt;
+				if ((mt = HEX_NUMBER.matcher(m.label)).matches()) //hexadecimal notation
+					m.label = "x" + Integer.toHexString(Integer.parseInt(mt.group(1), 16) << s >>> s).toUpperCase();
+				else if ((mt = BIN_NUMBER.matcher(m.label)).matches()) //binary notation
+					m.label = "b" + mt.group(1);
+				else if (m.label.charAt(0) == '+') //unsigned decimal
+					m.label = "+" + Integer.toString(Integer.parseInt(m.label) << s >>> s);
+				else m.label = Integer.toString(Integer.parseInt(m.label) << s >> s);
 			} catch(NumberFormatException e) {m.label = "0";}
 			tile.modified++;
 			break;
@@ -268,7 +276,7 @@ public class GuiCircuitDesigner extends AdvancedGui {
 			x *= scale; y *= scale;
 		}
 		for (char c : cs) {
-			drawTexturedModalRect(x, y, c == '-' ? 40 : 4 * (c - '0'), 250, 4, 6);
+			drawTexturedModalRect(x, y, c << 2 & 0xfc, 244 + (c >> 6) * 6, 4, 6);
 			x += 4;
 		}
 		if (cs.length > w) GlStateManager.popMatrix();
