@@ -2,10 +2,12 @@ package cd4017be.circuits.tileEntity;
 
 import java.io.IOException;
 
+import cd4017be.api.circuits.IDirectionalRedstone;
 import cd4017be.api.computers.ComputerAPI;
 import cd4017be.lib.BlockGuiHandler.ClientPacketReceiver;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
+import cd4017be.lib.util.Utils;
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
@@ -19,6 +21,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.ITickable;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fml.common.Optional.*;
 
 /**
@@ -35,31 +38,37 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 	public int internal;
 
 	@Override
-	protected void updateInput() {
-		int newIn = internal;
-		for (EnumFacing s : EnumFacing.values()) {
-			int i = s.ordinal(), k = shifts[i + 18];
-			if (k > 0)
-				newIn |= (world.getRedstonePower(pos.offset(s), s) & 0xffffffff >>> (32 - k)) << shifts[i + 12];
-		}
-		if (newIn != comp.inputState) {
-			comp.inputState = newIn;
+	protected void combineInputs() {
+		int value = internal;
+		for (int i = 0, k; i < 6; i++)
+			if ((k = shifts[i + 18]) > 0)
+				value |= (inputs[i] & 0xffffffff >>> (32 - k)) << shifts[i + 12];
+		if (value != comp.inputState) {
+			comp.inputState = value;
 			comp.network.markStateDirty();
 			markDirty();
 		}
 	}
 
 	@Override
-	protected void checkCons() {
-		short pre = comp.rsIO;
-		super.checkCons();
-		pre ^= comp.rsIO;
-		if (pre != 0) {
-			for (int i = 0; i < 12 ; i++)
-				if ((pre >> i & 1) != 0) {
-					int j = i / 2 - (i & 1) * 12 + 18;
-					if (shifts[j] <= 0) shifts[j] = (byte)(32 - shifts[j - 6]);
+	protected void checkCon(EnumFacing side) {
+		int i = side.ordinal();
+		if (comp.canConnect((byte)i) && (comp.rsIO >> (i << 1) & 3) == 0) {
+			ICapabilityProvider te = Utils.neighborTile(this, side);
+			byte d;
+			if (te instanceof IDirectionalRedstone && (d = ((IDirectionalRedstone)te).getRSDirection(side.getOpposite())) != 0) {
+				short io = (short)(comp.rsIO | ((d & 1) << 1 | (d & 2) >> 1) << (side.ordinal() * 2));
+				comp.network.setIO(comp, io);
+				this.markUpdate();
+				
+				if (d == 1 || d == 3) {
+					if (shifts[i + 6] <= 0) shifts[i + 6] = (byte)(32 - shifts[i]);
+					if (comp.network.outputState != 0)
+						world.neighborChanged(pos.offset(side), blockType, pos);
 				}
+				if ((d == 2 || d == 3) && shifts[i + 18] <= 0)
+					shifts[i + 18] = (byte)(32 - shifts[i + 12]);
+			}
 		}
 	}
 
@@ -120,10 +129,10 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 				}
 			}
 			if (cmd < 12) comp.onStateChange();
-			else updateInput();
+			else combineInputs();
 		} else {
 			internal = 0;
-			updateInput();
+			combineInputs();
 		}
 		markDirty();
 	}
@@ -192,7 +201,7 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 	@Callback
 	public Object[] write(Context context, Arguments args) throws Exception {
 		internal = args.checkInteger(0);
-		updateInput();
+		combineInputs();
 		return null;
 	}
 
@@ -201,7 +210,7 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 		int mask = 0xffffffff >>> (32 - shifts[i + 6]) << o;
 		internal &= ~mask;
 		internal |= v << o & mask;
-		updateInput();
+		combineInputs();
 	}
 
 }
