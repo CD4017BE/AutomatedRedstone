@@ -23,11 +23,24 @@ import cd4017be.lib.block.AdvancedBlock.IRedstoneTile;
 import cd4017be.lib.tileentity.BaseTileEntity;
 import cd4017be.lib.util.Utils;
 
+/**
+ * 
+ * @author cd4017be
+ */
 public class EnergyValve extends BaseTileEntity implements INeighborAwareTile, IRedstoneTile, ITickable, IDirectionalRedstone, IGuiData, ClientPacketReceiver, IEnergyStorage {
 
-	private TileEntity out;
+	public static final IEnergyStorage NULL_RECEIVE = new IEnergyStorage() {
+		@Override public int receiveEnergy(int maxReceive, boolean simulate) { return 0; }
+		@Override public int getMaxEnergyStored() { return 0; }
+		@Override public int getEnergyStored() { return 0; }
+		@Override public int extractEnergy(int maxExtract, boolean simulate) { return 0; }
+		@Override public boolean canReceive() { return false; }
+		@Override public boolean canExtract() { return true; }
+	};
+
+	private IEnergyStorage out;
 	public int tickInt = 1;
-	public boolean measure, update;
+	public boolean measure;
 	public int flow, state;
 
 	@Override
@@ -48,9 +61,7 @@ public class EnergyValve extends BaseTileEntity implements INeighborAwareTile, I
 
 	@Override
 	public void neighborBlockChange(Block b, BlockPos src) {
-		if (world.isRemote) return;
-		update |= pos.offset(getOrientation().front).equals(src);
-		if (measure) return;
+		if (measure || world.isRemote) return;
 		int ls = state;
 		state = 0;
 		for (EnumFacing s : EnumFacing.VALUES)
@@ -60,10 +71,6 @@ public class EnergyValve extends BaseTileEntity implements INeighborAwareTile, I
 
 	@Override
 	public void neighborTileChange(TileEntity te, EnumFacing side) {
-		if (side == getOrientation().front) {
-			out = te;
-			update = false;
-		}
 	}
 
 	@Override
@@ -83,7 +90,6 @@ public class EnergyValve extends BaseTileEntity implements INeighborAwareTile, I
 		state = nbt.getInteger("state");
 		tickInt = nbt.getInteger("tickInt");
 		measure = nbt.getBoolean("measure");
-		update = true;
 	}
 
 	@Override
@@ -132,30 +138,28 @@ public class EnergyValve extends BaseTileEntity implements INeighborAwareTile, I
 
 	@Override
 	public boolean hasCapability(Capability<?> cap, EnumFacing facing) {
-		return (cap == CapabilityEnergy.ENERGY) && facing != null && facing == getOrientation().front;
+		EnumFacing front = getOrientation().front;
+		return cap == CapabilityEnergy.ENERGY && (facing == front || facing == front.getOpposite());
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getCapability(Capability<T> cap, EnumFacing facing) {
-		if (facing != null && facing == getOrientation().front && cap == CapabilityEnergy.ENERGY) return (T) this;
-		return null;
-	}
-
-	private IEnergyStorage getOutput() {
-		if (update || out != null && out.isInvalid()) {
-			out = Utils.neighborTile(this, getOrientation().front.getOpposite());
-			update = false;
+		if (cap == CapabilityEnergy.ENERGY) {
+			EnumFacing front = getOrientation().front;
+			if (facing == front) {
+				out = Utils.neighborCapability(this, front.getOpposite(), CapabilityEnergy.ENERGY);
+				return (T) this;
+			} else if (facing == front.getOpposite()) return (T) NULL_RECEIVE;
 		}
-		return out != null ? out.getCapability(CapabilityEnergy.ENERGY, getOrientation().front) : null;
+		return null;
 	}
 
 	@Override
 	public int receiveEnergy(int am, boolean sim) {
 		if (am > flow) am = flow;
-		IEnergyStorage stor;
-		if (am > 0 && (stor = getOutput()) != null) {
-			am = stor.receiveEnergy(am, sim);
+		if (am > 0 && out != null) {
+			am = out.receiveEnergy(am, sim);
 			if (!sim) {
 				flow -= am;
 				markDirty();
@@ -172,12 +176,12 @@ public class EnergyValve extends BaseTileEntity implements INeighborAwareTile, I
 
 	@Override
 	public int getEnergyStored() {
-		return 0;
+		return measure ? Integer.MAX_VALUE - flow : state - flow;
 	}
 
 	@Override
 	public int getMaxEnergyStored() {
-		return 0;
+		return measure ? Integer.MAX_VALUE : state;
 	}
 
 	@Override

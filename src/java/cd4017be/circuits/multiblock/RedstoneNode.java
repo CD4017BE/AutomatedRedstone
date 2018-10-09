@@ -1,24 +1,25 @@
-package multiblock;
+package cd4017be.circuits.multiblock;
 
-import cd4017be.api.IAbstractTile;
 import cd4017be.circuits.Objects;
+import cd4017be.circuits.tileEntity.RedstonePipe;
 import cd4017be.lib.TickRegistry;
-import cd4017be.lib.TickRegistry.IUpdatable;
-import cd4017be.lib.block.AdvancedBlock.IRedstoneTile;
-import cd4017be.lib.templates.MultiblockComp;
+import cd4017be.lib.templates.NetworkNode;
 import cd4017be.lib.util.Utils;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.common.capabilities.Capability;
 
-public class IntegerComp extends MultiblockComp<IntegerComp, SharedInteger> {
+/**
+ * 
+ * @author CD4017BE
+ */
+public class RedstoneNode extends NetworkNode<RedstoneNode, RedstoneNetwork, RedstonePipe> {
 
-	public final int mask;
+	public final boolean digital;
 
-	public IntegerComp(IAbstractTile tile, int bitSize) {
+	public RedstoneNode(RedstonePipe tile, boolean digital) {
 		super(tile);
-		this.mask = 0xffffffff >>> (32 - bitSize);
+		this.digital = digital;
 	}
 
 	public int inputState;
@@ -27,14 +28,14 @@ public class IntegerComp extends MultiblockComp<IntegerComp, SharedInteger> {
 
 	public void setUID(long uid) {
 		super.setUID(uid);
-		if (network == null) new SharedInteger(this);
+		if (network == null) new RedstoneNetwork(this);
 		network.setIO(this, rsIO);
 	}
 
 	public void onStateChange() {
 		for (int i = 0; i < 6; i++)
 			if ((rsIO >> (i * 2) & 2) != 0)
-				Utils.updateRedstoneOnSide((TileEntity & IRedstoneTile) tile, EnumFacing.VALUES[i]);
+				Utils.updateRedstoneOnSide(tile, EnumFacing.VALUES[i]);
 	}
 
 	@Override
@@ -47,15 +48,15 @@ public class IntegerComp extends MultiblockComp<IntegerComp, SharedInteger> {
 			con |= 1 << side;
 			if (!updateCon) {
 				updateCon = true;
-				TickRegistry.instance.updates.add((IUpdatable)tile);
+				TickRegistry.instance.updates.add(tile);
 			}
 		}
 	}
 
 	@Override
-	public IntegerComp getNeighbor(byte side) {
-		IntegerComp c = super.getNeighbor(side);
-		return c == null || c.mask != mask ? null : c;
+	public RedstoneNode getNeighbor(byte side) {
+		RedstoneNode c = super.getNeighbor(side);
+		return c == null || (c.digital ^ digital) ? null : c;
 	}
 
 	public void readFromNBT(NBTTagCompound nbt) {
@@ -72,7 +73,7 @@ public class IntegerComp extends MultiblockComp<IntegerComp, SharedInteger> {
 	}
 
 	@Override
-	public Capability<IntegerComp> getCap() {
+	public Capability<RedstoneNode> getCap() {
 		return Objects.RS_INTEGER_CAPABILITY;
 	}
 

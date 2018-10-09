@@ -1,17 +1,22 @@
 package cd4017be.circuits.tileEntity;
 
 import java.io.IOException;
+import java.util.List;
 
 import cd4017be.api.circuits.IDirectionalRedstone;
 import cd4017be.lib.BlockGuiHandler.ClientPacketReceiver;
 import cd4017be.lib.Gui.DataContainer;
 import cd4017be.lib.Gui.DataContainer.IGuiData;
 import cd4017be.lib.block.AdvancedBlock.INeighborAwareTile;
+import cd4017be.lib.block.AdvancedBlock.ITilePlaceHarvest;
 import cd4017be.lib.tileentity.BaseTileEntity;
 import cd4017be.lib.util.Orientation;
 import cd4017be.lib.util.Utils;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.PacketBuffer;
@@ -25,7 +30,7 @@ import net.minecraft.world.World;
  *
  * @author CD4017BE
  */
-public class Display8bit extends BaseTileEntity implements INeighborAwareTile, IDirectionalRedstone, IGuiData, ClientPacketReceiver {
+public class Display8bit extends BaseTileEntity implements INeighborAwareTile, IDirectionalRedstone, IGuiData, ClientPacketReceiver, ITilePlaceHarvest {
 
 	private static final int OVERLOAD = 0x27_28_2b;
 
@@ -329,6 +334,16 @@ public class Display8bit extends BaseTileEntity implements INeighborAwareTile, I
 
 	@Override
 	public void updateClientChanges(DataContainer container, PacketBuffer dis) {
+	}
+
+	@Override
+	public void onPlaced(EntityLivingBase entity, ItemStack item) {
+		neighborBlockChange(null, pos);
+	}
+
+	@Override
+	public List<ItemStack> dropItem(IBlockState state, int fortune) {
+		return makeDefaultDrops(null);
 	}
 
 }

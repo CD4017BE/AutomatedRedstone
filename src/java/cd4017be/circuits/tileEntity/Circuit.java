@@ -24,7 +24,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.network.NetworkManager;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
@@ -317,11 +319,10 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 				for (IOcfg c : iocfg)
 					if (c.side == prev)
 						dir |= c.dir ? 2 : 1;
-				if (dir == 0) ioacc[prev] = null;
-				else ioacc[prev].dir &= dir | 4;
+				ioacc[prev].setDir(dir);
 				IOacc acc = ioacc[side];
 				if (acc == null) ioacc[side] = acc = new IOacc(side);
-				acc.dir |= cfg.dir ? 2 : 1;
+				acc.setDir(cfg.dir ? 2 : 1);
 				neighborBlockChange(blockType, pos);
 			}
 			byte ofs = data.readByte();
@@ -364,6 +365,8 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 					while (j <= k) ram[j++] = 0;
 				}
 			}
+			for (IOacc acc : ioacc)
+				if (acc != null) acc.update(0);
 		} else if (cmd == 4) {
 			int i = data.readByte() & 0x3f;
 			if (i < startIdx) {
@@ -463,7 +466,22 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 
 	@Override
 	public void onPlaced(EntityLivingBase entity, ItemStack item) {
-		if (item.hasTagCompound()) read(item.getTagCompound());
+		if (!world.isRemote && item.hasTagCompound()) {
+			read(item.getTagCompound());
+			markUpdate();
+		}
+	}
+
+	@Override
+	public SPacketUpdateTileEntity getUpdatePacket() {
+		NBTTagCompound nbt = new NBTTagCompound();
+		write(nbt);
+		return new SPacketUpdateTileEntity(pos, -1, nbt);
+	}
+
+	@Override
+	public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
+		read(pkt.getNbtCompound());
 	}
 
 	@Override
@@ -643,6 +661,13 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 				}
 			} else dir |= 4;
 			markDirty();
+		}
+		void setDir(int ndir) {
+			ndir ^= dir & 3;
+			if (ndir == 0) return;
+			dir ^= ndir;
+			if ((dir & 3) == 0) ioacc[side.ordinal()] = null;
+			world.neighborChanged(pos.offset(side), blockType, pos);
 		}
 	}
 
