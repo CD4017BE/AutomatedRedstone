@@ -168,7 +168,7 @@ public class GuiCircuit extends AdvancedGui {
 				else if (b == 1) val = 0;
 				else return false;
 			} else if (d == 3) {
-				val = (byte)(tile.ram[j] + b * (isShiftKeyDown() ? 16 : 1));
+				val = (byte)(tile.ram[j] - b * (isShiftKeyDown() ? 16 : 1));
 			} else return false;
 			PacketBuffer data = BlockGuiHandler.getPacketTargetData(tile.pos());
 			data.writeByte(4).writeByte(j).writeByte(val);
