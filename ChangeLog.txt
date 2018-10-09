@@ -1,3 +1,22 @@
+v6.1.4
+Changes:
+- fixed Cables sometimes not showing connection to Wireless Connectors
+- fixed #24 by giving Energy Valve an aditional fake RF buffer on output side
+- fixed display showing 0 after placement, even when receiving a signal
+- fixed other just placed blocks not receiving signals due missing block updates
+- fixed clients missing data for circuits that someone else placed
+- editing side config of circuits now causes block updates and RESET also clears output
+- changed basic cable behavior to add input signals together
+- added convenient Circuit quick cheat button in Assembler
+- added support for hex and binary notation in constant modules
+- the virtual energy buffer of Energy Valves now gives more reasonable storage and capacity values
+- fixed basic RS cables not updating when breaking redstone suppling block
+- fixed scroll input being backwards in circuit memory cell edit
+Dependencies:
+- for MC-1.12.2
+- forge-14.23.0.2512 (or newer)
+- CD4017BE_lib-6.2.6
+
 v6.1.3
 Changes:
 - fixed bit shift instructions to now use unsigned inputs
