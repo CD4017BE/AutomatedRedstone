@@ -34,8 +34,8 @@ public class EnergyValve extends BaseTileEntity implements INeighborAwareTile, I
 		@Override public int getMaxEnergyStored() { return 0; }
 		@Override public int getEnergyStored() { return 0; }
 		@Override public int extractEnergy(int maxExtract, boolean simulate) { return 0; }
-		@Override public boolean canReceive() { return true; }
-		@Override public boolean canExtract() { return false; }
+		@Override public boolean canReceive() { return false; }
+		@Override public boolean canExtract() { return true; }
 	};
 
 	private IEnergyStorage out;
@@ -176,12 +176,12 @@ public class EnergyValve extends BaseTileEntity implements INeighborAwareTile, I
 
 	@Override
 	public int getEnergyStored() {
-		return 0;
+		return measure ? Integer.MAX_VALUE - flow : state - flow;
 	}
 
 	@Override
 	public int getMaxEnergyStored() {
-		return 0;
+		return measure ? Integer.MAX_VALUE : state;
 	}
 
 	@Override
