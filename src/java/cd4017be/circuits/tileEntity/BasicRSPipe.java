@@ -51,7 +51,10 @@ public class BasicRSPipe extends RedstonePipe implements IInteractiveTile {
 			if (nio != io) {
 				comp.network.setIO(comp, (short)(comp.rsIO ^ (nio ^ io) << i));
 				markUpdate();
-				if (inputs != null && nio != 1) inputs[i >> 1] = 0;
+				if (inputs != null && nio != 1 && inputs[i >> 1] != 0) {
+					inputs[i >> 1] = 0;
+					combineInputs();
+				}
 				if (nio == 2 && comp.network.outputState != 0) world.neighborChanged(pos.offset(side), blockType, pos);
 			}
 		}
