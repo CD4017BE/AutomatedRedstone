@@ -129,10 +129,12 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 				}
 			}
 			if (cmd < 12) comp.onStateChange();
+			else if (inputs == null) initInputCache();
 			else combineInputs();
 		} else {
 			internal = 0;
-			combineInputs();
+			if (inputs == null) initInputCache();
+			else combineInputs();
 		}
 		markDirty();
 	}
@@ -200,17 +202,23 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 	@Method(modid = "opencomputers")
 	@Callback
 	public Object[] write(Context context, Arguments args) throws Exception {
-		internal = args.checkInteger(0);
-		combineInputs();
+		int i = args.checkInteger(0);
+		if (i == internal) return null;
+		internal = i;
+		if (inputs == null) initInputCache();
+		else combineInputs();
 		return null;
 	}
 
 	public void setInput(int v, EnumFacing side) {
-		int i = side.ordinal() + 12, o = shifts[i];
-		int mask = 0xffffffff >>> (32 - shifts[i + 6]) << o;
-		internal &= ~mask;
-		internal |= v << o & mask;
-		combineInputs();
+		int i = side.ordinal() + 12, o = shifts[i], l = shifts[i + 6];
+		if (l <= 0) return;
+		int mask = 0xffffffff >>> (32 - l) << o;
+		v = (internal ^ v << o) & mask;
+		if (v == 0) return;
+		internal ^= v;
+		if (inputs == null) initInputCache();
+		else combineInputs();
 	}
 
 }
