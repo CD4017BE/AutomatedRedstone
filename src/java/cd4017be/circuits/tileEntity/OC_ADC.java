@@ -9,12 +9,13 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import cd4017be.api.circuits.IDirectionalRedstone;
 import cd4017be.api.computers.ComputerAPI;
+import cd4017be.circuits.Objects;
 import cd4017be.lib.block.AdvancedBlock.IRedstoneTile;
 import cd4017be.lib.util.Utils;
+import li.cil.oc.api.Driver;
 import li.cil.oc.api.machine.Arguments;
 import li.cil.oc.api.machine.Callback;
 import li.cil.oc.api.machine.Context;
-import li.cil.oc.api.machine.Value;
 import li.cil.oc.api.network.ComponentConnector;
 import li.cil.oc.api.network.Environment;
 import li.cil.oc.api.network.Message;
@@ -98,11 +99,14 @@ public class OC_ADC extends SyncronousRedstoneIO implements IRedstoneTile, IDire
 						signal(node, target);
 				}
 			}
-		else for (int i = 6; i < 12; i++) {
-			int[] buff = active_buffer[i];
-			int v;
-			if (buff != null && buff[s] != (v = buff[s1]))
-				Utils.updateRedstoneOnSide(this, v, EnumFacing.VALUES[i - 6]);
+		else {
+			for (int i = 6; i < 12; i++) {
+				int[] buff = active_buffer[i];
+				int v;
+				if (buff != null && buff[s] != (v = buff[s1]))
+					Utils.updateRedstoneOnSide(this, v, EnumFacing.VALUES[i - 6]);
+			}
+			step = s1;
 		}
 	}
 
@@ -117,11 +121,11 @@ public class OC_ADC extends SyncronousRedstoneIO implements IRedstoneTile, IDire
 	private void startCycle() {
 		step = 0;
 		int s = samples;
-		for (int i = 6, m = modified; i < 12; i++, m >>>= 1) {
+		for (int i = 6, m = modified; i < 12; i++) {
 			int[] buff0 = active_buffer[i];
 			if (buff0 == null) continue;
 			int oldv = buff0[s-1];
-			if ((m & 1) != 0)
+			if ((m >> i & 1) != 0)
 				System.arraycopy(back_buffer[i], 0, buff0, 0, s);
 			int newv = buff0[0];
 			if (newv != oldv)
@@ -150,7 +154,7 @@ public class OC_ADC extends SyncronousRedstoneIO implements IRedstoneTile, IDire
 		this.status = nbt.getByte("status");
 		int usedIO = 0;
 		for (int i : inputCfg) usedIO |= 1 << i;
-		for (int i : outputCfg) usedIO |= 0x40 << i;
+		for (int i : outputCfg) usedIO |= 1 << i;
 		NBTTagList list = nbt.getTagList("buffers", NBT.TAG_COMPOUND);
 		for (int i = 0, j = 0; i < 12; i++)
 			if ((usedIO >> i & 1) != 0) {
@@ -183,6 +187,7 @@ public class OC_ADC extends SyncronousRedstoneIO implements IRedstoneTile, IDire
 				NBTTagCompound tag = new NBTTagCompound();
 				tag.setIntArray("a", buff);
 				tag.setIntArray("b", back_buffer[i]);
+				list.appendTag(tag);
 			}
 		}
 		nbt.setTag("buffers", list);
@@ -207,7 +212,7 @@ public class OC_ADC extends SyncronousRedstoneIO implements IRedstoneTile, IDire
 	}
 
 	@Method(modid = "opencomputers")
-	@Callback(direct = false, doc = "")
+	@Callback(direct = false, doc = "function(inputs:table, outputs:table, samples:number, interval:number[, phase:number]) -- Configure the device to assign channels to the given lists of input and output sides with the given sample buffer size and synchronize timing based on the given interval and phase-offset in seconds.")
 	public Object[] configure(Context context, Arguments args) throws Exception {
 		int[] inCfg = parse(args.checkTable(0));
 		int[] outCfg = parse(args.checkTable(1));
@@ -218,7 +223,11 @@ public class OC_ADC extends SyncronousRedstoneIO implements IRedstoneTile, IDire
 		if (interv < 1) interv = 1;
 		int usedIO = 0;
 		for (int i : inCfg) usedIO |= 1 << i;
-		for (int i : outCfg) usedIO |= 0x40 << i;
+		for (int i = 0; i < outCfg.length; i++) {
+			int j = outCfg[i] + 6;
+			outCfg[i] = j;
+			usedIO |= 1 << j;
+		}
 		synchronized (back_buffer) {
 			ComponentConnector node = (ComponentConnector)this.node;
 			if (!node.tryChangeBuffer(-INIT_COST))
@@ -240,6 +249,7 @@ public class OC_ADC extends SyncronousRedstoneIO implements IRedstoneTile, IDire
 			this.setupData();
 			this.powerUsage = RUN_COST * (double)(inputCfg.length + outputCfg.length);
 		}
+		this.world.notifyNeighborsOfStateChange(pos, blockType, false);
 		return null;
 	}
 
@@ -266,7 +276,7 @@ public class OC_ADC extends SyncronousRedstoneIO implements IRedstoneTile, IDire
 	}
 
 	@Method(modid = "opencomputers")
-	@Callback(direct = true, doc = "")
+	@Callback(direct = true, doc = "function():table -- Get the current configuration of the device.")
 	public Object[] getConfig(Context context, Arguments args) throws Exception {
 		HashMap<String, Object> map = new HashMap<>();
 		map.put("samples", Double.valueOf(samples));
@@ -278,7 +288,7 @@ public class OC_ADC extends SyncronousRedstoneIO implements IRedstoneTile, IDire
 	}
 
 	@Method(modid = "opencomputers")
-	@Callback(direct = false, doc = "")
+	@Callback(direct = false, doc = "function([singleRun:bool]):bool -- Start recording and playback of Redstone signals and if singleRun is given True automatically stop after one processing cycle has been completed. Returns whether it was already running. Also registeres the caller to receive \"buffer_swap\" signals.")
 	public Object[] start(Context context, Arguments args) throws Exception {
 		boolean single = args.optBoolean(0, false);
 		boolean running = true;
@@ -299,7 +309,7 @@ public class OC_ADC extends SyncronousRedstoneIO implements IRedstoneTile, IDire
 	}
 
 	@Method(modid = "opencomputers")
-	@Callback(direct = false, doc = "")
+	@Callback(direct = false, doc = "function([force:bool]):bool -- Stop recording and playback of Redstone signals but letting the current processing cycle complete unless force is given True. Returns whether it was running.")
 	public Object[] stop(Context context, Arguments args) throws Exception {
 		boolean force = args.optBoolean(0, false);
 		boolean running = status != 2;
@@ -316,107 +326,55 @@ public class OC_ADC extends SyncronousRedstoneIO implements IRedstoneTile, IDire
 	}
 
 	@Method(modid = "opencomputers")
-	@Callback(direct = true, limit = 6, doc = "")
+	@Callback(direct = true, limit = 6, doc = "function():number -- Get the currently processed index in the active buffers or 0 if no signal recording/playback in progress.")
 	public Object[] running(Context context, Arguments args) throws Exception {
 		return new Object[] {Double.valueOf(interval > 0 ? step + 1 : 0)};
 	}
 
 	@Method(modid = "opencomputers")
-	@Callback(direct = true, limit = 6, doc = "")
+	@Callback(direct = true, limit = 6, doc = "function(channel:number, sampleData:table) -- Assign the given sample data to the secondary buffer of the specified output channel. It's swapped over into the active buffer when a new processing cycle starts (which triggers a \"buffer_swap\" signal).")
 	public Object[] setOutput(Context context, Arguments args) throws Exception {
-		int i = outputCfg[args.checkInteger(0) - 1], n = samples;
-		Object data = args.checkAny(1);
-		ComponentConnector node = (ComponentConnector)this.node;
+		int i = outputCfg[args.checkInteger(0) - 1];
+		Map<?,?> data = args.checkTable(1);
 		synchronized (back_buffer) {
-			int[] buff = back_buffer[i];
-			if (data instanceof SampleData) {
-				SampleData sd = (SampleData)data;
-				int l = Math.min(sd.data.length, n);
-				if (!node.tryChangeBuffer(-WRITE_COST * (double)l)) throw new IllegalStateException("Out of Power!");
-				System.arraycopy(sd.data, 0, buff, 0, l);
-			} else if (data instanceof Map) {
-				Map<?,?> map = (Map<?,?>)data;
-				if (!node.tryChangeBuffer(-WRITE_COST * (double)map.size())) throw new IllegalStateException("Out of Power!");
-				for (Entry<?,?> e : map.entrySet()) {
-					int j = ((Number)e.getKey()).intValue() - 1;
-					if (j >= 0 && j < n)
-						buff[j] = ((Number)e.getValue()).intValue();
-				}
-			} else throw new IllegalArgumentException("table or sample data expected in arg 1");
+			ComponentConnector node = (ComponentConnector)this.node;
+			if (!node.tryChangeBuffer(-WRITE_COST * (double)data.size())) throw new IllegalStateException("Out of Power!");
+			setStates(back_buffer[i], data);
 			modified |= 1 << i;
 		}
 		return null;
 	}
 
 	@Method(modid = "opencomputers")
-	@Callback(direct = true, limit = 6, doc = "")
+	@Callback(direct = true, limit = 6, doc = "function(channel:number):table -- Get the sample data currently stored in the secondary buffer of the specified output channel.")
 	public Object[] getOutput(Context context, Arguments args) throws Exception {
 		int i = outputCfg[args.checkInteger(0) - 1];
-		SampleData data = new SampleData();
 		synchronized (back_buffer) {
-			data.data = back_buffer[i].clone();
+			return new Object[] {back_buffer[i]};
 		}
-		return new Object[] {data};
 	}
 
 	@Method(modid = "opencomputers")
-	@Callback(direct = true, limit = 6, doc = "")
+	@Callback(direct = true, limit = 6, doc = "function(channel:number):table -- Get the sample data in the secondary buffer of the specified input channel that was fetched from the active buffer after the last processing cycle completed (which triggered a \"buffer_swap\" signal).")
 	public Object[] getInput(Context context, Arguments args) throws Exception {
 		int i = inputCfg[args.checkInteger(0) - 1];
-		SampleData data = new SampleData();
 		synchronized (back_buffer) {
-			data.data = back_buffer[i].clone();
+			return new Object[] {back_buffer[i]};
 		}
-		return new Object[] {data};
 	}
 
-	@Interface(iface = "li.cil.oc.api.machine.Value", modid = "opencomputers")
-	public static class SampleData implements Value {
-
-		public int[] data;
-
-		public SampleData() {}
-
-		public SampleData(int size) {
-			this.data = new int[size];
+	private static void setStates(int[] buffer, Map<?,?> map) {
+		int n = buffer.length;
+		for (Entry<?,?> e : map.entrySet()) {
+			int j = ((Number)e.getKey()).intValue() - 1;
+			if (j >= 0 && j < n)
+				buffer[j] = ((Number)e.getValue()).intValue();
 		}
-
-		@Override
-		public void load(NBTTagCompound nbt) {
-			data = nbt.getIntArray("d");
-		}
-
-		@Override
-		public void save(NBTTagCompound nbt) {
-			nbt.setIntArray("d", data);
-		}
-
-		@Override
-		public Object apply(Context context, Arguments args) {
-			if (args.isInteger(0)) {
-				int i = args.checkInteger(0);
-				return i < 0 || i >= data.length ? Double.NaN : Double.valueOf(data[i]);
-			} else if (args.isString(0) && args.checkString(0).equals("size")) {
-				return Double.valueOf(data.length);
-			} else return null;
-		}
-
-		@Override
-		public void unapply(Context context, Arguments args) {
-			if (args.isInteger(0)) {
-				int i = args.checkInteger(0);
-				if (i >= 0 && i < data.length)
-					data[i] = args.checkInteger(1);
-			}
-		}
-
-		@Override
-		public Object[] call(Context context, Arguments args) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void dispose(Context arg0) {}
-
 	}
+
+	@Method(modid = "opencomputers")
+	public static void registerAPI() {
+		Driver.add((stack) -> stack.getItem() == Objects.oc_adc ? OC_ADC.class : null);
+	}
+
 }

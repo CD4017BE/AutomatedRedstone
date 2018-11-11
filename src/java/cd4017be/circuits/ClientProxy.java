@@ -80,6 +80,7 @@ public class ClientProxy extends CommonProxy {
 		BlockItemRegistry.registerRender(ENERGY_VALVE);
 		BlockItemRegistry.registerRender(ITEM_VALVE);
 		BlockItemRegistry.registerRender(WIRELESS_CON, 0, 1);
+		BlockItemRegistry.registerRender(OC_ADC);
 		BlockItemRegistry.registerRender(circuit_plan);
 		BlockItemRegistry.registerRender(item_sensor);
 		BlockItemRegistry.registerRender(fluid_sensor);

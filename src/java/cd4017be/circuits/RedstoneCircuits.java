@@ -2,6 +2,7 @@ package cd4017be.circuits;
 
 import cd4017be.api.recipes.RecipeScriptContext;
 import cd4017be.api.recipes.RecipeScriptContext.ConfigConstants;
+import cd4017be.circuits.tileEntity.OC_ADC;
 import cd4017be.circuits.tis3d.API;
 import cd4017be.lib.script.ScriptFiles.Version;
 import net.minecraftforge.common.MinecraftForge;
@@ -49,6 +50,7 @@ public class RedstoneCircuits {
 	@Mod.EventHandler
 	public void postInit(FMLPostInitializationEvent event) {
 		if (Loader.isModLoaded("tis3d")) API.register();
+		if (Loader.isModLoaded("opencomputers")) OC_ADC.registerAPI();
 	}
 
 }

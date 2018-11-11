@@ -16,23 +16,10 @@ import cd4017be.api.Capabilities;
 import cd4017be.api.recipes.RecipeScriptContext.ConfigConstants;
 import cd4017be.circuits.block.*;
 import cd4017be.circuits.item.*;
+import cd4017be.circuits.tileEntity.*;
 import cd4017be.circuits.multiblock.RedstoneNode;
-import cd4017be.circuits.tileEntity.Assembler;
-import cd4017be.circuits.tileEntity.BasicRSPipe;
-import cd4017be.circuits.tileEntity.BitShiftPipe;
-import cd4017be.circuits.tileEntity.BitShifter;
-import cd4017be.circuits.tileEntity.BlockSensor;
-import cd4017be.circuits.tileEntity.Circuit;
-import cd4017be.circuits.tileEntity.CircuitDesigner;
-import cd4017be.circuits.tileEntity.EnergyValve;
-import cd4017be.circuits.tileEntity.FluidValve;
-import cd4017be.circuits.tileEntity.IntegerPipe;
-import cd4017be.circuits.tileEntity.ItemValve;
-import cd4017be.circuits.tileEntity.MultiLever;
-import cd4017be.circuits.tileEntity.Oszillograph;
-import cd4017be.circuits.tileEntity.Potentiometer;
-import cd4017be.circuits.tileEntity.WirelessConnector;
 import cd4017be.lib.BlockItemRegistry;
+import cd4017be.lib.block.AdvancedBlock;
 import cd4017be.lib.block.BlockCoveredPipe;
 import cd4017be.lib.block.OrientedBlock;
 import cd4017be.lib.item.BaseItemBlock;
@@ -71,6 +58,7 @@ public class Objects {
 	public static final OrientedBlock ENERGY_VALVE = null;
 	public static final OrientedBlock ITEM_VALVE = null;
 	public static final OrientedBlock WIRELESS_CON = null;
+	public static final AdvancedBlock OC_ADC = null;
 
 	//ItemBlocks
 	public static final BaseItemBlock designer = null;
@@ -89,6 +77,7 @@ public class Objects {
 	public static final BaseItemBlock energy_valve = null;
 	public static final BaseItemBlock item_valve = null;
 	public static final ItemWirelessCon wireless_con = null;
+	public static final BaseItemBlock oc_adc = null;
 
 	//Items
 	public static final ItemProgramm circuit_plan = null;
@@ -140,7 +129,8 @@ public class Objects {
 			OrientedBlock.create("fluid_valve", Material.IRON, SoundType.METAL, 0, FluidValve.class, PropertyOrientation.ALL_AXIS).setCreativeTab(tabCircuits),
 			OrientedBlock.create("energy_valve", Material.IRON, SoundType.METAL, 0, EnergyValve.class, PropertyOrientation.ALL_AXIS).setCreativeTab(tabCircuits),
 			OrientedBlock.create("item_valve", Material.IRON, SoundType.METAL, 0, ItemValve.class, PropertyOrientation.ALL_AXIS).setCreativeTab(tabCircuits),
-			OrientedBlock.create("wireless_con", Material.IRON, SoundType.METAL, 3, WirelessConnector.class, PropertyOrientation.ALL_AXIS).setBlockBounds(new AxisAlignedBB(0.25, 0.25, 0.0, 0.75, 0.75, 0.875)).setLightOpacity(0).setCreativeTab(tabCircuits)
+			OrientedBlock.create("wireless_con", Material.IRON, SoundType.METAL, 3, WirelessConnector.class, PropertyOrientation.ALL_AXIS).setBlockBounds(new AxisAlignedBB(0.25, 0.25, 0.0, 0.75, 0.75, 0.875)).setLightOpacity(0).setCreativeTab(tabCircuits),
+			new AdvancedBlock("oc_adc", Material.IRON, SoundType.METAL, 0, OC_ADC.class).setCreativeTab(tabCircuits)
 		);
 	}
 
@@ -163,6 +153,7 @@ public class Objects {
 			new BaseItemBlock(ENERGY_VALVE),
 			new BaseItemBlock(ITEM_VALVE),
 			new ItemWirelessCon(WIRELESS_CON),
+			new BaseItemBlock(OC_ADC),
 			new ItemProgramm("circuit_plan").setCreativeTab(tabCircuits),
 			new ItemItemSensor("item_sensor").setCreativeTab(tabCircuits),
 			new ItemFluidSensor("fluid_sensor").setCreativeTab(tabCircuits),
