@@ -1,0 +1,8 @@
+{
+	"parent": "circuits:block/base0",
+    "textures": {
+        "top": "circuits:blocks/oc_adc",
+		"bot": "circuits:blocks/oc_adc",
+		"side": "circuits:blocks/oc_adc"
+    }
+}

@@ -253,6 +253,17 @@ public class OC_ADC extends SyncronousRedstoneIO implements IRedstoneTile, IDire
 		return null;
 	}
 
+	@Method(modid = "opencomputers")
+	@Callback(direct = false, doc = "function(samples:number, interval:number[, phase:number]) -- Change the timing to the given interval and phase-offset in seconds.")
+	public Object[] setTiming(Context context, Arguments args) throws Exception {
+		int interv = (int)(args.checkDouble(0) * 20D);
+		int phase = (int)(args.optDouble(1, 0) * 20D);
+		this.interval = interval < 0 ? -interv : interv;
+		this.phase = phase;
+		this.setupData();
+		return null;
+	}
+
 	private int[] parse(Map<?,?> map) {
 		int[] arr = new int[map.size()];
 		for (Entry<?,?> e : map.entrySet()) {

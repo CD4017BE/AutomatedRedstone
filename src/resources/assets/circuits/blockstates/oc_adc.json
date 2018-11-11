@@ -1,0 +1,6 @@
+{
+    "variants": {
+		"inventory": { "model": "circuits:oc_adc" },
+        "normal": { "model": "circuits:oc_adc" }
+    }
+}
