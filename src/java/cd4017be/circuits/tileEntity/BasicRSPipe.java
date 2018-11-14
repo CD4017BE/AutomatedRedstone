@@ -29,7 +29,7 @@ public class BasicRSPipe extends RedstonePipe implements IInteractiveTile {
 		else if (value < 0) value = 0;
 		if (value != comp.inputState) {
 			comp.inputState = value;
-			comp.network.markStateDirty();
+			if (!comp.invalid()) comp.network.markStateDirty();
 			markDirty();
 		}
 	}

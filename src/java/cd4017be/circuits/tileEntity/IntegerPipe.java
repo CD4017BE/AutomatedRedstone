@@ -28,7 +28,7 @@ public class IntegerPipe extends RedstonePipe implements IInteractiveTile {
 		for (int s : inputs) value |= s;
 		if (value != comp.inputState) {
 			comp.inputState = value;
-			comp.network.markStateDirty();
+			if (!comp.invalid()) comp.network.markStateDirty();
 			markDirty();
 		}
 	}

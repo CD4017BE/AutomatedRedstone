@@ -45,7 +45,7 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 				value |= (inputs[i] & 0xffffffff >>> (32 - k)) << shifts[i + 12];
 		if (value != comp.inputState) {
 			comp.inputState = value;
-			comp.network.markStateDirty();
+			if (!comp.invalid()) comp.network.markStateDirty();
 			markDirty();
 		}
 	}
@@ -83,7 +83,7 @@ public class BitShiftPipe extends IntegerPipe implements IGuiData, ClientPacketR
 	public int redstoneLevel(EnumFacing side, boolean strong) {
 		int i = side.ordinal(), k = shifts[i + 6];
 		if (strong || k == 0) return 0;
-		return comp.network.outputState >> shifts[i] & 0xffffffff >>> (32 - k);
+		return comp.invalid() ? 0 : comp.network.outputState >> shifts[i] & 0xffffffff >>> (32 - k);
 	}
 
 	@Override
