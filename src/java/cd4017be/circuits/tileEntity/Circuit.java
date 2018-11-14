@@ -641,6 +641,7 @@ public class Circuit extends BaseTileEntity implements INeighborAwareTile, IReds
 				if (te == null || te.invalid()) {
 					ICapabilityProvider t = Utils.neighborTile(Circuit.this, side);
 					if (t instanceof IQuickRedstoneHandler) te = (IQuickRedstoneHandler)t;
+					else te = null;
 				}
 				if (te != null) te.onRedstoneStateChange(side.getOpposite(), state, Circuit.this);
 				else world.neighborChanged(pos.offset(side), getBlockType(), pos);
