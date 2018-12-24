@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.function.IntSupplier;
 
+import cd4017be.circuits.editor.InvalidSchematicException;
+import cd4017be.circuits.editor.InvalidSchematicException.ErrorType;
 import cd4017be.circuits.editor.compile.IOp;
 import cd4017be.lib.jvm_utils.MethodAssembler;
 import io.netty.buffer.ByteBuf;
@@ -17,6 +19,8 @@ public class OpNode implements IOp {
 	public final OpType op;
 	public final int index;
 	public final Pin[] inputs, outputs;
+	/** -1: checking, 0: unchecked, 1: approved valid */
+	public byte check = 0;
 
 	public OpNode(OpType type, int index) {
 		this.op = type;
@@ -46,6 +50,23 @@ public class OpNode implements IOp {
 			if (inputs[i] == pin)
 				break;
 		return i;
+	}
+
+	public void checkValid() throws InvalidSchematicException {
+		if (check > 0) return;
+		check = -1;
+		Pin[] inputs = this.inputs;
+		for (int i = 0, l = inputs.length; i < l; i++) {
+			Pin pin = inputs[i];
+			if (pin != null) {
+				OpNode node = pin.src;
+				if (node.check < 0)
+					throw new InvalidSchematicException(ErrorType.causalLoop, this, i);
+				pin.src.checkValid();
+			} else if (op.requiresInput(i))
+				throw new InvalidSchematicException(ErrorType.missingInput, this, i);
+		}
+		check = 1;
 	}
 
 	public boolean isEnd() {

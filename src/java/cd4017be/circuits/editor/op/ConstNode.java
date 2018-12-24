@@ -2,6 +2,8 @@ package cd4017be.circuits.editor.op;
 
 import java.util.function.IntSupplier;
 
+import cd4017be.circuits.editor.InvalidSchematicException;
+import cd4017be.circuits.editor.InvalidSchematicException.ErrorType;
 import cd4017be.lib.jvm_utils.MethodAssembler;
 
 /**
@@ -14,6 +16,16 @@ public class ConstNode extends OpNode {
 
 	public ConstNode(int index) {
 		super(OpType.cst, index);
+	}
+
+	@Override
+	public void checkValid() throws InvalidSchematicException {
+		super.checkValid();
+		try {
+			parse(value);
+		} catch (NumberFormatException e) {
+			throw new InvalidSchematicException(ErrorType.invalidCfg, this, 0);
+		}
 	}
 
 	public static int parse(String value) {

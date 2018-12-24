@@ -5,6 +5,8 @@ import static cd4017be.lib.jvm_utils.ClassAssembler.*;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 
+import cd4017be.circuits.editor.InvalidSchematicException;
+import cd4017be.circuits.editor.InvalidSchematicException.ErrorType;
 import cd4017be.lib.jvm_utils.ConstantPool;
 import cd4017be.lib.jvm_utils.MethodAssembler;
 import io.netty.buffer.ByteBuf;
@@ -17,6 +19,17 @@ public class IONode extends OpNode {
 
 	public IONode(OpType type, int index) {
 		super(type, index);
+	}
+
+	@Override
+	public void checkValid() throws InvalidSchematicException {
+		super.checkValid();
+		String s = label;
+		if (s.isEmpty() || !Character.isJavaIdentifierStart(s.charAt(0)))
+			throw new InvalidSchematicException(ErrorType.invalidLabel, this, -1);
+		for (int i = 1, l = s.length(); i < l; i++)
+			if (!Character.isJavaIdentifierPart(s.charAt(i)))
+				throw new InvalidSchematicException(ErrorType.invalidLabel, this, -1);
 	}
 
 	public String fieldDesc() {
