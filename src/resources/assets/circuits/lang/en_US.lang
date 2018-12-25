@@ -78,6 +78,8 @@ item.cd4017be.time_sensor.name=Time Sensor Module
 item.cd4017be.time_sensor.tip=§6Sensor§7 module for time measurement [s].\nCan use §3server-tick§7, §3ingame§7 or §3real-world§7 time.\nRight-Click to configure settings.\nSneak-Click block to link as signal source.
 item.cd4017be.remote_comp.name=Remote Comparator §e(%.0f)
 item.cd4017be.remote_comp.tip=§6Sensor§7 module for reading the comparator\noutput value of a linked block (usually 0-15).\n§4Does not read basic redstone signals!\nSneak-Click block to link (max \\<remoteComp_range>m range).
+item.cd4017be.processor.name=Assembled Circuit
+item.circuits.processor.ingreds=Cost\: §c%d §f%d §e%d
 
 # GUI
 gui.cd4017be.tickInt=%.2fs
