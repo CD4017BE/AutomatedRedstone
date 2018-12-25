@@ -10,7 +10,7 @@ import cd4017be.lib.jvm_utils.MethodAssembler;
  * @author CD4017BE
  *
  */
-public class ConstNode extends OpNode {
+public class ConstNode extends OpNode implements IConfigurable {
 
 	public String value = "0";
 
@@ -48,6 +48,21 @@ public class ConstNode extends OpNode {
 		int v;
 		try { v = parse(value); } catch (NumberFormatException e) { v = 0; }
 		ma.pushConst(v);
+	}
+
+	@Override
+	public String getCfg() {
+		return value;
+	}
+
+	@Override
+	public void setCfg(String cfg) {
+		this.value = cfg;
+	}
+
+	@Override
+	public String cfgTooltip() {
+		return "gui.circuits.opCfg.value";
 	}
 
 }

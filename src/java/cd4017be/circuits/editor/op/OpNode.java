@@ -4,7 +4,9 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.function.IntSupplier;
 
+import cd4017be.circuits.editor.BoundingBox2D;
 import cd4017be.circuits.editor.InvalidSchematicException;
+import cd4017be.circuits.editor.PinRef;
 import cd4017be.circuits.editor.InvalidSchematicException.ErrorType;
 import cd4017be.circuits.editor.compile.IOp;
 import cd4017be.lib.jvm_utils.MethodAssembler;
@@ -21,6 +23,8 @@ public class OpNode implements IOp {
 	public final Pin[] inputs, outputs;
 	/** -1: checking, 0: unchecked, 1: approved valid */
 	public byte check = 0;
+	public String label = "";
+	public int rasterX, rasterY;
 
 	public OpNode(OpType type, int index) {
 		this.op = type;
@@ -142,6 +146,50 @@ public class OpNode implements IOp {
 	@Override
 	public String toString() {
 		return (index & 0xff) + ": Node[" + op.name() + "]";
+	}
+
+	//#### GUI stuff ####
+
+	public BoundingBox2D<OpNode> getBounds() {
+		if (op.height == 1)
+			return new BoundingBox2D<OpNode>(this, rasterX << 1, (rasterY << 1) - 2, op.width << 1, 4);
+		else
+			return new BoundingBox2D<OpNode>(this, rasterX << 1, (rasterY << 1) - 1, op.width << 1, op.height << 1);
+	}
+
+	/**@return pin raster coords: 0xXXXXYYYY (X-coord,Y-coord)*/
+	public int[] getInputPositions() {
+		int p = op.pinsI;
+		int[] ps = new int[Integer.bitCount(p)];
+		for (int i = 0, j = 0; p != 0; p >>>= 1, i++)
+			if ((p & 1) != 0)
+				ps[j++] = rasterX << 16 | rasterY + i;
+		return ps;
+	}
+
+	/**@return pin raster coords: 0xXXXXYYYY (X-coord,Y-coord)*/
+	public int getOutputPos(int i) {
+		for (int p = op.pinsO, j = 0; p != 0; p >>>= 1, j++)
+			if ((p & 1) != 0 && --i < 0)
+				return (rasterX + op.width) << 16 | rasterY + j;
+		return (rasterX + op.width) << 16 | rasterY + op.height - 1;
+	}
+
+	public PinRef findPin(int x, int y) {
+		if (x == rasterX) {
+			for (int p = op.pinsI, i = 0, j = 0; p != 0; p >>>= 1, i++)
+				if ((p & 1) != 0)
+					if (y == rasterY + i)
+						return new PinRef(this, j);
+					else j++;
+		} else if (x == rasterX + op.width) {
+			for (int p = op.pinsO, i = 0, j = op.ins; p != 0; p >>>= 1, i++)
+				if ((p & 1) != 0)
+					if (y == rasterY + i)
+						return new PinRef(this, j);
+					else j++;
+		}
+		return null;
 	}
 
 }

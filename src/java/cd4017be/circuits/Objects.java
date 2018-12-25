@@ -60,6 +60,7 @@ public class Objects {
 	public static final OrientedBlock ITEM_VALVE = null;
 	public static final OrientedBlock WIRELESS_CON = null;
 	public static final AdvancedBlock OC_ADC = null;
+	public static final OrientedBlock EDITOR = null;
 
 	//ItemBlocks
 	public static final BaseItemBlock designer = null;
@@ -79,6 +80,7 @@ public class Objects {
 	public static final BaseItemBlock item_valve = null;
 	public static final ItemWirelessCon wireless_con = null;
 	public static final BaseItemBlock oc_adc = null;
+	public static final BaseItemBlock editor = null;
 
 	//Items
 	public static final ItemProgramm circuit_plan = null;
@@ -87,6 +89,7 @@ public class Objects {
 	public static final ItemEnergySensor energy_sensor = null;
 	public static final ItemTimeSensor time_sensor = null;
 	public static final ItemRedstoneSensor remote_comp = null;
+	public static final ItemProcessor processor = null;
 
 	/** creates and registers them all */
 	public static void init() {
@@ -131,7 +134,8 @@ public class Objects {
 			OrientedBlock.create("energy_valve", Material.IRON, SoundType.METAL, 0, EnergyValve.class, PropertyOrientation.ALL_AXIS).setCreativeTab(tabCircuits),
 			OrientedBlock.create("item_valve", Material.IRON, SoundType.METAL, 0, ItemValve.class, PropertyOrientation.ALL_AXIS).setCreativeTab(tabCircuits),
 			OrientedBlock.create("wireless_con", Material.IRON, SoundType.METAL, 3, WirelessConnector.class, PropertyOrientation.ALL_AXIS).setBlockBounds(new AxisAlignedBB(0.25, 0.25, 0.0, 0.75, 0.75, 0.875)).setLightOpacity(0).setCreativeTab(tabCircuits),
-			new AdvancedBlock("oc_adc", Material.IRON, SoundType.METAL, 0, OC_ADC.class).setCreativeTab(tabCircuits)
+			new AdvancedBlock("oc_adc", Material.IRON, SoundType.METAL, 0, OC_ADC.class).setCreativeTab(tabCircuits),
+			OrientedBlock.create("editor", Material.ROCK, SoundType.STONE, 8, Editor.class, PropertyOrientation.HOR_AXIS).setCreativeTab(tabCircuits)
 		);
 	}
 
@@ -155,12 +159,14 @@ public class Objects {
 			new BaseItemBlock(ITEM_VALVE),
 			new ItemWirelessCon(WIRELESS_CON),
 			new BaseItemBlock(OC_ADC),
+			new BaseItemBlock(EDITOR),
 			new ItemProgramm("circuit_plan").setCreativeTab(tabCircuits),
 			new ItemItemSensor("item_sensor").setCreativeTab(tabCircuits),
 			new ItemFluidSensor("fluid_sensor").setCreativeTab(tabCircuits),
 			new ItemEnergySensor("energy_sensor").setCreativeTab(tabCircuits),
 			new ItemTimeSensor("time_sensor").setCreativeTab(tabCircuits),
-			new ItemRedstoneSensor("remote_comp").setCreativeTab(tabCircuits)
+			new ItemRedstoneSensor("remote_comp").setCreativeTab(tabCircuits),
+			new ItemProcessor("processor").setCreativeTab(tabCircuits)
 		);
 	}
 

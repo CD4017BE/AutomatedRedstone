@@ -25,6 +25,7 @@ public class CommonProxy {
 		BlockGuiHandler.registerContainer(ENERGY_VALVE, DataContainer.class);
 		BlockGuiHandler.registerContainer(ITEM_VALVE, DataContainer.class);
 		BlockGuiHandler.registerContainer(RSP_SHIFT, DataContainer.class);
+		BlockGuiHandler.registerContainer(EDITOR, TileContainer.class);
 	}
 
 }

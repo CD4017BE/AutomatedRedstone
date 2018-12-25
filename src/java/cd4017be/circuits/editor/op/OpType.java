@@ -13,18 +13,23 @@ import io.netty.buffer.ByteBuf;
 public enum OpType {
 
 	in(0x01) {
+		{texture = 0x1e0c0000; width = 6;}
 		@Override
 		public OpNode node(int idx) { return new IONode(this, idx); }
 	}, out(0x10) {
+		{texture = 0x1e0c1e00; width = 6;}
 		@Override
 		public OpNode node(int idx) { return new IONode(this, idx); }
 	}, read(0x01) {
+		{texture = 0x1c0c3c00; width = 6;}
 		@Override
 		public OpNode node(int idx) { return new ReadVar(idx); }
 	}, write(0x31) {
+		{texture = 0x1c0c5800; width = 6; pinsI = 0b1; pinsO = 0b1; height = 1; }
 		@Override
 		public OpNode node(int idx) { return new WriteVar(idx); }
 	}, cst(0x01) {
+		{texture = 0x1c0c7400; width = 6;}
 		@Override
 		public OpNode node(int idx) { return new ConstNode(idx); }
 	},
@@ -77,6 +82,7 @@ public enum OpType {
 			else super.compile(ma, node);
 		}
 	}, bsplt(0x108) {
+		{texture = 0x0c200024; width = 2; pinsI = 0b00000001; pinsO = 0b11111111;}
 		@Override
 		public void compile(MethodAssembler ma, OpNode node) {
 			ByteBuf b = ma.code;
@@ -100,6 +106,7 @@ public enum OpType {
 			ma.pop(1);
 		}
 	}, bcomb(0x801) {
+		{texture = 0x0c200c24; width = 2; pinsI = 0b11111111; pinsO = 0b00000001;}
 		@Override
 		public boolean requiresInput(int i) { return false; }
 		@Override
@@ -139,6 +146,11 @@ public enum OpType {
 		this.outs = io & 15;
 		this.instr = instr;
 		this.stack = stack;
+		int i = ordinal() + 4;
+		this.texture = 0x100c0000 | (i & 15)*0x1000 | (i >> 4 & 15)*0x0c;
+		this.height = Math.max(ins == 2 ? 3 : ins, outs == 2 ? 3 : outs);
+		this.pinsI = (ins == 2 ? 0b101 : (1 << ins) - 1) << (height - ins) / 2;
+		this.pinsO = (outs == 2 ? 0b101 : (1 << outs) - 1) << (height - outs) / 2;
 	}
 
 	final byte[] instr;
@@ -146,6 +158,11 @@ public enum OpType {
 	public final int ins, outs;
 	
 	private final String stack;
+
+	/** texture coords: 0xWWHHUUVV (Width,Height,U-coord,V-coord)*/
+	public int texture;
+	public int width = 3, height = 1;
+	public int pinsI, pinsO;
 
 	public OpNode node(int idx) {
 		return new OpNode(this, idx);

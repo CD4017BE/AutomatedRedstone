@@ -42,6 +42,7 @@ public class ClientProxy extends CommonProxy {
 		BlockGuiHandler.registerGui(ENERGY_VALVE, GuiEnergyValve.class);
 		BlockGuiHandler.registerGui(ITEM_VALVE, GuiItemValve.class);
 		BlockGuiHandler.registerGui(RSP_SHIFT, GuiBitShiftPipe.class);
+		BlockGuiHandler.registerGui(EDITOR, GuiEditor.class);
 		
 		RSP_BASIC.setBlockLayer(BlockRenderLayer.TRANSLUCENT);
 		RSP_32BIT.setBlockLayer(BlockRenderLayer.TRANSLUCENT);
@@ -81,12 +82,14 @@ public class ClientProxy extends CommonProxy {
 		BlockItemRegistry.registerRender(ITEM_VALVE);
 		BlockItemRegistry.registerRender(WIRELESS_CON, 0, 1);
 		BlockItemRegistry.registerRender(OC_ADC);
+		BlockItemRegistry.registerRender(EDITOR);
 		BlockItemRegistry.registerRender(circuit_plan);
 		BlockItemRegistry.registerRender(item_sensor);
 		BlockItemRegistry.registerRender(fluid_sensor);
 		BlockItemRegistry.registerRender(energy_sensor);
 		BlockItemRegistry.registerRender(time_sensor);
 		BlockItemRegistry.registerRender(remote_comp);
+		BlockItemRegistry.registerRender(processor);
 	}
 
 }
