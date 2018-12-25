@@ -36,6 +36,7 @@ public class GuiEditor extends ModularGui {
 	public final CircuitBoard board;
 	public final TextField editLabel, editCfg;
 	public final GuiErrorMarker error;
+	private GuiDebugger debug;
 
 	public GuiEditor(IGuiData tile, EntityPlayer player) {
 		super(new TileContainer(tile, player));
@@ -121,9 +122,24 @@ public class GuiEditor extends ModularGui {
 			tile.modified = false;
 		}
 		error.update();
+		if (debug != null)
+			debug.update();
 	}
 
 	private void compile(int b) {
+		if (isShiftKeyDown()) {
+			Item item = tile.inventory.getItem();
+			if (item instanceof IChipItem) {
+				IChipItem cp = (IChipItem)item;
+				Chip chip = cp.provideChip(tile.inventory);
+				if (chip != null) {
+					compGroup.remove(debug);
+					debug = new GuiDebugger((GuiFrame)compGroup, chip);
+					debug.init(width, height, zLevel, fontRenderer);
+					debug.position(guiLeft, guiTop);
+				}
+			}
+		}
 		sendCommand(A_COMPILE);
 	}
 

@@ -99,6 +99,8 @@ gui.cd4017be.energy_valve.name=Energy Valve Control
 gui.cd4017be.item_valve.name=Item Valve Control
 gui.cd4017be.rsp_shift.name=Bit Shifters
 gui.cd4017be.editor.name=Circuit Workbench
+gui.circuits.debug.name=Debugger
+gui.circuits.state.name=Variables
 # Gui tooltips
 gui.cd4017be.itemSensor.neg=Invert filter?
 gui.cd4017be.itemSensor.ore=Use Ore-Dictionary?
@@ -305,6 +307,11 @@ gui.cd4017be.bit.info0=§7How to transmit 5 numbers in range 0-99 over a connect
 gui.cd4017be.bit.info1=§7Using the text fields you can specify for each of the 6 block faces an input and output bandwidth (0 = not connected).\n§7You have a total of 32 bit available to freely distribute over all the individual signals you want to transfer. How many bits you should give each signal depends individually on the range of possible redstone strength values they could carry: n bits -> range 0 ... 2^n - 1\n§7Using the sliders you can then define where in the total bit pattern each value should be located (make sure they don't overlap to prevent interference). Of course also all entrance and exit points in your cable network that belong to the same signal must have the same bandwidth and bit offset setting for the transmission to work.
 gui.cd4017be.bit.info2=§7With the mod OpenComputers installed this device works as component providing these functions:\n§9int §6read() §7returns the current full signal state of the internal wire.\n§9void §6write(§9int§6) §7sets the value of the computer input signal.\n§7(computer input signal only has an effect if at least one input bandwidth is non zero)
 gui.cd4017be.bit.info3=§7With the mod TIS-3D installed this device can be connected to a serial port:\n§7Pushing values will set the signal that this device should receive from the serial port.\n§7Pulling values will read the signal that this device would emit into the serial port.\n§7§oKeep in mind that TIS-3D operates with only 16-bit and not 32.
+gui.circuits.interval=Update Interval
+gui.circuits.debug.run0=Running
+gui.circuits.debug.run1=Paused
+gui.circuits.debug.step0=§7state\: §4stable
+gui.circuits.debug.step1=Run single cycle\n§7state\: §2unstable
 gui.circuits.editor.del=Delete sel. Operator
 gui.circuits.editor.save=Save Schematic
 gui.circuits.opLabel=Operator Label
