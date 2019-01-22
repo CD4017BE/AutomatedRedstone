@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.logging.log4j.Level;
-
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
@@ -24,9 +22,9 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.items.ItemHandlerHelper;
 import cd4017be.circuits.Objects;
+import cd4017be.circuits.RedstoneCircuits;
 import cd4017be.circuits.tileEntity.CircuitDesigner.ModuleType;
 import cd4017be.lib.BlockGuiHandler;
 import cd4017be.lib.BlockGuiHandler.ClientPacketReceiver;
@@ -199,9 +197,10 @@ public class Assembler extends BaseTileEntity implements ITickable, IGuiData, IS
 			}
 			if (data.position() != data.limit()) throw new IllegalStateException(String.format("Only read %d of %d bytes!", data.position(), data.limit()));
 		} catch (Exception e) {
-			String s = " ";
+			String s = "Circuit Assembler crashed while compiling schematic data: [ ";
 			for (byte b : data.array()) s += Integer.toHexString(b & 0xff) + " ";
-			FMLLog.log("Circuit Assembler", Level.ERROR, e, "crashed while compiling schematic data: [%s]", s);
+			s += "]";
+			RedstoneCircuits.LOG.error(s, e);
 			N[8] = 4;
 			return;
 		}

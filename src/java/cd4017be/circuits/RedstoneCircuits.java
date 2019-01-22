@@ -1,5 +1,7 @@
 package cd4017be.circuits;
 
+import org.apache.logging.log4j.Logger;
+
 import cd4017be.api.recipes.RecipeScriptContext;
 import cd4017be.api.recipes.RecipeScriptContext.ConfigConstants;
 import cd4017be.circuits.tileEntity.OC_ADC;
@@ -26,6 +28,8 @@ public class RedstoneCircuits {
 	@Instance(ID)
 	public static RedstoneCircuits instance;
 
+	public static Logger LOG;
+
 	@SidedProxy(clientSide="cd4017be.circuits.ClientProxy", serverSide="cd4017be.circuits.CommonProxy")
 	public static CommonProxy proxy;
 
@@ -35,6 +39,7 @@ public class RedstoneCircuits {
 
 	@Mod.EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
+		LOG = event.getModLog();
 		MinecraftForge.EVENT_BUS.register(proxy);
 		RecipeScriptContext.instance.run("automatedRedstone.PRE_INIT");
 	}

@@ -79,24 +79,6 @@ public class RedstoneNetwork extends SharedNetwork<RedstoneNode, RedstoneNetwork
 	}
 
 	@Override
-	protected void updatePhysics() {
-		if (updateState) { 
-			int newState = 0;
-			for (RedstoneNode c : inputs)
-				if (c.digital) newState |= c.inputState;
-				else if ((newState += c.inputState) >= 255) {
-					newState = 255;
-					break;
-				}
-			if (newState != outputState) {
-				outputState = newState;
-				for (RedstoneNode c : outputs) c.onStateChange();
-			}
-			updateState = false;
-		}
-	}
-
-	@Override
 	public void markDirty() {
 		if (!update) {
 			update = true;
@@ -119,7 +101,20 @@ public class RedstoneNetwork extends SharedNetwork<RedstoneNode, RedstoneNetwork
 			reassembleNetwork();
 			update = false;
 		}
-		updatePhysics();
+		if (updateState) { 
+			int newState = 0;
+			for (RedstoneNode c : inputs)
+				if (c.digital) newState |= c.inputState;
+				else if ((newState += c.inputState) >= 255) {
+					newState = 255;
+					break;
+				}
+			if (newState != outputState) {
+				outputState = newState;
+				for (RedstoneNode c : outputs) c.onStateChange();
+			}
+			updateState = false;
+		}
 	}
 
 }
