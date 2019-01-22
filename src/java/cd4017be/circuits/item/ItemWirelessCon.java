@@ -8,12 +8,15 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.List;
 
 import net.minecraft.block.Block;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import cd4017be.lib.item.BaseItemBlock;
 import cd4017be.lib.util.TooltipUtil;
 
+/**
+ * 
+ * @author CD4017BE
+ */
 public class ItemWirelessCon extends BaseItemBlock {
 
 	public ItemWirelessCon(Block id) {

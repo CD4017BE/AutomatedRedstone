@@ -8,7 +8,6 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import java.util.List;
 
 import cd4017be.lib.item.BaseItem;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 

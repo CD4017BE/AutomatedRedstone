@@ -29,6 +29,10 @@ import cd4017be.lib.Gui.ItemGuiData;
 import cd4017be.lib.item.BaseItem;
 import cd4017be.lib.util.TooltipUtil;
 
+/**
+ * 
+ * @author CD4017BE
+ */
 public class ItemTimeSensor extends BaseItem implements ISensor, IGuiItem, ClientItemPacketReceiver {
 
 	public double RangeSQ = 400D;

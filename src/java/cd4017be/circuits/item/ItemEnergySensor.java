@@ -9,6 +9,10 @@ import cd4017be.api.circuits.ISensor;
 import cd4017be.api.circuits.ItemBlockSensor;
 import cd4017be.api.energy.EnergyAPI;
 
+/**
+ * 
+ * @author CD4017BE
+ */
 public class ItemEnergySensor extends ItemBlockSensor implements ISensor {
 
 	public ItemEnergySensor(String id) {

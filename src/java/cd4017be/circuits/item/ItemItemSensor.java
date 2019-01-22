@@ -38,6 +38,10 @@ import cd4017be.lib.capability.InventoryItem.IItemInventory;
 import cd4017be.lib.util.TooltipUtil;
 import cd4017be.lib.util.Utils.ItemType;
 
+/**
+ * 
+ * @author CD4017BE
+ */
 public class ItemItemSensor extends ItemBlockSensor implements IGuiItem, IItemInventory, ClientItemPacketReceiver {
 
 	public ItemItemSensor(String id) {

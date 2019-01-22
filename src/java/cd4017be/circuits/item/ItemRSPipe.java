@@ -1,9 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package cd4017be.circuits.item;
 
 import cd4017be.lib.BlockItemRegistry;
@@ -15,8 +9,7 @@ import net.minecraft.item.ItemStack;
  *
  * @author CD4017BE
  */
-public class ItemRSPipe extends BaseItemBlock
-{
+public class ItemRSPipe extends BaseItemBlock {
 
 	public ItemRSPipe(Block id) {
 		super(id);

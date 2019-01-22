@@ -9,7 +9,6 @@ import java.util.List;
 
 import cd4017be.lib.item.BaseItemBlock;
 import net.minecraft.block.Block;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 

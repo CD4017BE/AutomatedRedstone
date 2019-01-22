@@ -38,6 +38,10 @@ import cd4017be.lib.Gui.TileContainer;
 import cd4017be.lib.Gui.TileContainer.TankSlot;
 import cd4017be.lib.util.TooltipUtil;
 
+/**
+ * 
+ * @author CD4017BE
+ */
 public class ItemFluidSensor extends ItemBlockSensor implements IGuiItem, ClientItemPacketReceiver {
 
 	public ItemFluidSensor(String id) {
