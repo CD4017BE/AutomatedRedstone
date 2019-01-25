@@ -28,8 +28,8 @@ public class ItemProgramm extends BaseItem {
 		if (nbt != null) {
 			list.add(nbt.getString("name"));
 			if (nbt.hasKey("code") && !nbt.hasKey("data")) {
-				list.add("§cWarning: deprecated data format detected!");
-				list.add("load and save in §6Circuit Programmer§7 to convert");
+				list.add("ï¿½cWarning: deprecated data format detected!");
+				list.add("load and save in ï¿½6Circuit Programmerï¿½7 to convert");
 			}
 		}
 		super.addInformation(item, player, list, par4);

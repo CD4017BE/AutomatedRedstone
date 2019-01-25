@@ -10,7 +10,7 @@ import net.minecraft.tileentity.TileEntity;
  * Instances of this perform the actual logic.
  * @author CD4017BE
  */
-public abstract class Chip {
+public abstract class Chip implements IntConsumer {
 
 	/** true when this chip should update */
 	public boolean dirty = true;
@@ -24,6 +24,11 @@ public abstract class Chip {
 	 */
 	public void setHost(TileEntity tile) {
 		this.host = tile;
+	}
+
+	@Override
+	public void accept(int value) {
+		dirty = true;
 	}
 
 	/** update the chips internal logic */

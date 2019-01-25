@@ -6,6 +6,7 @@ import cd4017be.lib.tileentity.BaseTileEntity;
 import cd4017be.lib.tileentity.BaseTileEntity.ITickableServerOnly;
 import cd4017be.lib.util.Utils;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -21,6 +22,9 @@ public abstract class SyncronousRedstoneIO extends BaseTileEntity implements INe
 	public final int[] rsInput = new int[6];
 	private int modified;
 	public int timer, interval, phase;
+
+	public SyncronousRedstoneIO() {}
+	public SyncronousRedstoneIO(IBlockState state) { super(state); }
 
 	@Override
 	public void update() {
