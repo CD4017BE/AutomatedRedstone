@@ -50,12 +50,12 @@ public class RedstoneCircuits {
 		Objects.initConstants(new ConfigConstants(RecipeScriptContext.instance.modules.get("automatedRedstone")));
 		proxy.registerBlocks();
 		proxy.registerRenderers();
+		if (Loader.isModLoaded("opencomputers")) OC_ADC.registerAPI();
+		if (Loader.isModLoaded("tis3d")) API.register();
 	}
 
 	@Mod.EventHandler
 	public void postInit(FMLPostInitializationEvent event) {
-		if (Loader.isModLoaded("tis3d")) API.register();
-		if (Loader.isModLoaded("opencomputers")) OC_ADC.registerAPI();
 	}
 
 }
